@@ -2,7 +2,7 @@
 Main entry point for ECSPNet training and evaluation.
 Trains models on benchmark scales N = [20, 40, 60, 100].
 
-VERSION: 2.1-GPU-ASYNC - Full GPU acceleration with async data prefetch
+VERSION: 2.2-GPU-ASYNC - Fixed async prefetch
 """
 
 import argparse
@@ -24,7 +24,7 @@ from ecsp.infer import (
 )
 from ecsp import __version__ as PACKAGE_VERSION
 
-MAIN_VERSION = "2.1-GPU-ASYNC"
+MAIN_VERSION = "2.2-GPU-ASYNC"
 
 
 def train_all_scales(

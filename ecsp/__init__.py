@@ -2,7 +2,7 @@
 ECSP - Energy-Conscious Scheduling Problem Package.
 Paper-exact implementation of ECSPNet.
 
-VERSION: 2.1-GPU-ASYNC - Full GPU acceleration with async data prefetch
+VERSION: 2.2-GPU-ASYNC - Fixed async prefetch
 """
 
 from .data import (
@@ -34,7 +34,7 @@ from .infer import (
     visualize_pareto_front,
 )
 
-__version__ = "2.1.0-GPU-ASYNC"
+__version__ = "2.2.0-GPU-ASYNC"
 print(f"[ECSP Package v{__version__}] Loaded with GPU + async prefetch")
 
 __all__ = [

@@ -2,7 +2,7 @@
 Training module - Algorithm 1 from paper.
 Paper-exact implementation.
 
-VERSION: 2.1-GPU-ASYNC - Full GPU acceleration with async data prefetch
+VERSION: 2.2-GPU-ASYNC - Fixed async prefetch (CPU-only background thread)
 """
 
 import torch
@@ -14,7 +14,6 @@ from tqdm import tqdm
 import os
 import json
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor
 from queue import Queue
 import threading
 
@@ -29,7 +28,7 @@ from .env import GPUBatchECSPEnv
 from .model import ECSPNet
 
 # Version identifier
-TRAIN_VERSION = "2.1-GPU-ASYNC"
+TRAIN_VERSION = "2.2-GPU-ASYNC"
 print(
     f"[Trainer v{TRAIN_VERSION}] Loading GPU-accelerated training with async prefetch..."
 )
@@ -39,8 +38,8 @@ __all__ = ["Trainer", "train_model", "TRAIN_VERSION"]
 
 class AsyncDataPrefetcher:
     """
-    Async data prefetcher that generates batches on CPU in background threads
-    and transfers them to GPU using pinned memory and non-blocking transfers.
+    Async data prefetcher that generates batches on CPU in background threads.
+    CPU data generation happens in background, GPU transfer happens in main thread.
     """
 
     def __init__(
@@ -48,7 +47,7 @@ class AsyncDataPrefetcher:
         N: int,
         batch_size: int,
         device: torch.device,
-        prefetch_count: int = 2,
+        prefetch_count: int = 3,
         num_workers: int = 4,
     ):
         self.N = N
@@ -57,82 +56,85 @@ class AsyncDataPrefetcher:
         self.prefetch_count = prefetch_count
         self.num_workers = num_workers
 
-        # Queue to hold prefetched GPU tensors
+        # Queue to hold prefetched CPU tensors (pinned memory)
         self.queue = Queue(maxsize=prefetch_count)
         self.stop_event = threading.Event()
-
-        # Thread pool for parallel data generation
-        self.executor = ThreadPoolExecutor(max_workers=num_workers)
         self.prefetch_thread = None
+
+        # CUDA stream for async transfer (created in main thread)
+        self._stream = None
 
         print(
             f"[AsyncDataPrefetcher] Initialized with {num_workers} workers, prefetch={prefetch_count}"
         )
 
-    def _generate_single_batch(self, seed_offset: int) -> np.ndarray:
-        """Generate a single batch on CPU."""
-        return generate_batch(self.N, self.batch_size)
-
     def _prefetch_worker(self):
-        """Background worker that continuously prefetches data."""
-        # Create a CUDA stream for async transfers
-        if self.device.type == "cuda":
-            stream = torch.cuda.Stream()
-        else:
-            stream = None
+        """Background worker that generates data on CPU only."""
+        import traceback
 
         batch_counter = 0
         while not self.stop_event.is_set():
             try:
-                # Generate batch on CPU (using thread pool for parallelism)
-                tasks_np = self._generate_single_batch(batch_counter)
+                # Generate batch on CPU
+                tasks_np = generate_batch(self.N, self.batch_size)
                 batch_counter += 1
 
-                # Create pinned memory tensor for faster transfer
+                # Create pinned memory tensor (CPU operation, safe in thread)
                 tasks_pinned = torch.from_numpy(tasks_np).pin_memory()
 
-                # Transfer to GPU asynchronously
-                if stream is not None:
-                    with torch.cuda.stream(stream):
-                        tasks_gpu = tasks_pinned.to(self.device, non_blocking=True)
-                        # Generate ws on GPU directly
-                        ws_gpu = (
-                            torch.rand(self.batch_size, device=self.device) * 0.98
-                            + 0.01
-                        )
-                    stream.synchronize()  # Wait for transfer to complete
-                else:
-                    tasks_gpu = tasks_pinned.to(self.device)
-                    ws_gpu = (
-                        torch.rand(self.batch_size, device=self.device) * 0.98 + 0.01
-                    )
-
-                # Put in queue (will block if full)
-                self.queue.put((tasks_gpu, ws_gpu), timeout=1.0)
+                # Put CPU tensor in queue (will block if full)
+                try:
+                    self.queue.put(tasks_pinned, timeout=1.0)
+                except:
+                    # Queue full or timeout, just continue
+                    if self.stop_event.is_set():
+                        break
+                    continue
 
             except Exception as e:
                 if not self.stop_event.is_set():
                     print(f"[AsyncDataPrefetcher] Error: {e}")
+                    traceback.print_exc()
                 break
 
     def start(self):
         """Start the prefetch thread."""
         self.stop_event.clear()
+        # Create CUDA stream in main thread
+        if self.device.type == "cuda":
+            self._stream = torch.cuda.Stream()
         self.prefetch_thread = threading.Thread(
             target=self._prefetch_worker, daemon=True
         )
         self.prefetch_thread.start()
 
+        # Pre-fill the queue
+        import time
+
+        time.sleep(0.5)  # Give prefetcher time to fill queue
+
     def get_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Get the next prefetched batch."""
-        return self.queue.get()
+        """Get the next batch - transfers to GPU in main thread."""
+        # Get CPU tensor from queue
+        tasks_pinned = self.queue.get()
+
+        # Transfer to GPU using stream (in main thread - safe)
+        if self._stream is not None:
+            with torch.cuda.stream(self._stream):
+                tasks_gpu = tasks_pinned.to(self.device, non_blocking=True)
+                ws_gpu = torch.rand(self.batch_size, device=self.device) * 0.98 + 0.01
+            self._stream.synchronize()
+        else:
+            tasks_gpu = tasks_pinned.to(self.device)
+            ws_gpu = torch.rand(self.batch_size, device=self.device) * 0.98 + 0.01
+
+        return tasks_gpu, ws_gpu
 
     def stop(self):
         """Stop the prefetch thread."""
         self.stop_event.set()
         if self.prefetch_thread is not None:
             self.prefetch_thread.join(timeout=2.0)
-        self.executor.shutdown(wait=False)
 
 
 class Trainer:
