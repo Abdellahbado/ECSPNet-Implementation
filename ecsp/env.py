@@ -389,6 +389,39 @@ class BatchECSPEnv:
         self.max_wait = max_wait
         self.ep_horizon = ep_horizon
 
+        # Precompute one TOU cycle (paper: 0.6/0.4/0.6/0.4 with dt=0.1 => 20 slots)
+        self._cycle_len = 20
+        self._price_cycle = np.array(
+            [get_price_at_slot(i) for i in range(self._cycle_len)], dtype=np.float32
+        )
+
+        # For each slot-in-cycle s, store the smallest offset>=1 to reach a low-price slot.
+        # Used to implement "wait until next low-price slot" efficiently.
+        next_low_offset = np.zeros(self._cycle_len, dtype=np.int32)
+        for s in range(self._cycle_len):
+            for offset in range(1, self._cycle_len + 1):
+                if self._price_cycle[(s + offset) % self._cycle_len] == 0.0:
+                    next_low_offset[s] = offset
+                    break
+        self._next_low_offset = next_low_offset
+
+        # Step-2 durations are multiples of dt in [0.2, 0.6] => 2..6 slots.
+        self._max_p2_slots = int(round(0.6 / self.dt))
+        eec_table = np.zeros(
+            (self._cycle_len, self._max_p2_slots + 1), dtype=np.float32
+        )
+        for start_mod in range(self._cycle_len):
+            for L in range(self._max_p2_slots + 1):
+                if L == 0:
+                    eec_table[start_mod, L] = 0.0
+                else:
+                    # Exact because all times are multiples of dt.
+                    idxs = (start_mod + np.arange(L, dtype=np.int32)) % self._cycle_len
+                    eec_table[start_mod, L] = (
+                        float(self._price_cycle[idxs].sum()) * self.dt
+                    )
+        self._eec_table = eec_table
+
         # Batch state
         self.tasks: Optional[np.ndarray] = None  # [batch, max_N, 5]
         self.current_times: Optional[np.ndarray] = None  # [batch]
@@ -397,6 +430,9 @@ class BatchECSPEnv:
         self.ws: Optional[np.ndarray] = None  # [batch]
         self.masks: Optional[np.ndarray] = None  # [batch, max_N]
         self.dones: Optional[np.ndarray] = None  # [batch]
+        self.remaining: Optional[np.ndarray] = (
+            None  # [batch] remaining unscheduled tasks
+        )
 
     def reset(
         self,
@@ -431,6 +467,7 @@ class BatchECSPEnv:
         actual_N = self.N if tasks is None else tasks.shape[1]
         self.masks = np.zeros((self.batch_size, self.max_N), dtype=np.float32)
         self.masks[:, :actual_N] = 1.0
+        self.remaining = np.full(self.batch_size, actual_N, dtype=np.int32)
 
         # Set preference weights
         if ws is not None:
@@ -450,12 +487,11 @@ class BatchECSPEnv:
 
     def _get_obs(self) -> Dict[str, np.ndarray]:
         """Get batched observations."""
-        # Compute EP for each instance based on current time
-        EP = np.zeros((self.batch_size, self.ep_horizon), dtype=np.float32)
-        for b in range(self.batch_size):
-            current_slot = int(self.current_times[b] / self.dt)
-            for i in range(self.ep_horizon):
-                EP[b, i] = get_price_at_slot(current_slot + i)
+        # Compute EP for each instance based on current time (vectorized)
+        current_slots = (self.current_times / self.dt).astype(np.int64)  # [batch]
+        offsets = np.arange(self.ep_horizon, dtype=np.int64)[None, :]  # [1, H]
+        slot_idxs = (current_slots[:, None] + offsets) % self._cycle_len  # [batch, H]
+        EP = self._price_cycle[slot_idxs].astype(np.float32)
 
         return {
             "tasks": self.tasks.copy(),
@@ -479,50 +515,74 @@ class BatchECSPEnv:
         """
         rewards = np.zeros(self.batch_size, dtype=np.float32)
 
-        for b in range(self.batch_size):
-            if self.dones[b]:
-                continue
+        if actions.shape[0] != self.batch_size:
+            raise ValueError(
+                f"Expected actions shape [{self.batch_size}], got {actions.shape}"
+            )
 
-            action = actions[b]
-            task_idx = action // 2
-            mode = action % 2
+        active = ~self.dones
+        if not np.any(active):
+            return self._get_obs(), rewards, self.dones.copy(), {}
 
-            if self.masks[b, task_idx] == 0:
-                raise ValueError(f"Batch {b}: Task {task_idx} not available")
+        active_idx = np.nonzero(active)[0]
+        act = actions[active_idx].astype(np.int64)
+        task_idx = (act // 2).astype(np.int64)
+        mode = (act % 2).astype(np.int64)
 
-            # Get task features
-            p1, p2, p3 = self.tasks[b, task_idx, :3]
+        # Validate actions
+        if np.any(self.masks[active_idx, task_idx] == 0.0):
+            bad_local = np.nonzero(self.masks[active_idx, task_idx] == 0.0)[0][0]
+            b = int(active_idx[bad_local])
+            t = int(task_idx[bad_local])
+            raise ValueError(f"Batch {b}: Task {t} not available")
 
-            # Simulate task
-            start_time = self.current_times[b]
-            step1_end = start_time + p1
+        # Gather task durations
+        p1 = self.tasks[active_idx, task_idx, 0]
+        p2 = self.tasks[active_idx, task_idx, 1]
+        p3 = self.tasks[active_idx, task_idx, 2]
 
-            wait_time = 0.0
-            if mode == 1:
-                slot_after_step1 = int(step1_end / self.dt)
-                if get_price_at_slot(slot_after_step1) == 1.0:
-                    time_to_low = self._time_to_next_low(step1_end)
-                    wait_time = min(time_to_low, self.max_wait)
+        start_time = self.current_times[active_idx]
+        step1_end = start_time + p1
 
-            step2_start = step1_end + wait_time
-            step2_end = step2_start + p2
-            step3_end = step2_end + p3
+        # Wait logic: if mode==1 and price right after step1 is high, wait until next low slot, capped.
+        slot_after_step1 = (step1_end / self.dt).astype(np.int64)
+        slot_mod = (slot_after_step1 % self._cycle_len).astype(np.int64)
+        price_after = self._price_cycle[slot_mod]
 
-            eec = self._compute_step2_eec(step2_start, step2_end)
+        wait_time = np.zeros_like(step1_end, dtype=np.float32)
+        need_wait = (mode == 1) & (price_after == 1.0)
+        if np.any(need_wait):
+            offsets = self._next_low_offset[slot_mod[need_wait]].astype(np.float32)
+            time_to_low = offsets * self.dt
+            wait_time[need_wait] = np.minimum(time_to_low, self.max_wait)
 
-            # Update state
-            self.current_times[b] = step3_end
-            self.twts[b] += wait_time
-            self.eecs[b] += eec
-            self.masks[b, task_idx] = 0.0
+        step2_start = step1_end + wait_time
 
-            # Check done
-            if np.sum(self.masks[b]) == 0:
-                self.dones[b] = True
-                final_eec = self.eecs[b] * 2
-                rewards[b] = -max(
-                    self.ws[b] * self.twts[b], (1 - self.ws[b]) * final_eec
-                )
+        # Step2 energy cost is exact because all times are multiples of dt.
+        start_slot2 = (step2_start / self.dt).astype(np.int64)
+        start_mod2 = (start_slot2 % self._cycle_len).astype(np.int64)
+        p2_slots = np.rint(p2 / self.dt).astype(np.int64)
+        p2_slots = np.clip(p2_slots, 0, self._max_p2_slots)
+        eec = self._eec_table[start_mod2, p2_slots]
+
+        step3_end = step2_start + p2 + p3
+
+        # Update state
+        self.current_times[active_idx] = step3_end
+        self.twts[active_idx] += wait_time
+        self.eecs[active_idx] += eec
+        self.masks[active_idx, task_idx] = 0.0
+        self.remaining[active_idx] -= 1
+
+        done_now = self.remaining[active_idx] <= 0
+        if np.any(done_now):
+            done_global = active_idx[done_now]
+            self.dones[done_global] = True
+            final_eec = self.eecs[done_global] * 2
+            rewards[done_global] = -np.maximum(
+                self.ws[done_global] * self.twts[done_global],
+                (1.0 - self.ws[done_global]) * final_eec,
+            ).astype(np.float32)
 
         return self._get_obs(), rewards, self.dones.copy(), {}
 
