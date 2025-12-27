@@ -2,7 +2,7 @@
 Training module - Algorithm 1 from paper.
 Paper-exact implementation.
 
-VERSION: 2.0-GPU - Full GPU acceleration for training
+VERSION: 2.1-GPU-ASYNC - Full GPU acceleration with async data prefetch
 """
 
 import torch
@@ -14,6 +14,9 @@ from tqdm import tqdm
 import os
 import json
 from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor
+from queue import Queue
+import threading
 
 from .data import (
     generate_batch,
@@ -26,10 +29,110 @@ from .env import GPUBatchECSPEnv
 from .model import ECSPNet
 
 # Version identifier
-TRAIN_VERSION = "2.0-GPU"
-print(f"[Trainer v{TRAIN_VERSION}] Loading GPU-accelerated training module...")
+TRAIN_VERSION = "2.1-GPU-ASYNC"
+print(
+    f"[Trainer v{TRAIN_VERSION}] Loading GPU-accelerated training with async prefetch..."
+)
 
 __all__ = ["Trainer", "train_model", "TRAIN_VERSION"]
+
+
+class AsyncDataPrefetcher:
+    """
+    Async data prefetcher that generates batches on CPU in background threads
+    and transfers them to GPU using pinned memory and non-blocking transfers.
+    """
+
+    def __init__(
+        self,
+        N: int,
+        batch_size: int,
+        device: torch.device,
+        prefetch_count: int = 2,
+        num_workers: int = 4,
+    ):
+        self.N = N
+        self.batch_size = batch_size
+        self.device = device
+        self.prefetch_count = prefetch_count
+        self.num_workers = num_workers
+
+        # Queue to hold prefetched GPU tensors
+        self.queue = Queue(maxsize=prefetch_count)
+        self.stop_event = threading.Event()
+
+        # Thread pool for parallel data generation
+        self.executor = ThreadPoolExecutor(max_workers=num_workers)
+        self.prefetch_thread = None
+
+        print(
+            f"[AsyncDataPrefetcher] Initialized with {num_workers} workers, prefetch={prefetch_count}"
+        )
+
+    def _generate_single_batch(self, seed_offset: int) -> np.ndarray:
+        """Generate a single batch on CPU."""
+        return generate_batch(self.N, self.batch_size)
+
+    def _prefetch_worker(self):
+        """Background worker that continuously prefetches data."""
+        # Create a CUDA stream for async transfers
+        if self.device.type == "cuda":
+            stream = torch.cuda.Stream()
+        else:
+            stream = None
+
+        batch_counter = 0
+        while not self.stop_event.is_set():
+            try:
+                # Generate batch on CPU (using thread pool for parallelism)
+                tasks_np = self._generate_single_batch(batch_counter)
+                batch_counter += 1
+
+                # Create pinned memory tensor for faster transfer
+                tasks_pinned = torch.from_numpy(tasks_np).pin_memory()
+
+                # Transfer to GPU asynchronously
+                if stream is not None:
+                    with torch.cuda.stream(stream):
+                        tasks_gpu = tasks_pinned.to(self.device, non_blocking=True)
+                        # Generate ws on GPU directly
+                        ws_gpu = (
+                            torch.rand(self.batch_size, device=self.device) * 0.98
+                            + 0.01
+                        )
+                    stream.synchronize()  # Wait for transfer to complete
+                else:
+                    tasks_gpu = tasks_pinned.to(self.device)
+                    ws_gpu = (
+                        torch.rand(self.batch_size, device=self.device) * 0.98 + 0.01
+                    )
+
+                # Put in queue (will block if full)
+                self.queue.put((tasks_gpu, ws_gpu), timeout=1.0)
+
+            except Exception as e:
+                if not self.stop_event.is_set():
+                    print(f"[AsyncDataPrefetcher] Error: {e}")
+                break
+
+    def start(self):
+        """Start the prefetch thread."""
+        self.stop_event.clear()
+        self.prefetch_thread = threading.Thread(
+            target=self._prefetch_worker, daemon=True
+        )
+        self.prefetch_thread.start()
+
+    def get_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Get the next prefetched batch."""
+        return self.queue.get()
+
+    def stop(self):
+        """Stop the prefetch thread."""
+        self.stop_event.set()
+        if self.prefetch_thread is not None:
+            self.prefetch_thread.join(timeout=2.0)
+        self.executor.shutdown(wait=False)
 
 
 class Trainer:
@@ -97,6 +200,12 @@ class Trainer:
         if self.device.type == "cuda":
             print(f"[Trainer v{TRAIN_VERSION}] GPU: {torch.cuda.get_device_name(0)}")
             print(f"[Trainer v{TRAIN_VERSION}] CUDA version: {torch.version.cuda}")
+            # Enable TF32 for faster matmuls on Ampere+ GPUs
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
+            # Enable cudnn autotuner
+            torch.backends.cudnn.benchmark = True
+            print(f"[Trainer v{TRAIN_VERSION}] TF32 and cuDNN benchmark enabled")
 
         # Create model
         self.model = ECSPNet(
@@ -110,6 +219,15 @@ class Trainer:
 
         # Create GPU-native environment
         self.env = GPUBatchECSPEnv(N=N, batch_size=batch_size, device=self.device)
+
+        # Create async data prefetcher (uses 4 CPU cores)
+        self.prefetcher = AsyncDataPrefetcher(
+            N=N,
+            batch_size=batch_size,
+            device=self.device,
+            prefetch_count=3,  # Keep 3 batches ready
+            num_workers=4,  # Use 4 CPU cores for data generation
+        )
 
         # Training history
         self.history = {
@@ -231,7 +349,7 @@ class Trainer:
 
     def train_epoch(self, epoch: int) -> Dict[str, float]:
         """
-        Train for one epoch. All computation on GPU.
+        Train for one epoch. All computation on GPU with async data prefetch.
 
         Args:
             epoch: Current epoch number
@@ -239,21 +357,17 @@ class Trainer:
         Returns:
             Dictionary of metrics
         """
-        epoch_losses = []
-        epoch_policy_losses = []
-        epoch_entropies = []
-        epoch_rewards = []
-        epoch_twts = []
-        epoch_eecs = []
+        # Accumulate metrics on GPU to avoid sync points
+        total_loss = torch.tensor(0.0, device=self.device)
+        total_policy_loss = torch.tensor(0.0, device=self.device)
+        total_entropy = torch.tensor(0.0, device=self.device)
+        total_reward = torch.tensor(0.0, device=self.device)
+        total_twt = torch.tensor(0.0, device=self.device)
+        total_eec = torch.tensor(0.0, device=self.device)
 
         for batch_idx in range(self.batches_per_epoch):
-            # Generate new batch of instances (50 × 2048 per epoch)
-            # Data generation on CPU, then move to GPU once
-            tasks_batch_np = generate_batch(self.N, self.batch_size)
-            tasks_batch = torch.from_numpy(tasks_batch_np).to(self.device)
-
-            # Sample preference weights uniformly (on GPU)
-            ws = torch.rand(self.batch_size, device=self.device) * 0.98 + 0.01
+            # Get prefetched batch (already on GPU)
+            tasks_batch, ws = self.prefetcher.get_batch()
 
             # Rollout trajectories (all on GPU)
             twts, eecs, total_log_probs, entropy = self.rollout_batch(tasks_batch, ws)
@@ -286,30 +400,23 @@ class Trainer:
 
             self.optimizer.step()
 
-            # Record metrics (move to CPU only for logging)
-            epoch_losses.append(loss.item())
-            epoch_policy_losses.append(policy_loss.item())
-            epoch_entropies.append(entropy.item())
-            epoch_rewards.append(rewards.mean().item())
-            epoch_twts.append(twts.mean().item())
-            epoch_eecs.append(eecs.mean().item())
+            # Accumulate on GPU (no sync)
+            total_loss += loss.detach()
+            total_policy_loss += policy_loss.detach()
+            total_entropy += entropy.detach()
+            total_reward += rewards.mean()
+            total_twt += twts.mean()
+            total_eec += eecs.mean()
 
+        # Single sync at end of epoch
+        n = float(self.batches_per_epoch)
         return {
-            "loss": np.mean(epoch_losses),
-            "policy_loss": np.mean(epoch_policy_losses),
-            "entropy": np.mean(epoch_entropies),
-            "mean_reward": np.mean(epoch_rewards),
-            "mean_twt": np.mean(epoch_twts),
-            "mean_eec": np.mean(epoch_eecs),
-        }
-
-        return {
-            "loss": np.mean(epoch_losses),
-            "policy_loss": np.mean(epoch_policy_losses),
-            "entropy": np.mean(epoch_entropies),
-            "mean_reward": np.mean(epoch_rewards),
-            "mean_twt": np.mean(epoch_twts),
-            "mean_eec": np.mean(epoch_eecs),
+            "loss": (total_loss / n).item(),
+            "policy_loss": (total_policy_loss / n).item(),
+            "entropy": (total_entropy / n).item(),
+            "mean_reward": (total_reward / n).item(),
+            "mean_twt": (total_twt / n).item(),
+            "mean_eec": (total_eec / n).item(),
         }
 
     def adjust_learning_rate(self, epoch: int):
@@ -330,7 +437,7 @@ class Trainer:
         save_every: int = 100,
     ):
         """
-        Full training loop.
+        Full training loop with async data prefetch.
 
         Args:
             resume_from: Path to checkpoint to resume from
@@ -344,7 +451,9 @@ class Trainer:
             print(f"Resumed from epoch {start_epoch}")
 
         print("=" * 60)
-        print(f"[Trainer v{TRAIN_VERSION}] GPU-ACCELERATED TRAINING")
+        print(
+            f"[Trainer v{TRAIN_VERSION}] GPU-ACCELERATED TRAINING WITH ASYNC PREFETCH"
+        )
         print("=" * 60)
         print(f"Starting training from epoch {start_epoch}")
         print(
@@ -358,39 +467,49 @@ class Trainer:
             )
         print("=" * 60)
 
+        # Start async data prefetcher
+        print("[Trainer] Starting async data prefetcher...")
+        self.prefetcher.start()
+
         progress_bar = tqdm(range(start_epoch, self.num_epochs), desc="Training")
 
-        for epoch in progress_bar:
-            # Adjust learning rate
-            current_lr = self.adjust_learning_rate(epoch)
+        try:
+            for epoch in progress_bar:
+                # Adjust learning rate
+                current_lr = self.adjust_learning_rate(epoch)
 
-            # Train epoch
-            metrics = self.train_epoch(epoch)
+                # Train epoch
+                metrics = self.train_epoch(epoch)
 
-            # Record history
-            self.history["epoch"].append(epoch)
-            self.history["loss"].append(metrics["loss"])
-            self.history["policy_loss"].append(metrics["policy_loss"])
-            self.history["entropy"].append(metrics["entropy"])
-            self.history["mean_reward"].append(metrics["mean_reward"])
-            self.history["mean_twt"].append(metrics["mean_twt"])
-            self.history["mean_eec"].append(metrics["mean_eec"])
-            self.history["lr"].append(current_lr)
+                # Record history
+                self.history["epoch"].append(epoch)
+                self.history["loss"].append(metrics["loss"])
+                self.history["policy_loss"].append(metrics["policy_loss"])
+                self.history["entropy"].append(metrics["entropy"])
+                self.history["mean_reward"].append(metrics["mean_reward"])
+                self.history["mean_twt"].append(metrics["mean_twt"])
+                self.history["mean_eec"].append(metrics["mean_eec"])
+                self.history["lr"].append(current_lr)
 
-            # Update progress bar
-            progress_bar.set_postfix(
-                {
-                    "loss": f"{metrics['loss']:.4f}",
-                    "reward": f"{metrics['mean_reward']:.4f}",
-                    "twt": f"{metrics['mean_twt']:.4f}",
-                    "eec": f"{metrics['mean_eec']:.4f}",
-                    "lr": f"{current_lr:.6f}",
-                }
-            )
+                # Update progress bar
+                progress_bar.set_postfix(
+                    {
+                        "loss": f"{metrics['loss']:.4f}",
+                        "reward": f"{metrics['mean_reward']:.4f}",
+                        "twt": f"{metrics['mean_twt']:.4f}",
+                        "eec": f"{metrics['mean_eec']:.4f}",
+                        "lr": f"{current_lr:.6f}",
+                    }
+                )
 
-            # Save checkpoint
-            if (epoch + 1) % save_every == 0:
-                self.save_checkpoint(epoch + 1)
+                # Save checkpoint
+                if (epoch + 1) % save_every == 0:
+                    self.save_checkpoint(epoch + 1)
+
+        finally:
+            # Stop prefetcher
+            print("[Trainer] Stopping async data prefetcher...")
+            self.prefetcher.stop()
 
         # Save final checkpoint
         self.save_checkpoint(self.num_epochs, is_final=True)

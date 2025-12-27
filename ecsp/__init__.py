@@ -2,7 +2,7 @@
 ECSP - Energy-Conscious Scheduling Problem Package.
 Paper-exact implementation of ECSPNet.
 
-VERSION: 2.0-GPU - Full GPU acceleration
+VERSION: 2.1-GPU-ASYNC - Full GPU acceleration with async data prefetch
 """
 
 from .data import (
@@ -22,7 +22,7 @@ from .env import ECSPEnv, BatchECSPEnv, GPUBatchECSPEnv, ENV_VERSION
 
 from .model import ECSPNet, obs_dict_to_tensors
 
-from .train import Trainer, train_model
+from .train import Trainer, train_model, TRAIN_VERSION
 
 from .infer import (
     Inferencer,
@@ -34,8 +34,8 @@ from .infer import (
     visualize_pareto_front,
 )
 
-__version__ = "2.0.0-GPU"
-print(f"[ECSP Package v{__version__}] Loaded with GPU acceleration")
+__version__ = "2.1.0-GPU-ASYNC"
+print(f"[ECSP Package v{__version__}] Loaded with GPU + async prefetch")
 
 __all__ = [
     # Data

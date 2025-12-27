@@ -89,7 +89,7 @@ def generate_instance(N: int, seed: int = None) -> np.ndarray:
 
 def generate_batch(N: int, batch_size: int, seed: int = None) -> np.ndarray:
     """
-    Generate a batch of problem instances.
+    Generate a batch of problem instances (vectorized for speed).
 
     Args:
         N: Number of tasks per instance
@@ -102,10 +102,16 @@ def generate_batch(N: int, batch_size: int, seed: int = None) -> np.ndarray:
     if seed is not None:
         np.random.seed(seed)
 
+    # Vectorized generation - much faster than loop
     batch = np.zeros((batch_size, N, 5), dtype=np.float32)
 
-    for b in range(batch_size):
-        batch[b] = generate_instance(N)
+    # Generate all random values at once and round to 0.1
+    # p1: [0.4, 0.8], p2: [0.2, 0.6], p3: [0.4, 0.8]
+    batch[:, :, 0] = np.round(np.random.uniform(0.4, 0.8, (batch_size, N)), 1)  # p1
+    batch[:, :, 1] = np.round(np.random.uniform(0.2, 0.6, (batch_size, N)), 1)  # p2
+    batch[:, :, 2] = np.round(np.random.uniform(0.4, 0.8, (batch_size, N)), 1)  # p3
+    batch[:, :, 3] = 1.0  # P_high
+    batch[:, :, 4] = 0.0  # P_low
 
     return batch
 

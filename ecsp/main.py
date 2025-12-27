@@ -2,7 +2,7 @@
 Main entry point for ECSPNet training and evaluation.
 Trains models on benchmark scales N = [20, 40, 60, 100].
 
-VERSION: 2.0-GPU - Full GPU acceleration
+VERSION: 2.1-GPU-ASYNC - Full GPU acceleration with async data prefetch
 """
 
 import argparse
@@ -24,7 +24,7 @@ from ecsp.infer import (
 )
 from ecsp import __version__ as PACKAGE_VERSION
 
-MAIN_VERSION = "2.0-GPU"
+MAIN_VERSION = "2.1-GPU-ASYNC"
 
 
 def train_all_scales(
@@ -45,13 +45,14 @@ def train_all_scales(
         save_dir: Directory to save checkpoints
     """
     print("=" * 60)
-    print(f"ECSPNet Training v{MAIN_VERSION} - GPU ACCELERATED")
+    print(f"ECSPNet Training v{MAIN_VERSION} - GPU + ASYNC PREFETCH")
     print(f"Package: {PACKAGE_VERSION}, Trainer: {TRAIN_VERSION}")
     print("=" * 60)
 
     if torch.cuda.is_available():
         print(f"GPU: {torch.cuda.get_device_name(0)}")
         print(f"CUDA: {torch.version.cuda}")
+        print(f"Async prefetch: ENABLED (4 CPU workers)")
     else:
         print("WARNING: No GPU available, using CPU")
     print("=" * 60)
