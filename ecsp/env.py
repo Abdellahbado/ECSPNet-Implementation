@@ -1,12 +1,15 @@
 """
 ECSP Environment - Gym-style implementation.
 Paper-exact implementation of the Energy-Conscious Scheduling Problem.
+
+VERSION: 2.0-GPU - Full GPU acceleration for training
 """
 
 import numpy as np
+import torch
 import gymnasium as gym
 from gymnasium import spaces
-from typing import Dict, Tuple, Optional, List
+from typing import Dict, Tuple, Optional, List, Union
 from dataclasses import dataclass
 
 from .data import (
@@ -16,6 +19,10 @@ from .data import (
     DT,
     ENV_CONFIG,
 )
+
+# Version identifier for tracking
+ENV_VERSION = "2.0-GPU"
+print(f"[ECSPEnv v{ENV_VERSION}] Loading GPU-accelerated environment...")
 
 
 @dataclass
@@ -623,6 +630,229 @@ class BatchECSPEnv:
     def get_final_metrics(self) -> Tuple[np.ndarray, np.ndarray]:
         """Get final (TWT, EEC*2) for all instances."""
         return self.twts.copy(), self.eecs * 2
+
+
+class GPUBatchECSPEnv:
+    """
+    GPU-native batched ECSP environment using PyTorch tensors.
+    All operations stay on GPU to eliminate CPU-GPU transfer bottleneck.
+
+    VERSION: 2.0-GPU
+    """
+
+    def __init__(
+        self,
+        N: int = 20,
+        batch_size: int = 2048,
+        device: torch.device = None,
+        dt: float = DT,
+        max_wait: float = ENV_CONFIG["max_wait"],
+        ep_horizon: int = ENV_CONFIG["ep_horizon"],
+    ):
+        self.N = N
+        self.batch_size = batch_size
+        self.device = (
+            device
+            if device is not None
+            else torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        )
+        self.dt = dt
+        self.max_wait = max_wait
+        self.ep_horizon = ep_horizon
+        self._cycle_len = 20
+
+        print(
+            f"[GPUBatchECSPEnv v{ENV_VERSION}] Initialized on {self.device} with batch_size={batch_size}, N={N}"
+        )
+
+        # Precompute TOU cycle on GPU
+        price_cycle_np = np.array(
+            [get_price_at_slot(i) for i in range(self._cycle_len)], dtype=np.float32
+        )
+        self._price_cycle = torch.from_numpy(price_cycle_np).to(self.device)
+
+        # Precompute next-low-slot offsets on GPU
+        next_low_offset = np.zeros(self._cycle_len, dtype=np.int64)
+        for s in range(self._cycle_len):
+            for offset in range(1, self._cycle_len + 1):
+                if price_cycle_np[(s + offset) % self._cycle_len] == 0.0:
+                    next_low_offset[s] = offset
+                    break
+        self._next_low_offset = torch.from_numpy(next_low_offset).to(self.device)
+
+        # Precompute EEC table on GPU
+        max_p2_slots = int(round(0.6 / self.dt))
+        self._max_p2_slots = max_p2_slots
+        eec_table = np.zeros((self._cycle_len, max_p2_slots + 1), dtype=np.float32)
+        for start_mod in range(self._cycle_len):
+            for L in range(max_p2_slots + 1):
+                if L > 0:
+                    idxs = (start_mod + np.arange(L)) % self._cycle_len
+                    eec_table[start_mod, L] = (
+                        float(price_cycle_np[idxs].sum()) * self.dt
+                    )
+        self._eec_table = torch.from_numpy(eec_table).to(self.device)
+
+        # State tensors (initialized in reset)
+        self.tasks: Optional[torch.Tensor] = None  # [batch, N, 5]
+        self.current_times: Optional[torch.Tensor] = None  # [batch]
+        self.twts: Optional[torch.Tensor] = None  # [batch]
+        self.eecs: Optional[torch.Tensor] = None  # [batch]
+        self.ws: Optional[torch.Tensor] = None  # [batch]
+        self.masks: Optional[torch.Tensor] = None  # [batch, N]
+        self.dones: Optional[torch.Tensor] = None  # [batch]
+        self.remaining: Optional[torch.Tensor] = None  # [batch]
+
+    def reset(
+        self,
+        tasks: Union[np.ndarray, torch.Tensor, None] = None,
+        ws: Union[np.ndarray, torch.Tensor, None] = None,
+        seed: int = None,
+    ) -> Dict[str, torch.Tensor]:
+        """Reset with tasks/ws on GPU. Returns GPU tensors."""
+        if seed is not None:
+            torch.manual_seed(seed)
+            np.random.seed(seed)
+
+        # Handle tasks
+        if tasks is not None:
+            if isinstance(tasks, np.ndarray):
+                self.tasks = torch.from_numpy(tasks).to(self.device)
+            else:
+                self.tasks = tasks.to(self.device)
+        else:
+            # Generate on CPU then move to GPU (generation is fast)
+            from .data import generate_batch
+
+            tasks_np = generate_batch(self.N, self.batch_size)
+            self.tasks = torch.from_numpy(tasks_np).to(self.device)
+
+        # Handle ws
+        if ws is not None:
+            if isinstance(ws, np.ndarray):
+                self.ws = torch.from_numpy(ws).to(self.device)
+            else:
+                self.ws = ws.to(self.device)
+        else:
+            self.ws = (
+                torch.rand(self.batch_size, device=self.device) * 0.98 + 0.01
+            )  # [0.01, 0.99]
+
+        actual_N = self.tasks.shape[1]
+
+        # Initialize state tensors on GPU
+        self.masks = torch.ones(self.batch_size, actual_N, device=self.device)
+        self.remaining = torch.full(
+            (self.batch_size,), actual_N, dtype=torch.int64, device=self.device
+        )
+        self.current_times = torch.zeros(self.batch_size, device=self.device)
+        self.twts = torch.zeros(self.batch_size, device=self.device)
+        self.eecs = torch.zeros(self.batch_size, device=self.device)
+        self.dones = torch.zeros(self.batch_size, dtype=torch.bool, device=self.device)
+
+        return self._get_obs()
+
+    def _get_obs(self) -> Dict[str, torch.Tensor]:
+        """Get observation dict with GPU tensors."""
+        # Compute EP vectorized
+        current_slots = (self.current_times / self.dt).long()  # [batch]
+        offsets = torch.arange(self.ep_horizon, device=self.device).unsqueeze(
+            0
+        )  # [1, H]
+        slot_idxs = (
+            current_slots.unsqueeze(1) + offsets
+        ) % self._cycle_len  # [batch, H]
+        EP = self._price_cycle[slot_idxs]  # [batch, H]
+
+        return {
+            "tasks": self.tasks,
+            "EP": EP,
+            "objs": torch.stack([self.twts, self.eecs], dim=1),  # [batch, 2]
+            "w": self.ws.unsqueeze(1),  # [batch, 1]
+            "mask": self.masks,  # [batch, N]
+        }
+
+    def step(
+        self, actions: torch.Tensor
+    ) -> Tuple[Dict[str, torch.Tensor], torch.Tensor, torch.Tensor, Dict]:
+        """
+        Execute actions. All inputs/outputs are GPU tensors.
+
+        Args:
+            actions: [batch] integer actions (already on GPU)
+
+        Returns:
+            obs, rewards, dones - all GPU tensors
+        """
+        rewards = torch.zeros(self.batch_size, device=self.device)
+
+        active = ~self.dones
+        if not active.any():
+            return self._get_obs(), rewards, self.dones, {}
+
+        # Parse actions
+        task_idx = (actions // 2).long()  # [batch]
+        mode = (actions % 2).long()  # [batch]
+
+        # Gather task durations (only for active)
+        batch_idx = torch.arange(self.batch_size, device=self.device)
+        p1 = self.tasks[batch_idx, task_idx, 0]  # [batch]
+        p2 = self.tasks[batch_idx, task_idx, 1]  # [batch]
+        p3 = self.tasks[batch_idx, task_idx, 2]  # [batch]
+
+        start_time = self.current_times
+        step1_end = start_time + p1
+
+        # Wait logic
+        slot_after_step1 = (step1_end / self.dt).long()
+        slot_mod = slot_after_step1 % self._cycle_len
+        price_after = self._price_cycle[slot_mod]
+
+        wait_time = torch.zeros(self.batch_size, device=self.device)
+        need_wait = (mode == 1) & (price_after == 1.0) & active
+        if need_wait.any():
+            offsets = self._next_low_offset[slot_mod[need_wait]].float()
+            time_to_low = offsets * self.dt
+            wait_time[need_wait] = torch.minimum(
+                time_to_low, torch.tensor(self.max_wait, device=self.device)
+            )
+
+        step2_start = step1_end + wait_time
+
+        # Step2 EEC from lookup table
+        start_slot2 = (step2_start / self.dt).long()
+        start_mod2 = start_slot2 % self._cycle_len
+        p2_slots = torch.round(p2 / self.dt).long().clamp(0, self._max_p2_slots)
+        eec = self._eec_table[start_mod2, p2_slots]
+
+        step3_end = step2_start + p2 + p3
+
+        # Update state (only for active instances)
+        self.current_times = torch.where(active, step3_end, self.current_times)
+        self.twts = torch.where(active, self.twts + wait_time, self.twts)
+        self.eecs = torch.where(active, self.eecs + eec, self.eecs)
+
+        # Update masks using scatter
+        self.masks[batch_idx[active], task_idx[active]] = 0.0
+        self.remaining = torch.where(active, self.remaining - 1, self.remaining)
+
+        # Check done
+        done_now = (self.remaining <= 0) & active
+        self.dones = self.dones | done_now
+
+        # Compute rewards for newly done instances
+        if done_now.any():
+            final_eec = self.eecs[done_now] * 2
+            rewards[done_now] = -torch.maximum(
+                self.ws[done_now] * self.twts[done_now],
+                (1.0 - self.ws[done_now]) * final_eec,
+            )
+
+        return self._get_obs(), rewards, self.dones, {}
+
+    def get_final_metrics(self) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Get final (TWT, EEC*2) as GPU tensors."""
+        return self.twts, self.eecs * 2
 
 
 if __name__ == "__main__":

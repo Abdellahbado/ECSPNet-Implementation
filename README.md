@@ -2,6 +2,14 @@
 
 **Paper-exact implementation of "Deep Reinforcement Learning Energy Scheduling"**
 
+## VERSION: 2.0-GPU - Full GPU Acceleration
+
+This version runs the entire training loop on GPU:
+- Environment simulation (GPUBatchECSPEnv) runs entirely on GPU using PyTorch tensors
+- No CPU-GPU data transfers during rollouts
+- Baseline computation on GPU
+- Expected 10-50x speedup over CPU-bound version
+
 ## Overview
 
 This implementation reproduces the ECSPNet method for solving the Energy-Conscious Scheduling Problem (ECSP) using deep reinforcement learning with a transformer-based policy network.

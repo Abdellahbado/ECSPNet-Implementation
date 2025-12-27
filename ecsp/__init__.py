@@ -1,6 +1,8 @@
 """
 ECSP - Energy-Conscious Scheduling Problem Package.
 Paper-exact implementation of ECSPNet.
+
+VERSION: 2.0-GPU - Full GPU acceleration
 """
 
 from .data import (
@@ -16,7 +18,7 @@ from .data import (
     DT,
 )
 
-from .env import ECSPEnv, BatchECSPEnv
+from .env import ECSPEnv, BatchECSPEnv, GPUBatchECSPEnv, ENV_VERSION
 
 from .model import ECSPNet, obs_dict_to_tensors
 
@@ -32,7 +34,9 @@ from .infer import (
     visualize_pareto_front,
 )
 
-__version__ = "1.0.0"
+__version__ = "2.0.0-GPU"
+print(f"[ECSP Package v{__version__}] Loaded with GPU acceleration")
+
 __all__ = [
     # Data
     "generate_instance",
@@ -48,6 +52,8 @@ __all__ = [
     # Environment
     "ECSPEnv",
     "BatchECSPEnv",
+    "GPUBatchECSPEnv",
+    "ENV_VERSION",
     # Model
     "ECSPNet",
     "obs_dict_to_tensors",

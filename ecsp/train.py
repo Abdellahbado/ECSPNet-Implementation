@@ -1,6 +1,8 @@
 """
 Training module - Algorithm 1 from paper.
 Paper-exact implementation.
+
+VERSION: 2.0-GPU - Full GPU acceleration for training
 """
 
 import torch
@@ -20,8 +22,14 @@ from .data import (
     ENV_CONFIG,
     BENCHMARK_SCALES,
 )
-from .env import BatchECSPEnv
-from .model import ECSPNet, obs_dict_to_tensors
+from .env import GPUBatchECSPEnv
+from .model import ECSPNet
+
+# Version identifier
+TRAIN_VERSION = "2.0-GPU"
+print(f"[Trainer v{TRAIN_VERSION}] Loading GPU-accelerated training module...")
+
+__all__ = ["Trainer", "train_model", "TRAIN_VERSION"]
 
 
 class Trainer:
@@ -85,7 +93,10 @@ class Trainer:
 
         # Setup device
         self.device = torch.device(device if torch.cuda.is_available() else "cpu")
-        print(f"Using device: {self.device}")
+        print(f"[Trainer v{TRAIN_VERSION}] Using device: {self.device}")
+        if self.device.type == "cuda":
+            print(f"[Trainer v{TRAIN_VERSION}] GPU: {torch.cuda.get_device_name(0)}")
+            print(f"[Trainer v{TRAIN_VERSION}] CUDA version: {torch.version.cuda}")
 
         # Create model
         self.model = ECSPNet(
@@ -97,8 +108,8 @@ class Trainer:
         # Create optimizer
         self.optimizer = optim.Adam(self.model.parameters(), lr=initial_lr)
 
-        # Create environment
-        self.env = BatchECSPEnv(N=N, batch_size=batch_size)
+        # Create GPU-native environment
+        self.env = GPUBatchECSPEnv(N=N, batch_size=batch_size, device=self.device)
 
         # Training history
         self.history = {
@@ -117,12 +128,12 @@ class Trainer:
 
     def compute_baseline(
         self,
-        rewards: np.ndarray,  # [batch]
-        ws: np.ndarray,  # [batch]
-        T_pts: np.ndarray,  # [batch]
-    ) -> np.ndarray:
+        rewards: torch.Tensor,  # [batch] GPU tensor
+        ws: torch.Tensor,  # [batch] GPU tensor
+        T_pts: torch.Tensor,  # [batch] GPU tensor
+    ) -> torch.Tensor:
         """
-        Compute baseline using 10 w-bins.
+        Compute baseline using 10 w-bins. All on GPU.
 
         Paper Algorithm 1:
         - Group instances into bins based on w
@@ -130,30 +141,31 @@ class Trainer:
           b[i] = T_pt[i] * mean_{j in A_k}(R[j] / T_pt[j])
 
         Args:
-            rewards: Rewards for each instance [batch]
-            ws: Preference weights [batch]
-            T_pts: Total processing times [batch]
+            rewards: Rewards for each instance [batch] (GPU)
+            ws: Preference weights [batch] (GPU)
+            T_pts: Total processing times [batch] (GPU)
 
         Returns:
-            baselines: Baseline values [batch]
+            baselines: Baseline values [batch] (GPU)
         """
-        baselines = np.zeros_like(rewards)
+        baselines = torch.zeros_like(rewards)
 
         # Define bin edges
-        bin_edges = np.linspace(0, 1, self.num_w_bins + 1)
+        bin_edges = torch.linspace(0, 1, self.num_w_bins + 1, device=self.device)
 
         for k in range(self.num_w_bins):
             # Find instances in this bin
-            bin_mask = (ws >= bin_edges[k]) & (ws < bin_edges[k + 1])
-            if k == self.num_w_bins - 1:  # Include upper bound for last bin
+            if k == self.num_w_bins - 1:
                 bin_mask = (ws >= bin_edges[k]) & (ws <= bin_edges[k + 1])
+            else:
+                bin_mask = (ws >= bin_edges[k]) & (ws < bin_edges[k + 1])
 
-            if np.sum(bin_mask) == 0:
+            if not bin_mask.any():
                 continue
 
             # Compute mean(R/T_pt) for this bin
             R_over_Tpt = rewards[bin_mask] / (T_pts[bin_mask] + 1e-8)
-            mean_R_over_Tpt = np.mean(R_over_Tpt)
+            mean_R_over_Tpt = R_over_Tpt.mean()
 
             # Baseline for each instance in bin
             baselines[bin_mask] = T_pts[bin_mask] * mean_R_over_Tpt
@@ -162,37 +174,38 @@ class Trainer:
 
     def rollout_batch(
         self,
-        tasks_batch: np.ndarray,  # [batch, N, 5]
-        ws: np.ndarray,  # [batch]
-    ) -> Tuple[np.ndarray, np.ndarray, torch.Tensor, torch.Tensor]:
+        tasks_batch: torch.Tensor,  # [batch, N, 5] GPU tensor
+        ws: torch.Tensor,  # [batch] GPU tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
         """
-        Rollout trajectories for a batch of instances.
+        Rollout trajectories entirely on GPU.
 
         Args:
-            tasks_batch: Batch of task instances [batch, N, 5]
-            ws: Preference weights [batch]
+            tasks_batch: Batch of task instances [batch, N, 5] (GPU)
+            ws: Preference weights [batch] (GPU)
 
         Returns:
-            twts: Total wait times [batch]
-            eecs: Energy costs [batch]
-            total_log_probs: Sum of log probs for each trajectory [batch]
-            total_entropy: Mean entropy across all steps [scalar]
+            twts: Total wait times [batch] (GPU)
+            eecs: Energy costs [batch] (GPU)
+            total_log_probs: Sum of log probs for each trajectory [batch] (GPU)
+            total_entropy: Mean entropy across all steps [scalar] (GPU)
         """
         self.model.train()
 
-        # Reset environment
+        # Reset environment with GPU tensors
         obs = self.env.reset(tasks=tasks_batch, ws=ws)
-        obs_tensors = obs_dict_to_tensors(obs, self.device)
 
         total_log_probs = torch.zeros(self.batch_size, device=self.device)
         entropies = []
 
         # Rollout until all done
         for step in range(self.N):
-            # Forward pass
-            probs, logits = self.model.forward_from_obs(obs_tensors)
+            # Forward pass - obs is already GPU tensors
+            probs, logits = self.model(
+                obs["tasks"], obs["EP"], obs["objs"], obs["w"], obs["mask"]
+            )
 
-            # Sample actions
+            # Sample actions (stays on GPU)
             actions, log_probs = self.model.sample_action(probs)
 
             # Compute entropy
@@ -200,18 +213,15 @@ class Trainer:
             entropies.append(entropy)
 
             # Accumulate log probs
-            total_log_probs += log_probs
+            total_log_probs = total_log_probs + log_probs
 
-            # Environment step
-            actions_np = actions.cpu().numpy()
-            obs, rewards, dones, info = self.env.step(actions_np)
+            # Environment step (actions already on GPU)
+            obs, rewards, dones, info = self.env.step(actions)
 
             if dones.all():
                 break
 
-            obs_tensors = obs_dict_to_tensors(obs, self.device)
-
-        # Get final metrics
+        # Get final metrics (GPU tensors)
         twts, eecs = self.env.get_final_metrics()
 
         # Mean entropy across steps
@@ -221,7 +231,7 @@ class Trainer:
 
     def train_epoch(self, epoch: int) -> Dict[str, float]:
         """
-        Train for one epoch.
+        Train for one epoch. All computation on GPU.
 
         Args:
             epoch: Current epoch number
@@ -238,31 +248,28 @@ class Trainer:
 
         for batch_idx in range(self.batches_per_epoch):
             # Generate new batch of instances (50 × 2048 per epoch)
-            tasks_batch = generate_batch(self.N, self.batch_size)
+            # Data generation on CPU, then move to GPU once
+            tasks_batch_np = generate_batch(self.N, self.batch_size)
+            tasks_batch = torch.from_numpy(tasks_batch_np).to(self.device)
 
-            # Sample preference weights uniformly
-            ws = np.random.uniform(0.01, 0.99, size=self.batch_size).astype(np.float32)
+            # Sample preference weights uniformly (on GPU)
+            ws = torch.rand(self.batch_size, device=self.device) * 0.98 + 0.01
 
-            # Rollout trajectories
+            # Rollout trajectories (all on GPU)
             twts, eecs, total_log_probs, entropy = self.rollout_batch(tasks_batch, ws)
 
-            # Compute rewards: R = -max(w*TWT, (1-w)*EEC)
-            rewards = -np.maximum(ws * twts, (1 - ws) * eecs)
+            # Compute rewards on GPU: R = -max(w*TWT, (1-w)*EEC)
+            rewards = -torch.maximum(ws * twts, (1 - ws) * eecs)
 
-            # Compute T_pt for each instance (sum of p2)
-            T_pts = compute_total_processing_time(tasks_batch)
+            # Compute T_pt on GPU (sum of p2)
+            T_pts = tasks_batch[:, :, 1].sum(dim=1)  # [batch]
 
-            # Compute baseline
+            # Compute baseline (all on GPU)
             baselines = self.compute_baseline(rewards, ws, T_pts)
 
-            # Convert to tensors
-            rewards_t = torch.from_numpy(rewards).to(self.device)
-            baselines_t = torch.from_numpy(baselines).to(self.device)
-
-            # Policy gradient loss
-            # L = -mean((R - b) * log_prob)
-            advantages = rewards_t - baselines_t
-            policy_loss = -(advantages * total_log_probs).mean()
+            # Policy gradient loss (already on GPU)
+            advantages = rewards - baselines
+            policy_loss = -(advantages.detach() * total_log_probs).mean()
 
             # Entropy loss (maximize entropy, so negative)
             entropy_loss = -self.entropy_coef * entropy
@@ -279,13 +286,22 @@ class Trainer:
 
             self.optimizer.step()
 
-            # Record metrics
+            # Record metrics (move to CPU only for logging)
             epoch_losses.append(loss.item())
             epoch_policy_losses.append(policy_loss.item())
             epoch_entropies.append(entropy.item())
-            epoch_rewards.append(rewards.mean())
-            epoch_twts.append(twts.mean())
-            epoch_eecs.append(eecs.mean())
+            epoch_rewards.append(rewards.mean().item())
+            epoch_twts.append(twts.mean().item())
+            epoch_eecs.append(eecs.mean().item())
+
+        return {
+            "loss": np.mean(epoch_losses),
+            "policy_loss": np.mean(epoch_policy_losses),
+            "entropy": np.mean(epoch_entropies),
+            "mean_reward": np.mean(epoch_rewards),
+            "mean_twt": np.mean(epoch_twts),
+            "mean_eec": np.mean(epoch_eecs),
+        }
 
         return {
             "loss": np.mean(epoch_losses),
@@ -327,11 +343,20 @@ class Trainer:
             start_epoch = self.load_checkpoint(resume_from)
             print(f"Resumed from epoch {start_epoch}")
 
+        print("=" * 60)
+        print(f"[Trainer v{TRAIN_VERSION}] GPU-ACCELERATED TRAINING")
+        print("=" * 60)
         print(f"Starting training from epoch {start_epoch}")
         print(
             f"Configuration: N={self.N}, batch_size={self.batch_size}, "
             f"epochs={self.num_epochs}"
         )
+        print(f"Device: {self.device}")
+        if self.device.type == "cuda":
+            print(
+                f"GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f} GB"
+            )
+        print("=" * 60)
 
         progress_bar = tqdm(range(start_epoch, self.num_epochs), desc="Training")
 
@@ -476,14 +501,15 @@ if __name__ == "__main__":
         save_dir="test_checkpoints",
     )
 
-    # Test single batch rollout
-    tasks = generate_batch(10, 32)
-    ws = np.random.uniform(0.01, 0.99, size=32).astype(np.float32)
+    # Test single batch rollout (use GPU tensors)
+    tasks_np = generate_batch(10, 32)
+    tasks = torch.from_numpy(tasks_np).to(trainer.device)
+    ws = torch.rand(32, device=trainer.device) * 0.98 + 0.01
 
     twts, eecs, log_probs, entropy = trainer.rollout_batch(tasks, ws)
     print(f"\nRollout test:")
-    print(f"  TWTs: mean={twts.mean():.4f}, std={twts.std():.4f}")
-    print(f"  EECs: mean={eecs.mean():.4f}, std={eecs.std():.4f}")
+    print(f"  TWTs: mean={twts.mean().item():.4f}, std={twts.std().item():.4f}")
+    print(f"  EECs: mean={eecs.mean().item():.4f}, std={eecs.std().item():.4f}")
     print(f"  Log probs: mean={log_probs.mean().item():.4f}")
     print(f"  Entropy: {entropy.item():.4f}")
 

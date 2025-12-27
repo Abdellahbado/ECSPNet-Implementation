@@ -1,6 +1,8 @@
 """
 Main entry point for ECSPNet training and evaluation.
 Trains models on benchmark scales N = [20, 40, 60, 100].
+
+VERSION: 2.0-GPU - Full GPU acceleration
 """
 
 import argparse
@@ -13,13 +15,16 @@ from typing import Dict, List
 
 from ecsp.data import BENCHMARK_SCALES, TRAINING_CONFIG, generate_instance
 from ecsp.model import ECSPNet
-from ecsp.train import Trainer, train_model
+from ecsp.train import Trainer, train_model, TRAIN_VERSION
 from ecsp.infer import (
     Inferencer,
     load_model_for_inference,
     evaluate_on_benchmark,
     visualize_pareto_front,
 )
+from ecsp import __version__ as PACKAGE_VERSION
+
+MAIN_VERSION = "2.0-GPU"
 
 
 def train_all_scales(
@@ -40,7 +45,15 @@ def train_all_scales(
         save_dir: Directory to save checkpoints
     """
     print("=" * 60)
-    print("ECSPNet Training - Paper Exact Implementation")
+    print(f"ECSPNet Training v{MAIN_VERSION} - GPU ACCELERATED")
+    print(f"Package: {PACKAGE_VERSION}, Trainer: {TRAIN_VERSION}")
+    print("=" * 60)
+
+    if torch.cuda.is_available():
+        print(f"GPU: {torch.cuda.get_device_name(0)}")
+        print(f"CUDA: {torch.version.cuda}")
+    else:
+        print("WARNING: No GPU available, using CPU")
     print("=" * 60)
 
     results = {}
