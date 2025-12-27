@@ -1,0 +1,605 @@
+"""
+ECSP Environment - Gym-style implementation.
+Paper-exact implementation of the Energy-Conscious Scheduling Problem.
+"""
+
+import numpy as np
+import gymnasium as gym
+from gymnasium import spaces
+from typing import Dict, Tuple, Optional, List
+from dataclasses import dataclass
+
+from .data import (
+    generate_instance,
+    generate_tou_pattern,
+    get_price_at_slot,
+    DT,
+    ENV_CONFIG,
+)
+
+
+@dataclass
+class TaskScheduleResult:
+    """Result of scheduling a single task."""
+
+    task_idx: int
+    mode: int  # 0=no wait, 1=wait after step1
+    start_time: float
+    step1_end: float
+    wait_time: float
+    step2_start: float
+    step2_end: float
+    step3_end: float
+    eec_contribution: float  # Energy cost for this task's step2
+
+
+class ECSPEnv(gym.Env):
+    """
+    Energy-Conscious Scheduling Problem Environment.
+
+    State space:
+        - tasks: [N, 5] remaining task features [p1, p2, p3, P_high=1, P_low=0]
+        - EP: [20] next 20 time slots electricity price {0, 1}
+        - objs: [2] current [TWT, EEC] (raw values)
+        - w: [1] preference weight
+        - mask: [N] 1=available task, 0=scheduled/padding
+
+    Action space:
+        Categorical over 2*N actions: (task_idx, mode)
+        - action_idx // 2 = task_idx
+        - action_idx % 2 = mode (0=no wait, 1=wait after step1)
+    """
+
+    metadata = {"render_modes": ["human"]}
+
+    def __init__(
+        self,
+        N: int = 20,
+        max_N: int = None,
+        dt: float = DT,
+        max_wait: float = ENV_CONFIG["max_wait"],
+        ep_horizon: int = ENV_CONFIG["ep_horizon"],
+    ):
+        """
+        Initialize ECSP environment.
+
+        Args:
+            N: Number of tasks in each instance
+            max_N: Maximum N for padding (default: N)
+            dt: Time discretization step
+            max_wait: Maximum wait time T_PW (paper: 0.4)
+            ep_horizon: Number of look-ahead slots for EP (paper: 20)
+        """
+        super().__init__()
+
+        self.N = N
+        self.max_N = max_N if max_N is not None else N
+        self.dt = dt
+        self.max_wait = max_wait
+        self.ep_horizon = ep_horizon
+
+        # Action space: 2*max_N discrete actions
+        self.action_space = spaces.Discrete(2 * self.max_N)
+
+        # Observation space
+        self.observation_space = spaces.Dict(
+            {
+                "tasks": spaces.Box(
+                    low=0, high=2, shape=(self.max_N, 5), dtype=np.float32
+                ),
+                "EP": spaces.Box(
+                    low=0, high=1, shape=(self.ep_horizon,), dtype=np.float32
+                ),
+                "objs": spaces.Box(low=0, high=np.inf, shape=(2,), dtype=np.float32),
+                "w": spaces.Box(low=0, high=1, shape=(1,), dtype=np.float32),
+                "mask": spaces.Box(
+                    low=0, high=1, shape=(self.max_N,), dtype=np.float32
+                ),
+            }
+        )
+
+        # State variables (initialized in reset)
+        self.tasks: Optional[np.ndarray] = None
+        self.original_tasks: Optional[np.ndarray] = None
+        self.current_time: float = 0.0
+        self.twt: float = 0.0  # Total Wait Time
+        self.eec: float = 0.0  # Energy cost (sum during step2)
+        self.w: float = 0.5  # Preference weight
+        self.available_mask: Optional[np.ndarray] = None
+        self.schedule_history: List[TaskScheduleResult] = []
+
+    def reset(
+        self,
+        *,
+        seed: Optional[int] = None,
+        options: Optional[Dict] = None,
+    ) -> Tuple[Dict[str, np.ndarray], Dict]:
+        """
+        Reset environment with a new instance.
+
+        Options:
+            - tasks: np.ndarray [N, 5] - use provided tasks instead of generating
+            - w: float - preference weight (default: random uniform(0.01, 0.99))
+        """
+        super().reset(seed=seed)
+
+        # Generate or use provided tasks
+        if options is not None and "tasks" in options:
+            self.original_tasks = options["tasks"].copy()
+        else:
+            self.original_tasks = generate_instance(self.N, seed=seed)
+
+        # Pad tasks to max_N if necessary
+        actual_N = len(self.original_tasks)
+        self.tasks = np.zeros((self.max_N, 5), dtype=np.float32)
+        self.tasks[:actual_N] = self.original_tasks
+
+        # Initialize mask (1 for real tasks, 0 for padding)
+        self.available_mask = np.zeros(self.max_N, dtype=np.float32)
+        self.available_mask[:actual_N] = 1.0
+
+        # Set preference weight
+        if options is not None and "w" in options:
+            self.w = options["w"]
+        else:
+            self.w = np.random.uniform(0.01, 0.99)
+
+        # Reset state
+        self.current_time = 0.0
+        self.twt = 0.0
+        self.eec = 0.0
+        self.schedule_history = []
+
+        return self._get_obs(), self._get_info()
+
+    def _get_obs(self) -> Dict[str, np.ndarray]:
+        """Construct observation dictionary."""
+        # Get electricity prices for next ep_horizon slots
+        current_slot = int(self.current_time / self.dt)
+        EP = np.array(
+            [get_price_at_slot(current_slot + i) for i in range(self.ep_horizon)],
+            dtype=np.float32,
+        )
+
+        return {
+            "tasks": self.tasks.copy(),
+            "EP": EP,
+            "objs": np.array([self.twt, self.eec], dtype=np.float32),
+            "w": np.array([self.w], dtype=np.float32),
+            "mask": self.available_mask.copy(),
+        }
+
+    def _get_info(self) -> Dict:
+        """Get additional info."""
+        return {
+            "current_time": self.current_time,
+            "num_scheduled": len(self.schedule_history),
+            "num_remaining": int(np.sum(self.available_mask)),
+        }
+
+    def step(
+        self, action: int
+    ) -> Tuple[Dict[str, np.ndarray], float, bool, bool, Dict]:
+        """
+        Execute one scheduling action.
+
+        Args:
+            action: Integer in [0, 2*max_N), encoding (task_idx, mode)
+                   task_idx = action // 2
+                   mode = action % 2 (0=no wait, 1=wait after step1)
+
+        Returns:
+            observation, reward, terminated, truncated, info
+        """
+        task_idx = action // 2
+        mode = action % 2
+
+        # Validate action
+        if self.available_mask[task_idx] == 0:
+            raise ValueError(
+                f"Task {task_idx} is not available (already scheduled or padding)"
+            )
+
+        # Get task features
+        p1, p2, p3, P_high, P_low = self.tasks[task_idx]
+
+        # Schedule the task
+        result = self._simulate_task(task_idx, p1, p2, p3, mode)
+        self.schedule_history.append(result)
+
+        # Update state
+        self.current_time = result.step3_end
+        self.twt += result.wait_time
+        self.eec += result.eec_contribution
+
+        # Mark task as scheduled
+        self.available_mask[task_idx] = 0.0
+
+        # Check if episode is done
+        terminated = np.sum(self.available_mask) == 0
+        truncated = False
+
+        # Compute reward only at episode end
+        if terminated:
+            # Scale EEC by 2 as per paper
+            final_eec = self.eec * 2
+            # Reward: R = -max(w*TWT, (1-w)*EEC)
+            reward = -max(self.w * self.twt, (1 - self.w) * final_eec)
+        else:
+            reward = 0.0
+
+        return self._get_obs(), reward, terminated, truncated, self._get_info()
+
+    def _simulate_task(
+        self, task_idx: int, p1: float, p2: float, p3: float, mode: int
+    ) -> TaskScheduleResult:
+        """
+        Simulate scheduling a task with given mode.
+
+        Args:
+            task_idx: Index of the task
+            p1, p2, p3: Step durations
+            mode: 0=no wait, 1=wait after step1 (capped at max_wait)
+
+        Returns:
+            TaskScheduleResult with timing and energy cost
+        """
+        start_time = self.current_time
+
+        # Step 1: always runs immediately
+        step1_end = start_time + p1
+
+        # Determine wait time
+        wait_time = 0.0
+        if mode == 1:
+            # Check if we're in high-price period after step1
+            slot_after_step1 = int(step1_end / self.dt)
+            price_after_step1 = get_price_at_slot(slot_after_step1)
+
+            if price_after_step1 == 1.0:  # High price, try to wait
+                # Find distance to next low-price slot
+                time_to_next_low = self._time_to_next_low_price(step1_end)
+                # Cap wait at max_wait
+                wait_time = min(time_to_next_low, self.max_wait)
+            # If already low price, no wait needed
+
+        # Step 2: starts after wait
+        step2_start = step1_end + wait_time
+        step2_end = step2_start + p2
+
+        # Compute energy cost for step2 (sum of prices across slots)
+        eec_contribution = self._compute_step2_energy_cost(step2_start, step2_end)
+
+        # Step 3: immediately after step2
+        step3_end = step2_end + p3
+
+        return TaskScheduleResult(
+            task_idx=task_idx,
+            mode=mode,
+            start_time=start_time,
+            step1_end=step1_end,
+            wait_time=wait_time,
+            step2_start=step2_start,
+            step2_end=step2_end,
+            step3_end=step3_end,
+            eec_contribution=eec_contribution,
+        )
+
+    def _time_to_next_low_price(self, current_time: float) -> float:
+        """
+        Compute time until next low-price slot begins.
+
+        Args:
+            current_time: Current time in continuous units
+
+        Returns:
+            Time until next slot with price=0
+        """
+        current_slot = int(current_time / self.dt)
+
+        # Search ahead for low-price slot (max 20 slots = 1 full cycle)
+        for offset in range(1, 21):
+            if get_price_at_slot(current_slot + offset) == 0.0:
+                # Found low-price slot
+                next_low_slot_start = (current_slot + offset) * self.dt
+                return next_low_slot_start - current_time
+
+        # Should never reach here given the 20-slot cycle
+        return self.max_wait
+
+    def _compute_step2_energy_cost(self, step2_start: float, step2_end: float) -> float:
+        """
+        Compute energy cost during step2 execution.
+
+        EEC = sum over slots k that overlap with step2 of: PH[k] * P_high * dt
+        where P_high = 1.0
+
+        Args:
+            step2_start: Start time of step2
+            step2_end: End time of step2
+
+        Returns:
+            Energy cost contribution from this step2
+        """
+        # Find slots that overlap with step2
+        start_slot = int(step2_start / self.dt)
+        end_slot = int(np.ceil(step2_end / self.dt))
+
+        eec = 0.0
+        for slot in range(start_slot, end_slot):
+            slot_start = slot * self.dt
+            slot_end = (slot + 1) * self.dt
+
+            # Compute overlap with step2
+            overlap_start = max(step2_start, slot_start)
+            overlap_end = min(step2_end, slot_end)
+            overlap_duration = max(0, overlap_end - overlap_start)
+
+            if overlap_duration > 0:
+                price = get_price_at_slot(slot)
+                # EEC contribution: price * P_high * overlap_duration
+                # P_high = 1.0, so just price * overlap
+                eec += price * 1.0 * overlap_duration
+
+        return eec
+
+    def get_valid_actions(self) -> np.ndarray:
+        """
+        Get mask of valid actions.
+
+        Returns:
+            np.ndarray of shape [2*max_N] with 1 for valid actions, 0 otherwise
+        """
+        valid = np.zeros(2 * self.max_N, dtype=np.float32)
+        for i in range(self.max_N):
+            if self.available_mask[i] == 1.0:
+                valid[2 * i] = 1.0  # mode=0
+                valid[2 * i + 1] = 1.0  # mode=1
+        return valid
+
+    def get_final_metrics(self) -> Tuple[float, float]:
+        """
+        Get final TWT and EEC (with scaling).
+
+        Returns:
+            (TWT, EEC) where EEC is scaled by 2 as per paper
+        """
+        return self.twt, self.eec * 2
+
+
+class BatchECSPEnv:
+    """
+    Batched version of ECSPEnv for efficient training.
+    Handles multiple instances in parallel.
+    """
+
+    def __init__(
+        self,
+        N: int = 20,
+        batch_size: int = 2048,
+        max_N: int = None,
+        dt: float = DT,
+        max_wait: float = ENV_CONFIG["max_wait"],
+        ep_horizon: int = ENV_CONFIG["ep_horizon"],
+    ):
+        self.N = N
+        self.batch_size = batch_size
+        self.max_N = max_N if max_N is not None else N
+        self.dt = dt
+        self.max_wait = max_wait
+        self.ep_horizon = ep_horizon
+
+        # Batch state
+        self.tasks: Optional[np.ndarray] = None  # [batch, max_N, 5]
+        self.current_times: Optional[np.ndarray] = None  # [batch]
+        self.twts: Optional[np.ndarray] = None  # [batch]
+        self.eecs: Optional[np.ndarray] = None  # [batch]
+        self.ws: Optional[np.ndarray] = None  # [batch]
+        self.masks: Optional[np.ndarray] = None  # [batch, max_N]
+        self.dones: Optional[np.ndarray] = None  # [batch]
+
+    def reset(
+        self,
+        tasks: Optional[np.ndarray] = None,
+        ws: Optional[np.ndarray] = None,
+        seed: int = None,
+    ) -> Dict[str, np.ndarray]:
+        """
+        Reset all environments in batch.
+
+        Args:
+            tasks: [batch, N, 5] task features (optional)
+            ws: [batch] preference weights (optional)
+            seed: Random seed
+        """
+        if seed is not None:
+            np.random.seed(seed)
+
+        # Generate or use provided tasks
+        if tasks is not None:
+            self.tasks = np.zeros((self.batch_size, self.max_N, 5), dtype=np.float32)
+            actual_N = tasks.shape[1]
+            self.tasks[:, :actual_N] = tasks
+        else:
+            from .data import generate_batch
+
+            self.tasks = np.zeros((self.batch_size, self.max_N, 5), dtype=np.float32)
+            generated = generate_batch(self.N, self.batch_size)
+            self.tasks[:, : self.N] = generated
+
+        # Initialize masks
+        actual_N = self.N if tasks is None else tasks.shape[1]
+        self.masks = np.zeros((self.batch_size, self.max_N), dtype=np.float32)
+        self.masks[:, :actual_N] = 1.0
+
+        # Set preference weights
+        if ws is not None:
+            self.ws = ws.copy()
+        else:
+            self.ws = np.random.uniform(0.01, 0.99, size=self.batch_size).astype(
+                np.float32
+            )
+
+        # Reset state
+        self.current_times = np.zeros(self.batch_size, dtype=np.float32)
+        self.twts = np.zeros(self.batch_size, dtype=np.float32)
+        self.eecs = np.zeros(self.batch_size, dtype=np.float32)
+        self.dones = np.zeros(self.batch_size, dtype=bool)
+
+        return self._get_obs()
+
+    def _get_obs(self) -> Dict[str, np.ndarray]:
+        """Get batched observations."""
+        # Compute EP for each instance based on current time
+        EP = np.zeros((self.batch_size, self.ep_horizon), dtype=np.float32)
+        for b in range(self.batch_size):
+            current_slot = int(self.current_times[b] / self.dt)
+            for i in range(self.ep_horizon):
+                EP[b, i] = get_price_at_slot(current_slot + i)
+
+        return {
+            "tasks": self.tasks.copy(),
+            "EP": EP,
+            "objs": np.stack([self.twts, self.eecs], axis=1),
+            "w": self.ws[:, np.newaxis],
+            "mask": self.masks.copy(),
+        }
+
+    def step(
+        self, actions: np.ndarray
+    ) -> Tuple[Dict[str, np.ndarray], np.ndarray, np.ndarray, Dict]:
+        """
+        Execute batch of actions.
+
+        Args:
+            actions: [batch] integer actions
+
+        Returns:
+            observations, rewards, dones, info
+        """
+        rewards = np.zeros(self.batch_size, dtype=np.float32)
+
+        for b in range(self.batch_size):
+            if self.dones[b]:
+                continue
+
+            action = actions[b]
+            task_idx = action // 2
+            mode = action % 2
+
+            if self.masks[b, task_idx] == 0:
+                raise ValueError(f"Batch {b}: Task {task_idx} not available")
+
+            # Get task features
+            p1, p2, p3 = self.tasks[b, task_idx, :3]
+
+            # Simulate task
+            start_time = self.current_times[b]
+            step1_end = start_time + p1
+
+            wait_time = 0.0
+            if mode == 1:
+                slot_after_step1 = int(step1_end / self.dt)
+                if get_price_at_slot(slot_after_step1) == 1.0:
+                    time_to_low = self._time_to_next_low(step1_end)
+                    wait_time = min(time_to_low, self.max_wait)
+
+            step2_start = step1_end + wait_time
+            step2_end = step2_start + p2
+            step3_end = step2_end + p3
+
+            eec = self._compute_step2_eec(step2_start, step2_end)
+
+            # Update state
+            self.current_times[b] = step3_end
+            self.twts[b] += wait_time
+            self.eecs[b] += eec
+            self.masks[b, task_idx] = 0.0
+
+            # Check done
+            if np.sum(self.masks[b]) == 0:
+                self.dones[b] = True
+                final_eec = self.eecs[b] * 2
+                rewards[b] = -max(
+                    self.ws[b] * self.twts[b], (1 - self.ws[b]) * final_eec
+                )
+
+        return self._get_obs(), rewards, self.dones.copy(), {}
+
+    def _time_to_next_low(self, current_time: float) -> float:
+        """Time until next low-price slot."""
+        current_slot = int(current_time / self.dt)
+        for offset in range(1, 21):
+            if get_price_at_slot(current_slot + offset) == 0.0:
+                return (current_slot + offset) * self.dt - current_time
+        return self.max_wait
+
+    def _compute_step2_eec(self, step2_start: float, step2_end: float) -> float:
+        """Compute energy cost during step2."""
+        start_slot = int(step2_start / self.dt)
+        end_slot = int(np.ceil(step2_end / self.dt))
+
+        eec = 0.0
+        for slot in range(start_slot, end_slot):
+            slot_start = slot * self.dt
+            slot_end = (slot + 1) * self.dt
+            overlap_start = max(step2_start, slot_start)
+            overlap_end = min(step2_end, slot_end)
+            overlap = max(0, overlap_end - overlap_start)
+            if overlap > 0:
+                eec += get_price_at_slot(slot) * overlap
+        return eec
+
+    def get_valid_actions_mask(self) -> np.ndarray:
+        """Get valid action masks for all instances. Shape: [batch, 2*max_N]"""
+        valid = np.zeros((self.batch_size, 2 * self.max_N), dtype=np.float32)
+        for b in range(self.batch_size):
+            for i in range(self.max_N):
+                if self.masks[b, i] == 1.0:
+                    valid[b, 2 * i] = 1.0
+                    valid[b, 2 * i + 1] = 1.0
+        return valid
+
+    def get_final_metrics(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Get final (TWT, EEC*2) for all instances."""
+        return self.twts.copy(), self.eecs * 2
+
+
+if __name__ == "__main__":
+    # Test environment
+    print("Testing ECSPEnv...")
+
+    env = ECSPEnv(N=5)
+    obs, info = env.reset(seed=42, options={"w": 0.5})
+
+    print(f"Initial observation:")
+    for k, v in obs.items():
+        print(f"  {k}: shape={v.shape}, dtype={v.dtype}")
+    print(f"Info: {info}")
+
+    # Take random valid actions until done
+    done = False
+    step = 0
+    while not done:
+        valid = env.get_valid_actions()
+        valid_indices = np.where(valid == 1)[0]
+        action = np.random.choice(valid_indices)
+        obs, reward, terminated, truncated, info = env.step(action)
+        done = terminated or truncated
+        step += 1
+        print(
+            f"Step {step}: action={action} (task={action//2}, mode={action%2}), "
+            f"reward={reward:.4f}, done={done}"
+        )
+
+    twt, eec = env.get_final_metrics()
+    print(f"\nFinal metrics: TWT={twt:.4f}, EEC={eec:.4f}")
+
+    # Test batch environment
+    print("\n\nTesting BatchECSPEnv...")
+    batch_env = BatchECSPEnv(N=5, batch_size=4)
+    obs = batch_env.reset(seed=42)
+
+    print(f"Batch observation:")
+    for k, v in obs.items():
+        print(f"  {k}: shape={v.shape}")
