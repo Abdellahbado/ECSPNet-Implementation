@@ -2,7 +2,7 @@
 ECSP - Energy-Conscious Scheduling Problem Package.
 Paper-exact implementation of ECSPNet.
 
-VERSION: 2.2-GPU-ASYNC - Fixed async prefetch
+VERSION: 2.3-AUTO-RESUME - Automatic checkpoint resume for Kaggle
 """
 
 from .data import (
@@ -34,8 +34,8 @@ from .infer import (
     visualize_pareto_front,
 )
 
-__version__ = "2.2.0-GPU-ASYNC"
-print(f"[ECSP Package v{__version__}] Loaded with GPU + async prefetch")
+__version__ = "2.3.0-AUTO-RESUME"
+print(f"[ECSP Package v{__version__}] Auto-resume enabled for Kaggle")
 
 __all__ = [
     # Data

@@ -2,16 +2,18 @@
 Main entry point for ECSPNet training and evaluation.
 Trains models on benchmark scales N = [20, 40, 60, 100].
 
-VERSION: 2.2-GPU-ASYNC - Fixed async prefetch
+VERSION: 2.3-AUTO-RESUME - Automatic checkpoint resume for Kaggle
 """
 
 import argparse
 import os
+import re
+import glob
 import json
 import torch
 import numpy as np
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional, Tuple
 
 from ecsp.data import BENCHMARK_SCALES, TRAINING_CONFIG, generate_instance
 from ecsp.model import ECSPNet
@@ -24,7 +26,53 @@ from ecsp.infer import (
 )
 from ecsp import __version__ as PACKAGE_VERSION
 
-MAIN_VERSION = "2.2-GPU-ASYNC"
+MAIN_VERSION = "2.3-AUTO-RESUME"
+
+
+def find_latest_checkpoint(save_dir: str, N: int) -> Optional[Tuple[str, int]]:
+    """
+    Find the latest checkpoint for a given N.
+
+    Args:
+        save_dir: Directory containing checkpoints
+        N: Number of tasks
+
+    Returns:
+        Tuple of (checkpoint_path, epoch) or None if no checkpoint found
+    """
+    if not os.path.exists(save_dir):
+        return None
+
+    # Pattern: ecspnet_N{N}_epoch{epoch}.pt
+    pattern = os.path.join(save_dir, f"ecspnet_N{N}_epoch*.pt")
+    checkpoints = glob.glob(pattern)
+
+    if not checkpoints:
+        # Also check for final checkpoint
+        final_path = os.path.join(save_dir, f"ecspnet_N{N}_final.pt")
+        if os.path.exists(final_path):
+            try:
+                ckpt = torch.load(final_path, map_location="cpu")
+                return (final_path, ckpt.get("epoch", 0))
+            except:
+                pass
+        return None
+
+    # Extract epoch numbers and find max
+    latest_epoch = -1
+    latest_path = None
+
+    for ckpt_path in checkpoints:
+        match = re.search(r"epoch(\d+)\.pt$", ckpt_path)
+        if match:
+            epoch = int(match.group(1))
+            if epoch > latest_epoch:
+                latest_epoch = epoch
+                latest_path = ckpt_path
+
+    if latest_path:
+        return (latest_path, latest_epoch)
+    return None
 
 
 def train_all_scales(
@@ -33,9 +81,10 @@ def train_all_scales(
     batch_size: int = TRAINING_CONFIG["batch_size"],
     device: str = "cuda",
     save_dir: str = "checkpoints",
+    auto_resume: bool = True,
 ):
     """
-    Train models for all benchmark scales.
+    Train models for all benchmark scales with automatic checkpoint resume.
 
     Args:
         scales: List of N values to train on
@@ -43,9 +92,10 @@ def train_all_scales(
         batch_size: Batch size
         device: Training device
         save_dir: Directory to save checkpoints
+        auto_resume: Automatically resume from latest checkpoint if found
     """
     print("=" * 60)
-    print(f"ECSPNet Training v{MAIN_VERSION} - GPU + ASYNC PREFETCH")
+    print(f"ECSPNet Training v{MAIN_VERSION} - AUTO RESUME ENABLED")
     print(f"Package: {PACKAGE_VERSION}, Trainer: {TRAIN_VERSION}")
     print("=" * 60)
 
@@ -64,6 +114,24 @@ def train_all_scales(
         print(f"Training for N = {N}")
         print(f"{'=' * 60}")
 
+        # Check for existing checkpoint
+        resume_from = None
+        if auto_resume:
+            checkpoint_info = find_latest_checkpoint(save_dir, N)
+            if checkpoint_info:
+                resume_from, last_epoch = checkpoint_info
+                print(f"[AUTO-RESUME] Found checkpoint at epoch {last_epoch}")
+                print(f"[AUTO-RESUME] Path: {resume_from}")
+
+                # Skip if already completed
+                if last_epoch >= num_epochs:
+                    print(
+                        f"[AUTO-RESUME] Training already complete for N={N}, skipping..."
+                    )
+                    continue
+            else:
+                print(f"[AUTO-RESUME] No checkpoint found, starting fresh")
+
         trainer = Trainer(
             N=N,
             num_epochs=num_epochs,
@@ -72,7 +140,7 @@ def train_all_scales(
             save_dir=save_dir,
         )
 
-        trainer.train()
+        trainer.train(resume_from=resume_from)
         trainer.save_history()
 
         # Record final metrics

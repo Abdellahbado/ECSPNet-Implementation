@@ -2,13 +2,37 @@
 
 **Paper-exact implementation of "Deep Reinforcement Learning Energy Scheduling"**
 
-## VERSION: 2.0-GPU - Full GPU Acceleration
+## VERSION: 2.3-AUTO-RESUME - Automatic Checkpoint Resume for Kaggle
 
-This version runs the entire training loop on GPU:
-- Environment simulation (GPUBatchECSPEnv) runs entirely on GPU using PyTorch tensors
-- No CPU-GPU data transfers during rollouts
-- Baseline computation on GPU
-- Expected 10-50x speedup over CPU-bound version
+This version includes automatic checkpoint detection and resume functionality, perfect for Kaggle's 12-hour GPU limit.
+
+**Key Features:**
+- Automatically detects latest checkpoint on startup
+- Resumes training from last saved epoch
+- No manual intervention needed between Kaggle sessions
+- Checkpoints saved every 100 epochs
+
+## Kaggle Usage
+
+1. **First Run**: Training starts from epoch 0
+2. **Subsequent Runs**: Automatically resumes from latest checkpoint in `checkpoints/` folder
+
+### To persist checkpoints between Kaggle sessions:
+1. After training, download checkpoint files from Kaggle output
+2. Place them in `ecsp/checkpoints/` folder in your GitHub repo
+3. Push to GitHub
+4. Next Kaggle run will auto-detect and resume
+
+### Kaggle Notebook Example:
+```python
+# Clone repo and run - auto-resume is enabled by default
+!git clone https://github.com/YourUser/ECSPNet-Implementation.git
+%cd ECSPNet-Implementation
+!pip install -r requirements.txt
+
+# Training will auto-resume from any checkpoint in checkpoints/
+!python -m ecsp.main train --scales 20 --epochs 3000 --device cuda
+```
 
 ## Overview
 
