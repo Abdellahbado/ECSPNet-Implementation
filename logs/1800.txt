@@ -4631,3 +4631,1620 @@ Training:  35%|▎| 637/1800 [11:58:06<21:47:38, 67.46s/it, loss=-0.0675, reward
 Training:  35%|▎| 638/1800 [11:58:06<21:46:21, 67.45s/it, loss=-0.0675, reward=-
 Training:  35%|▎| 638/1800 [11:59:14<21:46:21, 67.45s/it, loss=-0.0781, reward=-
 Training:  36%|▎| 639/1800 [11:59:14<21:45:10, 67.45s/it, loss=-0.0781, reward=-
+
+
+
+
+Logs
+Version 2 was canceled after 40030.9s
+Accelerator
+
+GPU P100
+Environment
+
+Latest Container Image
+Output
+
+36.81 MB
+Time
+	
+#
+	
+Log Message
+7.2s	1	0.00s - Debugger warning: It seems that frozen modules are being used, which may
+7.2s	2	0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+7.2s	3	0.00s - to python to disable frozen modules.
+7.2s	4	0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+7.8s	5	0.00s - Debugger warning: It seems that frozen modules are being used, which may
+7.8s	6	0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+7.8s	7	0.00s - to python to disable frozen modules.
+7.8s	8	0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+12.4s	9	CUDA available: True
+12.4s	10	Device: Tesla P100-PCIE-16GB
+12.4s	11	Cloning into 'ECSPNet-Implementation'...
+
+13.0s	12	remote: Enumerating objects: 71, done.[K
+
+13.1s	13	remote: Counting objects:   1% (1/71)[K
+remote: Counting objects:   2% (2/71)[K
+remote: Counting objects:   4% (3/71)[K
+remote: Counting objects:   5% (4/71)[K
+remote: Counting objects:   7% (5/71)[K
+remote: Counting objects:   8% (6/71)[K
+remote: Counting objects:   9% (7/71)[K
+remote: Counting objects:  11% (8/71)[K
+remote: Counting objects:  12% (9/71)[K
+remote: Counting objects:  14% (10/71)[K
+remote: Counting objects:  15% (11/71)[K
+remote: Counting objects:  16% (12/71)[K
+remote: Counting objects:  18% (13/71)[K
+remote: Counting objects:  19% (14/71)[K
+remote: Counting objects:  21% (15/71)[K
+remote: Counting objects:  22% (16/71)[K
+remote: Counting objects:  23% (17/71)[K
+remote: Counting objects:  25% (18/71)[K
+remote: Counting objects:  26% (19/71)[K
+remote: Counting objects:  28% (20/71)[K
+remote: Counting objects:  29% (21/71)[K
+remote: Counting objects:  30% (22/71)[K
+remote: Counting objects:  32% (23/71)[K
+remote: Counting objects:  33% (24/71)[K
+remote: Counting objects:  35% (25/71)[K
+remote: Counting objects:  36% (26/71)[K
+remote: Counting objects:  38% (27/71)[K
+remote: Counting objects:  39% (28/71)[K
+remote: Counting objects:  40% (29/71)[K
+remote: Counting objects:  42% (30/71)[K
+remote: Counting objects:  43% (31/71)[K
+remote: Counting objects:  45% (32/71)[K
+remote: Counting objects:  46% (33/71)[K
+remote: Counting objects:  47% (34/71)[K
+remote: Counting objects:  49% (35/71)[K
+remote: Counting objects:  50% (36/71)[K
+remote: Counting objects:  52% (37/71)[K
+remote: Counting objects:  53% (38/71)[K
+remote: Counting objects:  54% (39/71)[K
+remote: Counting objects:  56% (40/71)[K
+remote: Counting objects:  57% (41/71)[K
+remote: Counting objects:  59% (42/71)[K
+remote: Counting objects:  60% (43/71)[K
+remote: Counting objects:  61% (44/71)[K
+remote: Counting objects:  63% (45/71)[K
+remote: Counting objects:  64% (46/71)[K
+remote: Counting objects:  66% (47/71)[K
+remote: Counting objects:  67% (48/71)[K
+remote: Counting objects:  69% (49/71)[K
+remote: Counting objects:  70% (50/71)[K
+remote: Counting objects:  71% (51/71)[K
+remote: Counting objects:  73% (52/71)[K
+remote: Counting objects:  74% (53/71)[K
+remote: Counting objects:  76% (54/71)[K
+remote: Counting objects:  77% (55/71)[K
+remote: Counting objects:  78% (56/71)[K
+remote: Counting objects:  80% (57/71)[K
+remote: Counting objects:  81% (58/71)[K
+remote: Counting objects:  83% (59/71)[K
+remote: Counting objects:  84% (60/71)[K
+remote: Counting objects:  85% (61/71)[K
+remote: Counting objects:  87% (62/71)[K
+remote: Counting objects:  88% (63/71)[K
+remote: Counting objects:  90% (64/71)[K
+remote: Counting objects:  91% (65/71)[K
+remote: Counting objects:  92% (66/71)[K
+remote: Counting objects:  94% (67/71)[K
+remote: Counting objects:  95% (68/71)[K
+remote: Counting objects:  97% (69/71)[K
+remote: Counting objects:  98% (70/71)[K
+remote: Counting objects: 100% (71/71)[K
+remote: Counting objects: 100% (71/71), done.[K
+
+13.3s	14	remote: Compressing objects:   2% (1/48)[K
+remote: Compressing objects:   4% (2/48)[K
+remote: Compressing objects:   6% (3/48)[K
+remote: Compressing objects:   8% (4/48)[K
+remote: Compressing objects:  10% (5/48)[K
+remote: Compressing objects:  12% (6/48)[K
+remote: Compressing objects:  14% (7/48)[K
+remote: Compressing objects:  16% (8/48)[K
+remote: Compressing objects:  18% (9/48)[K
+remote: Compressing objects:  20% (10/48)[K
+remote: Compressing objects:  22% (11/48)[K
+remote: Compressing objects:  25% (12/48)[K
+remote: Compressing objects:  27% (13/48)[K
+remote: Compressing objects:  29% (14/48)[K
+remote: Compressing objects:  31% (15/48)[K
+remote: Compressing objects:  33% (16/48)[K
+remote: Compressing objects:  35% (17/48)[K
+remote: Compressing objects:  37% (18/48)[K
+remote: Compressing objects:  39% (19/48)[K
+remote: Compressing objects:  41% (20/48)[K
+remote: Compressing objects:  43% (21/48)[K
+remote: Compressing objects:  45% (22/48)[K
+remote: Compressing objects:  47% (23/48)[K
+remote: Compressing objects:  50% (24/48)[K
+remote: Compressing objects:  52% (25/48)[K
+remote: Compressing objects:  54% (26/48)[K
+remote: Compressing objects:  56% (27/48)[K
+remote: Compressing objects:  58% (28/48)[K
+remote: Compressing objects:  60% (29/48)[K
+remote: Compressing objects:  62% (30/48)[K
+remote: Compressing objects:  64% (31/48)[K
+remote: Compressing objects:  66% (32/48)[K
+remote: Compressing objects:  68% (33/48)[K
+remote: Compressing objects:  70% (34/48)[K
+remote: Compressing objects:  72% (35/48)[K
+remote: Compressing objects:  75% (36/48)[K
+remote: Compressing objects:  77% (37/48)[K
+remote: Compressing objects:  79% (38/48)[K
+remote: Compressing objects:  81% (39/48)[K
+remote: Compressing objects:  83% (40/48)[K
+remote: Compressing objects:  85% (41/48)[K
+remote: Compressing objects:  87% (42/48)[K
+remote: Compressing objects:  89% (43/48)[K
+remote: Compressing objects:  91% (44/48)[K
+remote: Compressing objects:  93% (45/48)[K
+remote: Compressing objects:  95% (46/48)[K
+remote: Compressing objects:  97% (47/48)[K
+remote: Compressing objects: 100% (48/48)[K
+remote: Compressing objects: 100% (48/48), done.[K
+
+13.5s	15	Receiving objects:   1% (1/71)
+Receiving objects:   2% (2/71)
+Receiving objects:   4% (3/71)
+Receiving objects:   5% (4/71)
+Receiving objects:   7% (5/71)
+Receiving objects:   8% (6/71)
+Receiving objects:   9% (7/71)
+Receiving objects:  11% (8/71)
+Receiving objects:  12% (9/71)
+Receiving objects:  14% (10/71)
+Receiving objects:  15% (11/71)
+Receiving objects:  16% (12/71)
+Receiving objects:  18% (13/71)
+Receiving objects:  19% (14/71)
+Receiving objects:  21% (15/71)
+Receiving objects:  22% (16/71)
+Receiving objects:  23% (17/71)
+Receiving objects:  25% (18/71)
+Receiving objects:  26% (19/71)
+Receiving objects:  28% (20/71)
+Receiving objects:  29% (21/71)
+Receiving objects:  30% (22/71)
+Receiving objects:  32% (23/71)
+Receiving objects:  33% (24/71)
+Receiving objects:  35% (25/71)
+Receiving objects:  36% (26/71)
+Receiving objects:  38% (27/71)
+Receiving objects:  39% (28/71)
+Receiving objects:  40% (29/71)
+Receiving objects:  42% (30/71)
+Receiving objects:  43% (31/71)
+Receiving objects:  45% (32/71)
+Receiving objects:  46% (33/71)
+Receiving objects:  47% (34/71)
+remote: Total 71 (delta 33), reused 58 (delta 20), pack-reused 0 (from 0)[K
+
+13.5s	16	Receiving objects:  49% (35/71)
+Receiving objects:  50% (36/71)
+Receiving objects:  52% (37/71)
+Receiving objects:  53% (38/71)
+Receiving objects:  54% (39/71)
+Receiving objects:  56% (40/71)
+Receiving objects:  57% (41/71)
+Receiving objects:  59% (42/71)
+Receiving objects:  60% (43/71)
+Receiving objects:  61% (44/71)
+Receiving objects:  63% (45/71)
+Receiving objects:  64% (46/71)
+Receiving objects:  66% (47/71)
+Receiving objects:  67% (48/71)
+Receiving objects:  69% (49/71)
+Receiving objects:  70% (50/71)
+Receiving objects:  71% (51/71)
+Receiving objects:  73% (52/71)
+Receiving objects:  74% (53/71)
+Receiving objects:  76% (54/71)
+Receiving objects:  77% (55/71)
+Receiving objects:  78% (56/71)
+Receiving objects:  80% (57/71)
+Receiving objects:  81% (58/71)
+Receiving objects:  83% (59/71)
+Receiving objects:  84% (60/71)
+Receiving objects:  85% (61/71)
+Receiving objects:  87% (62/71)
+Receiving objects:  88% (63/71)
+Receiving objects:  90% (64/71)
+Receiving objects:  91% (65/71)
+Receiving objects:  92% (66/71)
+Receiving objects:  94% (67/71)
+Receiving objects:  95% (68/71)
+Receiving objects:  97% (69/71)
+Receiving objects:  98% (70/71)
+Receiving objects: 100% (71/71)
+Receiving objects: 100% (71/71), 8.83 MiB | 41.67 MiB/s, done.
+
+13.5s	17	Resolving deltas:   0% (0/33)
+Resolving deltas:   3% (1/33)
+Resolving deltas:   6% (2/33)
+Resolving deltas:   9% (3/33)
+Resolving deltas:  12% (4/33)
+Resolving deltas:  15% (5/33)
+Resolving deltas:  18% (6/33)
+Resolving deltas:  21% (7/33)
+Resolving deltas:  24% (8/33)
+Resolving deltas:  27% (9/33)
+Resolving deltas:  30% (10/33)
+Resolving deltas:  33% (11/33)
+Resolving deltas:  36% (12/33)
+Resolving deltas:  39% (13/33)
+Resolving deltas:  42% (14/33)
+Resolving deltas:  45% (15/33)
+Resolving deltas:  48% (16/33)
+Resolving deltas:  51% (17/33)
+Resolving deltas:  54% (18/33)
+Resolving deltas:  57% (19/33)
+Resolving deltas:  60% (20/33)
+Resolving deltas:  63% (21/33)
+Resolving deltas:  66% (22/33)
+Resolving deltas:  69% (23/33)
+Resolving deltas:  72% (24/33)
+Resolving deltas:  75% (25/33)
+Resolving deltas:  78% (26/33)
+Resolving deltas:  81% (27/33)
+Resolving deltas:  84% (28/33)
+Resolving deltas:  87% (29/33)
+Resolving deltas:  90% (30/33)
+Resolving deltas:  93% (31/33)
+Resolving deltas:  96% (32/33)
+Resolving deltas: 100% (33/33)
+Resolving deltas: 100% (33/33), done.
+
+15.5s	18	Requirement already satisfied: torch>=1.12.0 in /usr/local/lib/python3.12/dist-packages (from -r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (2.8.0+cu126)
+
+15.5s	19	Requirement already satisfied: numpy>=1.21.0 in /usr/local/lib/python3.12/dist-packages (from -r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 2)) (2.0.2)
+
+15.5s	20	Requirement already satisfied: gymnasium>=0.26.0 in /usr/local/lib/python3.12/dist-packages (from -r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 3)) (0.29.0)
+
+15.5s	21	Requirement already satisfied: tqdm>=4.64.0 in /usr/local/lib/python3.12/dist-packages (from -r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 4)) (4.67.1)
+
+15.5s	22	Requirement already satisfied: matplotlib>=3.5.0 in /usr/local/lib/python3.12/dist-packages (from -r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 5)) (3.10.0)
+
+15.5s	23	Requirement already satisfied: filelock in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (3.20.1)
+
+15.6s	24	Requirement already satisfied: typing-extensions>=4.10.0 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (4.15.0)
+
+15.6s	25	Requirement already satisfied: setuptools in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (75.2.0)
+
+15.6s	26	Requirement already satisfied: sympy>=1.13.3 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (1.13.3)
+
+15.6s	27	Requirement already satisfied: networkx in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (3.5)
+
+15.6s	28	Requirement already satisfied: jinja2 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (3.1.6)
+
+15.6s	29	Requirement already satisfied: fsspec in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (2025.10.0)
+
+15.6s	30	Requirement already satisfied: nvidia-cuda-nvrtc-cu12==12.6.77 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (12.6.77)
+
+15.6s	31	Requirement already satisfied: nvidia-cuda-runtime-cu12==12.6.77 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (12.6.77)
+
+15.6s	32	Requirement already satisfied: nvidia-cuda-cupti-cu12==12.6.80 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (12.6.80)
+
+15.6s	33	Requirement already satisfied: nvidia-cudnn-cu12==9.10.2.21 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (9.10.2.21)
+
+15.6s	34	Requirement already satisfied: nvidia-cublas-cu12==12.6.4.1 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (12.6.4.1)
+
+15.6s	35	Requirement already satisfied: nvidia-cufft-cu12==11.3.0.4 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (11.3.0.4)
+
+15.6s	36	Requirement already satisfied: nvidia-curand-cu12==10.3.7.77 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (10.3.7.77)
+
+15.6s	37	Requirement already satisfied: nvidia-cusolver-cu12==11.7.1.2 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (11.7.1.2)
+
+15.6s	38	Requirement already satisfied: nvidia-cusparse-cu12==12.5.4.2 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (12.5.4.2)
+
+15.6s	39	Requirement already satisfied: nvidia-cusparselt-cu12==0.7.1 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (0.7.1)
+
+15.6s	40	Requirement already satisfied: nvidia-nccl-cu12==2.27.3 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (2.27.3)
+
+15.6s	41	Requirement already satisfied: nvidia-nvtx-cu12==12.6.77 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (12.6.77)
+
+15.6s	42	Requirement already satisfied: nvidia-nvjitlink-cu12==12.6.85 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (12.6.85)
+
+15.6s	43	Requirement already satisfied: nvidia-cufile-cu12==1.11.1.6 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (1.11.1.6)
+
+15.6s	44	Requirement already satisfied: triton==3.4.0 in /usr/local/lib/python3.12/dist-packages (from torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (3.4.0)
+
+15.6s	45	Requirement already satisfied: cloudpickle>=1.2.0 in /usr/local/lib/python3.12/dist-packages (from gymnasium>=0.26.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 3)) (3.1.1)
+
+15.6s	46	Requirement already satisfied: farama-notifications>=0.0.1 in /usr/local/lib/python3.12/dist-packages (from gymnasium>=0.26.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 3)) (0.0.4)
+
+15.6s	47	Requirement already satisfied: contourpy>=1.0.1 in /usr/local/lib/python3.12/dist-packages (from matplotlib>=3.5.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 5)) (1.3.3)
+
+15.6s	48	Requirement already satisfied: cycler>=0.10 in /usr/local/lib/python3.12/dist-packages (from matplotlib>=3.5.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 5)) (0.12.1)
+
+15.6s	49	Requirement already satisfied: fonttools>=4.22.0 in /usr/local/lib/python3.12/dist-packages (from matplotlib>=3.5.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 5)) (4.60.1)
+
+15.6s	50	Requirement already satisfied: kiwisolver>=1.3.1 in /usr/local/lib/python3.12/dist-packages (from matplotlib>=3.5.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 5)) (1.4.9)
+
+15.6s	51	Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.12/dist-packages (from matplotlib>=3.5.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 5)) (25.0)
+
+15.6s	52	Requirement already satisfied: pillow>=8 in /usr/local/lib/python3.12/dist-packages (from matplotlib>=3.5.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 5)) (11.3.0)
+
+15.6s	53	Requirement already satisfied: pyparsing>=2.3.1 in /usr/local/lib/python3.12/dist-packages (from matplotlib>=3.5.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 5)) (3.2.5)
+
+15.6s	54	Requirement already satisfied: python-dateutil>=2.7 in /usr/local/lib/python3.12/dist-packages (from matplotlib>=3.5.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 5)) (2.9.0.post0)
+
+15.7s	55	Requirement already satisfied: six>=1.5 in /usr/local/lib/python3.12/dist-packages (from python-dateutil>=2.7->matplotlib>=3.5.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 5)) (1.17.0)
+
+15.7s	56	Requirement already satisfied: mpmath<1.4,>=1.1.0 in /usr/local/lib/python3.12/dist-packages (from sympy>=1.13.3->torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (1.3.0)
+
+15.7s	57	Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.12/dist-packages (from jinja2->torch>=1.12.0->-r /kaggle/working/ECSPNet-Implementation/requirements.txt (line 1)) (3.0.3)
+
+17.7s	58	/kaggle/working/ECSPNet-Implementation
+20.0s	59	Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+
+20.0s	60	Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+
+20.0s	61	See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+
+20.3s	62	[ECSPEnv v2.0-GPU] Loading GPU-accelerated environment...
+
+20.3s	63	[Trainer v2.2-GPU-ASYNC] Loading GPU-accelerated training with async prefetch...
+
+20.3s	64	[ECSP Package v2.3.0-AUTO-RESUME] Auto-resume enabled for Kaggle
+
+20.3s	65	============================================================
+
+20.3s	66	ECSPNet Training v2.3-AUTO-RESUME - AUTO RESUME ENABLED
+
+20.3s	67	Package: 2.3.0-AUTO-RESUME, Trainer: 2.2-GPU-ASYNC
+
+20.3s	68	============================================================
+
+20.3s	69	GPU: Tesla P100-PCIE-16GB
+
+20.3s	70	CUDA: 12.6
+
+20.3s	71	Async prefetch: ENABLED (4 CPU workers)
+
+20.3s	72	============================================================
+
+20.3s	73	
+
+20.3s	74	============================================================
+
+20.3s	75	Training for N = 20
+
+20.3s	76	============================================================
+
+20.3s	77	[AUTO-RESUME] Found checkpoint at epoch 1800
+
+20.3s	78	[AUTO-RESUME] Path: checkpoints/ecspnet_N20_epoch1800.pt
+
+20.3s	79	[Trainer v2.2-GPU-ASYNC] Using device: cuda
+
+20.3s	80	[Trainer v2.2-GPU-ASYNC] GPU: Tesla P100-PCIE-16GB
+
+20.3s	81	[Trainer v2.2-GPU-ASYNC] CUDA version: 12.6
+
+20.3s	82	[Trainer v2.2-GPU-ASYNC] TF32 and cuDNN benchmark enabled
+
+25.1s	83	[GPUBatchECSPEnv v2.0-GPU] Initialized on cuda with batch_size=2048, N=20
+
+25.1s	84	[AsyncDataPrefetcher] Initialized with 4 workers, prefetch=3
+
+25.1s	85	Resumed from epoch 1800
+
+25.1s	86	============================================================
+
+25.1s	87	[Trainer v2.2-GPU-ASYNC] GPU-ACCELERATED TRAINING WITH ASYNC PREFETCH
+
+25.1s	88	============================================================
+
+25.1s	89	Starting training from epoch 1800
+
+25.1s	90	Configuration: N=20, batch_size=2048, epochs=3000
+
+25.1s	91	Device: cuda
+
+25.1s	92	GPU Memory: 17.1 GB
+
+25.1s	93	============================================================
+
+25.1s	94	[Trainer] Starting async data prefetcher...
+
+6783.0s	95	
+Training:   0%|                                        | 0/1200 [00:00<?, ?it/s]
+Training:   0%| | 0/1200 [01:08<?, ?it/s, loss=-0.0653, reward=-1.6718, twt=3.42
+Training:   0%| | 1/1200 [01:08<22:51:07, 68.61s/it, loss=-0.0653, reward=-1.671
+Training:   0%| | 1/1200 [02:16<22:51:07, 68.61s/it, loss=-0.0742, reward=-1.673
+Training:   0%| | 2/1200 [02:16<22:37:33, 67.99s/it, loss=-0.0742, reward=-1.673
+Training:   0%| | 2/1200 [03:23<22:37:33, 67.99s/it, loss=-0.0777, reward=-1.677
+Training:   0%| | 3/1200 [03:23<22:32:12, 67.78s/it, loss=-0.0777, reward=-1.677
+Training:   0%| | 3/1200 [04:31<22:32:12, 67.78s/it, loss=-0.0787, reward=-1.677
+Training:   0%| | 4/1200 [04:31<22:29:11, 67.69s/it, loss=-0.0787, reward=-1.677
+Training:   0%| | 4/1200 [05:38<22:29:11, 67.69s/it, loss=-0.0769, reward=-1.675
+Training:   0%| | 5/1200 [05:38<22:26:49, 67.62s/it, loss=-0.0769, reward=-1.675
+Training:   0%| | 5/1200 [06:46<22:26:49, 67.62s/it, loss=-0.0764, reward=-1.675
+Training:   0%| | 6/1200 [06:46<22:25:14, 67.60s/it, loss=-0.0764, reward=-1.675
+Training:   0%| | 6/1200 [07:53<22:25:14, 67.60s/it, loss=-0.0851, reward=-1.677
+Training:   1%| | 7/1200 [07:53<22:24:25, 67.62s/it, loss=-0.0851, reward=-1.677
+Training:   1%| | 7/1200 [09:01<22:24:25, 67.62s/it, loss=-0.0994, reward=-1.676
+Training:   1%| | 8/1200 [09:01<22:23:18, 67.62s/it, loss=-0.0994, reward=-1.676
+Training:   1%| | 8/1200 [10:09<22:23:18, 67.62s/it, loss=-0.0903, reward=-1.681
+Training:   1%| | 9/1200 [10:09<22:21:18, 67.57s/it, loss=-0.0903, reward=-1.681
+Training:   1%| | 9/1200 [11:16<22:21:18, 67.57s/it, loss=-0.0697, reward=-1.678
+Training:   1%| | 10/1200 [11:16<22:19:38, 67.54s/it, loss=-0.0697, reward=-1.67
+Training:   1%| | 10/1200 [12:24<22:19:38, 67.54s/it, loss=-0.0801, reward=-1.67
+Training:   1%| | 11/1200 [12:24<22:18:30, 67.54s/it, loss=-0.0801, reward=-1.67
+Training:   1%| | 11/1200 [13:31<22:18:30, 67.54s/it, loss=-0.0726, reward=-1.67
+Training:   1%| | 12/1200 [13:31<22:17:12, 67.54s/it, loss=-0.0726, reward=-1.67
+Training:   1%| | 12/1200 [14:39<22:17:12, 67.54s/it, loss=-0.0678, reward=-1.67
+Training:   1%| | 13/1200 [14:39<22:15:44, 67.52s/it, loss=-0.0678, reward=-1.67
+Training:   1%| | 13/1200 [15:46<22:15:44, 67.52s/it, loss=-0.0612, reward=-1.68
+Training:   1%| | 14/1200 [15:46<22:14:50, 67.53s/it, loss=-0.0612, reward=-1.68
+Training:   1%| | 14/1200 [16:54<22:14:50, 67.53s/it, loss=-0.0842, reward=-1.67
+Training:   1%| | 15/1200 [16:54<22:14:28, 67.57s/it, loss=-0.0842, reward=-1.67
+Training:   1%| | 15/1200 [18:01<22:14:28, 67.57s/it, loss=-0.0763, reward=-1.68
+Training:   1%| | 16/1200 [18:01<22:13:16, 67.56s/it, loss=-0.0763, reward=-1.68
+Training:   1%| | 16/1200 [19:09<22:13:16, 67.56s/it, loss=-0.0676, reward=-1.67
+Training:   1%| | 17/1200 [19:09<22:12:19, 67.57s/it, loss=-0.0676, reward=-1.67
+Training:   1%| | 17/1200 [20:17<22:12:19, 67.57s/it, loss=-0.0506, reward=-1.67
+Training:   2%| | 18/1200 [20:17<22:11:13, 67.57s/it, loss=-0.0506, reward=-1.67
+Training:   2%| | 18/1200 [21:24<22:11:13, 67.57s/it, loss=-0.0739, reward=-1.67
+Training:   2%| | 19/1200 [21:24<22:10:11, 67.58s/it, loss=-0.0739, reward=-1.67
+Training:   2%| | 19/1200 [22:32<22:10:11, 67.58s/it, loss=-0.0760, reward=-1.67
+Training:   2%| | 20/1200 [22:32<22:09:09, 67.58s/it, loss=-0.0760, reward=-1.67
+Training:   2%| | 20/1200 [23:39<22:09:09, 67.58s/it, loss=-0.0880, reward=-1.67
+Training:   2%| | 21/1200 [23:39<22:08:06, 67.59s/it, loss=-0.0880, reward=-1.67
+Training:   2%| | 21/1200 [24:47<22:08:06, 67.59s/it, loss=-0.0856, reward=-1.67
+Training:   2%| | 22/1200 [24:47<22:06:55, 67.59s/it, loss=-0.0856, reward=-1.67
+Training:   2%| | 22/1200 [25:54<22:06:55, 67.59s/it, loss=-0.0913, reward=-1.67
+Training:   2%| | 23/1200 [25:54<22:05:16, 67.56s/it, loss=-0.0913, reward=-1.67
+Training:   2%| | 23/1200 [27:02<22:05:16, 67.56s/it, loss=-0.0940, reward=-1.67
+Training:   2%| | 24/1200 [27:02<22:03:42, 67.54s/it, loss=-0.0940, reward=-1.67
+Training:   2%| | 24/1200 [28:09<22:03:42, 67.54s/it, loss=-0.0837, reward=-1.67
+Training:   2%| | 25/1200 [28:09<22:02:18, 67.52s/it, loss=-0.0837, reward=-1.67
+Training:   2%| | 25/1200 [29:17<22:02:18, 67.52s/it, loss=-0.0974, reward=-1.68
+Training:   2%| | 26/1200 [29:17<22:02:08, 67.57s/it, loss=-0.0974, reward=-1.68
+Training:   2%| | 26/1200 [30:25<22:02:08, 67.57s/it, loss=-0.0921, reward=-1.67
+Training:   2%| | 27/1200 [30:25<22:01:09, 67.58s/it, loss=-0.0921, reward=-1.67
+Training:   2%| | 27/1200 [31:32<22:01:09, 67.58s/it, loss=-0.0896, reward=-1.67
+Training:   2%| | 28/1200 [31:32<22:00:07, 67.58s/it, loss=-0.0896, reward=-1.67
+Training:   2%| | 28/1200 [32:40<22:00:07, 67.58s/it, loss=-0.0732, reward=-1.67
+Training:   2%| | 29/1200 [32:40<21:58:26, 67.55s/it, loss=-0.0732, reward=-1.67
+Training:   2%| | 29/1200 [33:47<21:58:26, 67.55s/it, loss=-0.1052, reward=-1.67
+Training:   2%| | 30/1200 [33:47<21:56:48, 67.53s/it, loss=-0.1052, reward=-1.67
+Training:   2%| | 30/1200 [34:55<21:56:48, 67.53s/it, loss=-0.1068, reward=-1.67
+Training:   3%| | 31/1200 [34:55<21:55:26, 67.52s/it, loss=-0.1068, reward=-1.67
+Training:   3%| | 31/1200 [36:02<21:55:26, 67.52s/it, loss=-0.0751, reward=-1.67
+Training:   3%| | 32/1200 [36:02<21:54:16, 67.51s/it, loss=-0.0751, reward=-1.67
+Training:   3%| | 32/1200 [37:10<21:54:16, 67.51s/it, loss=-0.0813, reward=-1.67
+Training:   3%| | 33/1200 [37:10<21:52:56, 67.50s/it, loss=-0.0813, reward=-1.67
+Training:   3%| | 33/1200 [38:17<21:52:56, 67.50s/it, loss=-0.0763, reward=-1.67
+Training:   3%| | 34/1200 [38:17<21:51:41, 67.50s/it, loss=-0.0763, reward=-1.67
+Training:   3%| | 34/1200 [39:25<21:51:41, 67.50s/it, loss=-0.0777, reward=-1.67
+Training:   3%| | 35/1200 [39:25<21:50:28, 67.49s/it, loss=-0.0777, reward=-1.67
+Training:   3%| | 35/1200 [40:32<21:50:28, 67.49s/it, loss=-0.0774, reward=-1.67
+Training:   3%| | 36/1200 [40:32<21:49:18, 67.49s/it, loss=-0.0774, reward=-1.67
+Training:   3%| | 36/1200 [41:40<21:49:18, 67.49s/it, loss=-0.0706, reward=-1.67
+Training:   3%| | 37/1200 [41:40<21:48:41, 67.52s/it, loss=-0.0706, reward=-1.67
+Training:   3%| | 37/1200 [42:47<21:48:41, 67.52s/it, loss=-0.0779, reward=-1.67
+Training:   3%| | 38/1200 [42:47<21:47:25, 67.51s/it, loss=-0.0779, reward=-1.67
+Training:   3%| | 38/1200 [43:55<21:47:25, 67.51s/it, loss=-0.0606, reward=-1.67
+Training:   3%| | 39/1200 [43:55<21:46:17, 67.51s/it, loss=-0.0606, reward=-1.67
+Training:   3%| | 39/1200 [45:02<21:46:17, 67.51s/it, loss=-0.0574, reward=-1.67
+Training:   3%| | 40/1200 [45:02<21:45:23, 67.52s/it, loss=-0.0574, reward=-1.67
+Training:   3%| | 40/1200 [46:10<21:45:23, 67.52s/it, loss=-0.0765, reward=-1.67
+Training:   3%| | 41/1200 [46:10<21:45:04, 67.56s/it, loss=-0.0765, reward=-1.67
+Training:   3%| | 41/1200 [47:17<21:45:04, 67.56s/it, loss=-0.0676, reward=-1.68
+Training:   4%| | 42/1200 [47:17<21:43:37, 67.55s/it, loss=-0.0676, reward=-1.68
+Training:   4%| | 42/1200 [48:25<21:43:37, 67.55s/it, loss=-0.0716, reward=-1.67
+Training:   4%| | 43/1200 [48:25<21:42:11, 67.53s/it, loss=-0.0716, reward=-1.67
+Training:   4%| | 43/1200 [49:32<21:42:11, 67.53s/it, loss=-0.0606, reward=-1.67
+Training:   4%| | 44/1200 [49:32<21:41:13, 67.54s/it, loss=-0.0606, reward=-1.67
+Training:   4%| | 44/1200 [50:40<21:41:13, 67.54s/it, loss=-0.0530, reward=-1.67
+Training:   4%| | 45/1200 [50:40<21:40:33, 67.56s/it, loss=-0.0530, reward=-1.67
+Training:   4%| | 45/1200 [51:48<21:40:33, 67.56s/it, loss=-0.0687, reward=-1.67
+Training:   4%| | 46/1200 [51:48<21:39:35, 67.57s/it, loss=-0.0687, reward=-1.67
+Training:   4%| | 46/1200 [52:55<21:39:35, 67.57s/it, loss=-0.0762, reward=-1.67
+Training:   4%| | 47/1200 [52:55<21:38:34, 67.58s/it, loss=-0.0762, reward=-1.67
+Training:   4%| | 47/1200 [54:03<21:38:34, 67.58s/it, loss=-0.0825, reward=-1.67
+Training:   4%| | 48/1200 [54:03<21:37:28, 67.58s/it, loss=-0.0825, reward=-1.67
+Training:   4%| | 48/1200 [55:10<21:37:28, 67.58s/it, loss=-0.0799, reward=-1.67
+Training:   4%| | 49/1200 [55:10<21:36:24, 67.58s/it, loss=-0.0799, reward=-1.67
+Training:   4%| | 49/1200 [56:18<21:36:24, 67.58s/it, loss=-0.0782, reward=-1.67
+Training:   4%| | 50/1200 [56:18<21:35:22, 67.58s/it, loss=-0.0782, reward=-1.67
+Training:   4%| | 50/1200 [57:26<21:35:22, 67.58s/it, loss=-0.0775, reward=-1.67
+Training:   4%| | 51/1200 [57:26<21:34:18, 67.59s/it, loss=-0.0775, reward=-1.67
+Training:   4%| | 51/1200 [58:33<21:34:18, 67.59s/it, loss=-0.0697, reward=-1.67
+Training:   4%| | 52/1200 [58:33<21:33:12, 67.59s/it, loss=-0.0697, reward=-1.67
+Training:   4%| | 52/1200 [59:41<21:33:12, 67.59s/it, loss=-0.0707, reward=-1.67
+Training:   4%| | 53/1200 [59:41<21:32:04, 67.59s/it, loss=-0.0707, reward=-1.67
+Training:   4%| | 53/1200 [1:00:48<21:32:04, 67.59s/it, loss=-0.0706, reward=-1.
+Training:   4%| | 54/1200 [1:00:48<21:31:03, 67.59s/it, loss=-0.0706, reward=-1.
+Training:   4%| | 54/1200 [1:01:56<21:31:03, 67.59s/it, loss=-0.0661, reward=-1.
+Training:   5%| | 55/1200 [1:01:56<21:29:51, 67.59s/it, loss=-0.0661, reward=-1.
+Training:   5%| | 55/1200 [1:03:04<21:29:51, 67.59s/it, loss=-0.0723, reward=-1.
+Training:   5%| | 56/1200 [1:03:04<21:28:48, 67.60s/it, loss=-0.0723, reward=-1.
+Training:   5%| | 56/1200 [1:04:11<21:28:48, 67.60s/it, loss=-0.0685, reward=-1.
+Training:   5%| | 57/1200 [1:04:11<21:26:59, 67.56s/it, loss=-0.0685, reward=-1.
+Training:   5%| | 57/1200 [1:05:19<21:26:59, 67.56s/it, loss=-0.0614, reward=-1.
+Training:   5%| | 58/1200 [1:05:19<21:25:23, 67.53s/it, loss=-0.0614, reward=-1.
+Training:   5%| | 58/1200 [1:06:26<21:25:23, 67.53s/it, loss=-0.0690, reward=-1.
+Training:   5%| | 59/1200 [1:06:26<21:23:52, 67.51s/it, loss=-0.0690, reward=-1.
+Training:   5%| | 59/1200 [1:07:34<21:23:52, 67.51s/it, loss=-0.0759, reward=-1.
+Training:   5%| | 60/1200 [1:07:34<21:23:09, 67.54s/it, loss=-0.0759, reward=-1.
+Training:   5%| | 60/1200 [1:08:41<21:23:09, 67.54s/it, loss=-0.0634, reward=-1.
+Training:   5%| | 61/1200 [1:08:41<21:21:46, 67.52s/it, loss=-0.0634, reward=-1.
+Training:   5%| | 61/1200 [1:09:49<21:21:46, 67.52s/it, loss=-0.0557, reward=-1.
+Training:   5%| | 62/1200 [1:09:49<21:20:28, 67.51s/it, loss=-0.0557, reward=-1.
+Training:   5%| | 62/1200 [1:10:56<21:20:28, 67.51s/it, loss=-0.0659, reward=-1.
+Training:   5%| | 63/1200 [1:10:56<21:19:26, 67.52s/it, loss=-0.0659, reward=-1.
+Training:   5%| | 63/1200 [1:12:04<21:19:26, 67.52s/it, loss=-0.0526, reward=-1.
+Training:   5%| | 64/1200 [1:12:04<21:18:03, 67.50s/it, loss=-0.0526, reward=-1.
+Training:   5%| | 64/1200 [1:13:11<21:18:03, 67.50s/it, loss=-0.0652, reward=-1.
+Training:   5%| | 65/1200 [1:13:11<21:16:49, 67.50s/it, loss=-0.0652, reward=-1.
+Training:   5%| | 65/1200 [1:14:19<21:16:49, 67.50s/it, loss=-0.0654, reward=-1.
+Training:   6%| | 66/1200 [1:14:19<21:15:51, 67.51s/it, loss=-0.0654, reward=-1.
+Training:   6%| | 66/1200 [1:15:26<21:15:51, 67.51s/it, loss=-0.0645, reward=-1.
+Training:   6%| | 67/1200 [1:15:26<21:14:56, 67.52s/it, loss=-0.0645, reward=-1.
+Training:   6%| | 67/1200 [1:16:34<21:14:56, 67.52s/it, loss=-0.0407, reward=-1.
+Training:   6%| | 68/1200 [1:16:34<21:13:52, 67.52s/it, loss=-0.0407, reward=-1.
+Training:   6%| | 68/1200 [1:17:41<21:13:52, 67.52s/it, loss=-0.0557, reward=-1.
+Training:   6%| | 69/1200 [1:17:41<21:12:27, 67.50s/it, loss=-0.0557, reward=-1.
+Training:   6%| | 69/1200 [1:18:49<21:12:27, 67.50s/it, loss=-0.0636, reward=-1.
+Training:   6%| | 70/1200 [1:18:49<21:11:03, 67.49s/it, loss=-0.0636, reward=-1.
+Training:   6%| | 70/1200 [1:19:56<21:11:03, 67.49s/it, loss=-0.0602, reward=-1.
+Training:   6%| | 71/1200 [1:19:56<21:09:48, 67.48s/it, loss=-0.0602, reward=-1.
+Training:   6%| | 71/1200 [1:21:04<21:09:48, 67.48s/it, loss=-0.0729, reward=-1.
+Training:   6%| | 72/1200 [1:21:04<21:09:30, 67.53s/it, loss=-0.0729, reward=-1.
+Training:   6%| | 72/1200 [1:22:11<21:09:30, 67.53s/it, loss=-0.0706, reward=-1.
+Training:   6%| | 73/1200 [1:22:11<21:09:06, 67.57s/it, loss=-0.0706, reward=-1.
+Training:   6%| | 73/1200 [1:23:19<21:09:06, 67.57s/it, loss=-0.0702, reward=-1.
+Training:   6%| | 74/1200 [1:23:19<21:08:27, 67.59s/it, loss=-0.0702, reward=-1.
+Training:   6%| | 74/1200 [1:24:27<21:08:27, 67.59s/it, loss=-0.0660, reward=-1.
+Training:   6%| | 75/1200 [1:24:27<21:07:27, 67.60s/it, loss=-0.0660, reward=-1.
+Training:   6%| | 75/1200 [1:25:34<21:07:27, 67.60s/it, loss=-0.0810, reward=-1.
+Training:   6%| | 76/1200 [1:25:34<21:06:23, 67.60s/it, loss=-0.0810, reward=-1.
+Training:   6%| | 76/1200 [1:26:42<21:06:23, 67.60s/it, loss=-0.0617, reward=-1.
+Training:   6%| | 77/1200 [1:26:42<21:05:20, 67.60s/it, loss=-0.0617, reward=-1.
+Training:   6%| | 77/1200 [1:27:49<21:05:20, 67.60s/it, loss=-0.0550, reward=-1.
+Training:   6%| | 78/1200 [1:27:49<21:04:15, 67.61s/it, loss=-0.0550, reward=-1.
+Training:   6%| | 78/1200 [1:28:57<21:04:15, 67.61s/it, loss=-0.0612, reward=-1.
+Training:   7%| | 79/1200 [1:28:57<21:03:04, 67.60s/it, loss=-0.0612, reward=-1.
+Training:   7%| | 79/1200 [1:30:05<21:03:04, 67.60s/it, loss=-0.0624, reward=-1.
+Training:   7%| | 80/1200 [1:30:05<21:01:59, 67.61s/it, loss=-0.0624, reward=-1.
+Training:   7%| | 80/1200 [1:31:12<21:01:59, 67.61s/it, loss=-0.0717, reward=-1.
+Training:   7%| | 81/1200 [1:31:12<21:00:52, 67.61s/it, loss=-0.0717, reward=-1.
+Training:   7%| | 81/1200 [1:32:20<21:00:52, 67.61s/it, loss=-0.0640, reward=-1.
+Training:   7%| | 82/1200 [1:32:20<21:00:18, 67.64s/it, loss=-0.0640, reward=-1.
+Training:   7%| | 82/1200 [1:33:28<21:00:18, 67.64s/it, loss=-0.0749, reward=-1.
+Training:   7%| | 83/1200 [1:33:28<20:58:58, 67.63s/it, loss=-0.0749, reward=-1.
+Training:   7%| | 83/1200 [1:34:35<20:58:58, 67.63s/it, loss=-0.0856, reward=-1.
+Training:   7%| | 84/1200 [1:34:35<20:57:36, 67.61s/it, loss=-0.0856, reward=-1.
+Training:   7%| | 84/1200 [1:35:43<20:57:36, 67.61s/it, loss=-0.0830, reward=-1.
+Training:   7%| | 85/1200 [1:35:43<20:56:30, 67.61s/it, loss=-0.0830, reward=-1.
+Training:   7%| | 85/1200 [1:36:50<20:56:30, 67.61s/it, loss=-0.0632, reward=-1.
+Training:   7%| | 86/1200 [1:36:50<20:55:09, 67.60s/it, loss=-0.0632, reward=-1.
+Training:   7%| | 86/1200 [1:37:58<20:55:09, 67.60s/it, loss=-0.0726, reward=-1.
+Training:   7%| | 87/1200 [1:37:58<20:54:00, 67.60s/it, loss=-0.0726, reward=-1.
+Training:   7%| | 87/1200 [1:39:06<20:54:00, 67.60s/it, loss=-0.0643, reward=-1.
+Training:   7%| | 88/1200 [1:39:06<20:52:55, 67.60s/it, loss=-0.0643, reward=-1.
+Training:   7%| | 88/1200 [1:40:13<20:52:55, 67.60s/it, loss=-0.0558, reward=-1.
+Training:   7%| | 89/1200 [1:40:13<20:51:47, 67.60s/it, loss=-0.0558, reward=-1.
+Training:   7%| | 89/1200 [1:41:21<20:51:47, 67.60s/it, loss=-0.0571, reward=-1.
+Training:   8%| | 90/1200 [1:41:21<20:50:35, 67.60s/it, loss=-0.0571, reward=-1.
+Training:   8%| | 90/1200 [1:42:28<20:50:35, 67.60s/it, loss=-0.0713, reward=-1.
+Training:   8%| | 91/1200 [1:42:28<20:49:31, 67.60s/it, loss=-0.0713, reward=-1.
+Training:   8%| | 91/1200 [1:43:36<20:49:31, 67.60s/it, loss=-0.0631, reward=-1.
+Training:   8%| | 92/1200 [1:43:36<20:48:35, 67.61s/it, loss=-0.0631, reward=-1.
+Training:   8%| | 92/1200 [1:44:44<20:48:35, 67.61s/it, loss=-0.0650, reward=-1.
+Training:   8%| | 93/1200 [1:44:44<20:47:27, 67.61s/it, loss=-0.0650, reward=-1.
+Training:   8%| | 93/1200 [1:45:51<20:47:27, 67.61s/it, loss=-0.0764, reward=-1.
+Training:   8%| | 94/1200 [1:45:51<20:46:19, 67.61s/it, loss=-0.0764, reward=-1.
+Training:   8%| | 94/1200 [1:46:59<20:46:19, 67.61s/it, loss=-0.0768, reward=-1.
+Training:   8%| | 95/1200 [1:46:59<20:45:10, 67.61s/it, loss=-0.0768, reward=-1.
+Training:   8%| | 95/1200 [1:48:06<20:45:10, 67.61s/it, loss=-0.0554, reward=-1.
+Training:   8%| | 96/1200 [1:48:06<20:44:00, 67.61s/it, loss=-0.0554, reward=-1.
+Training:   8%| | 96/1200 [1:49:14<20:44:00, 67.61s/it, loss=-0.0544, reward=-1.
+Training:   8%| | 97/1200 [1:49:14<20:42:45, 67.60s/it, loss=-0.0544, reward=-1.
+Training:   8%| | 97/1200 [1:50:22<20:42:45, 67.60s/it, loss=-0.0640, reward=-1.
+Training:   8%| | 98/1200 [1:50:22<20:41:36, 67.60s/it, loss=-0.0640, reward=-1.
+Training:   8%| | 98/1200 [1:51:29<20:41:36, 67.60s/it, loss=-0.0717, reward=-1.
+Training:   8%| | 99/1200 [1:51:29<20:40:29, 67.60s/it, loss=-0.0717, reward=-1.
+Training:   8%| | 99/1200 [1:52:37<20:40:29, 67.60s/it, loss=-0.0494, reward=-1.Saved checkpoint to checkpoints/ecspnet_N20_epoch1900.pt
+
+13534.8s	96	
+Training:   8%| | 100/1200 [1:52:37<20:39:26, 67.61s/it, loss=-0.0494, reward=-1
+Training:   8%| | 100/1200 [1:53:44<20:39:26, 67.61s/it, loss=-0.0664, reward=-1
+Training:   8%| | 101/1200 [1:53:44<20:38:27, 67.61s/it, loss=-0.0664, reward=-1
+Training:   8%| | 101/1200 [1:54:52<20:38:27, 67.61s/it, loss=-0.0597, reward=-1
+Training:   8%| | 102/1200 [1:54:52<20:37:12, 67.61s/it, loss=-0.0597, reward=-1
+Training:   8%| | 102/1200 [1:56:00<20:37:12, 67.61s/it, loss=-0.0552, reward=-1
+Training:   9%| | 103/1200 [1:56:00<20:36:02, 67.60s/it, loss=-0.0552, reward=-1
+Training:   9%| | 103/1200 [1:57:07<20:36:02, 67.60s/it, loss=-0.0481, reward=-1
+Training:   9%| | 104/1200 [1:57:07<20:35:23, 67.63s/it, loss=-0.0481, reward=-1
+Training:   9%| | 104/1200 [1:58:15<20:35:23, 67.63s/it, loss=-0.0573, reward=-1
+Training:   9%| | 105/1200 [1:58:15<20:34:31, 67.64s/it, loss=-0.0573, reward=-1
+Training:   9%| | 105/1200 [1:59:23<20:34:31, 67.64s/it, loss=-0.0475, reward=-1
+Training:   9%| | 106/1200 [1:59:23<20:33:31, 67.65s/it, loss=-0.0475, reward=-1
+Training:   9%| | 106/1200 [2:00:30<20:33:31, 67.65s/it, loss=-0.0612, reward=-1
+Training:   9%| | 107/1200 [2:00:30<20:32:22, 67.65s/it, loss=-0.0612, reward=-1
+Training:   9%| | 107/1200 [2:01:38<20:32:22, 67.65s/it, loss=-0.0606, reward=-1
+Training:   9%| | 108/1200 [2:01:38<20:31:15, 67.65s/it, loss=-0.0606, reward=-1
+Training:   9%| | 108/1200 [2:02:46<20:31:15, 67.65s/it, loss=-0.0666, reward=-1
+Training:   9%| | 109/1200 [2:02:46<20:30:12, 67.66s/it, loss=-0.0666, reward=-1
+Training:   9%| | 109/1200 [2:03:53<20:30:12, 67.66s/it, loss=-0.0632, reward=-1
+Training:   9%| | 110/1200 [2:03:53<20:28:38, 67.63s/it, loss=-0.0632, reward=-1
+Training:   9%| | 110/1200 [2:05:01<20:28:38, 67.63s/it, loss=-0.0721, reward=-1
+Training:   9%| | 111/1200 [2:05:01<20:27:20, 67.62s/it, loss=-0.0721, reward=-1
+Training:   9%| | 111/1200 [2:06:08<20:27:20, 67.62s/it, loss=-0.0749, reward=-1
+Training:   9%| | 112/1200 [2:06:08<20:25:59, 67.61s/it, loss=-0.0749, reward=-1
+Training:   9%| | 112/1200 [2:07:16<20:25:59, 67.61s/it, loss=-0.0782, reward=-1
+Training:   9%| | 113/1200 [2:07:16<20:24:39, 67.60s/it, loss=-0.0782, reward=-1
+Training:   9%| | 113/1200 [2:08:24<20:24:39, 67.60s/it, loss=-0.0733, reward=-1
+Training:  10%| | 114/1200 [2:08:24<20:23:37, 67.60s/it, loss=-0.0733, reward=-1
+Training:  10%| | 114/1200 [2:09:31<20:23:37, 67.60s/it, loss=-0.0814, reward=-1
+Training:  10%| | 115/1200 [2:09:31<20:22:30, 67.60s/it, loss=-0.0814, reward=-1
+Training:  10%| | 115/1200 [2:10:39<20:22:30, 67.60s/it, loss=-0.0773, reward=-1
+Training:  10%| | 116/1200 [2:10:39<20:21:22, 67.60s/it, loss=-0.0773, reward=-1
+Training:  10%| | 116/1200 [2:11:46<20:21:22, 67.60s/it, loss=-0.0718, reward=-1
+Training:  10%| | 117/1200 [2:11:46<20:20:19, 67.61s/it, loss=-0.0718, reward=-1
+Training:  10%| | 117/1200 [2:12:54<20:20:19, 67.61s/it, loss=-0.0607, reward=-1
+Training:  10%| | 118/1200 [2:12:54<20:19:12, 67.61s/it, loss=-0.0607, reward=-1
+Training:  10%| | 118/1200 [2:14:02<20:19:12, 67.61s/it, loss=-0.0794, reward=-1
+Training:  10%| | 119/1200 [2:14:02<20:18:07, 67.61s/it, loss=-0.0794, reward=-1
+Training:  10%| | 119/1200 [2:15:09<20:18:07, 67.61s/it, loss=-0.0574, reward=-1
+Training:  10%| | 120/1200 [2:15:09<20:16:58, 67.61s/it, loss=-0.0574, reward=-1
+Training:  10%| | 120/1200 [2:16:17<20:16:58, 67.61s/it, loss=-0.0586, reward=-1
+Training:  10%| | 121/1200 [2:16:17<20:15:52, 67.61s/it, loss=-0.0586, reward=-1
+Training:  10%| | 121/1200 [2:17:24<20:15:52, 67.61s/it, loss=-0.0648, reward=-1
+Training:  10%| | 122/1200 [2:17:24<20:14:39, 67.61s/it, loss=-0.0648, reward=-1
+Training:  10%| | 122/1200 [2:18:32<20:14:39, 67.61s/it, loss=-0.0502, reward=-1
+Training:  10%| | 123/1200 [2:18:32<20:13:24, 67.60s/it, loss=-0.0502, reward=-1
+Training:  10%| | 123/1200 [2:19:40<20:13:24, 67.60s/it, loss=-0.0627, reward=-1
+Training:  10%| | 124/1200 [2:19:40<20:12:18, 67.60s/it, loss=-0.0627, reward=-1
+Training:  10%| | 124/1200 [2:20:47<20:12:18, 67.60s/it, loss=-0.0481, reward=-1
+Training:  10%| | 125/1200 [2:20:47<20:11:04, 67.59s/it, loss=-0.0481, reward=-1
+Training:  10%| | 125/1200 [2:21:55<20:11:04, 67.59s/it, loss=-0.0397, reward=-1
+Training:  10%| | 126/1200 [2:21:55<20:10:29, 67.62s/it, loss=-0.0397, reward=-1
+Training:  10%| | 126/1200 [2:23:02<20:10:29, 67.62s/it, loss=-0.0529, reward=-1
+Training:  11%| | 127/1200 [2:23:02<20:09:15, 67.62s/it, loss=-0.0529, reward=-1
+Training:  11%| | 127/1200 [2:24:10<20:09:15, 67.62s/it, loss=-0.0721, reward=-1
+Training:  11%| | 128/1200 [2:24:10<20:07:34, 67.59s/it, loss=-0.0721, reward=-1
+Training:  11%| | 128/1200 [2:25:18<20:07:34, 67.59s/it, loss=-0.0639, reward=-1
+Training:  11%| | 129/1200 [2:25:18<20:05:59, 67.56s/it, loss=-0.0639, reward=-1
+Training:  11%| | 129/1200 [2:26:25<20:05:59, 67.56s/it, loss=-0.0665, reward=-1
+Training:  11%| | 130/1200 [2:26:25<20:04:32, 67.54s/it, loss=-0.0665, reward=-1
+Training:  11%| | 130/1200 [2:27:33<20:04:32, 67.54s/it, loss=-0.0510, reward=-1
+Training:  11%| | 131/1200 [2:27:33<20:03:11, 67.53s/it, loss=-0.0510, reward=-1
+Training:  11%| | 131/1200 [2:28:40<20:03:11, 67.53s/it, loss=-0.0577, reward=-1
+Training:  11%| | 132/1200 [2:28:40<20:01:49, 67.52s/it, loss=-0.0577, reward=-1
+Training:  11%| | 132/1200 [2:29:47<20:01:49, 67.52s/it, loss=-0.0620, reward=-1
+Training:  11%| | 133/1200 [2:29:47<20:00:23, 67.50s/it, loss=-0.0620, reward=-1
+Training:  11%| | 133/1200 [2:30:55<20:00:23, 67.50s/it, loss=-0.0652, reward=-1
+Training:  11%| | 134/1200 [2:30:55<19:58:57, 67.48s/it, loss=-0.0652, reward=-1
+Training:  11%| | 134/1200 [2:32:02<19:58:57, 67.48s/it, loss=-0.0708, reward=-1
+Training:  11%| | 135/1200 [2:32:02<19:57:31, 67.47s/it, loss=-0.0708, reward=-1
+Training:  11%| | 135/1200 [2:33:10<19:57:31, 67.47s/it, loss=-0.0596, reward=-1
+Training:  11%| | 136/1200 [2:33:10<19:56:17, 67.46s/it, loss=-0.0596, reward=-1
+Training:  11%| | 136/1200 [2:34:17<19:56:17, 67.46s/it, loss=-0.0638, reward=-1
+Training:  11%| | 137/1200 [2:34:17<19:55:10, 67.46s/it, loss=-0.0638, reward=-1
+Training:  11%| | 137/1200 [2:35:25<19:55:10, 67.46s/it, loss=-0.0562, reward=-1
+Training:  12%| | 138/1200 [2:35:25<19:53:58, 67.46s/it, loss=-0.0562, reward=-1
+Training:  12%| | 138/1200 [2:36:32<19:53:58, 67.46s/it, loss=-0.0756, reward=-1
+Training:  12%| | 139/1200 [2:36:32<19:52:48, 67.45s/it, loss=-0.0756, reward=-1
+Training:  12%| | 139/1200 [2:37:40<19:52:48, 67.45s/it, loss=-0.0927, reward=-1
+Training:  12%| | 140/1200 [2:37:40<19:51:39, 67.45s/it, loss=-0.0927, reward=-1
+Training:  12%| | 140/1200 [2:38:47<19:51:39, 67.45s/it, loss=-0.0956, reward=-1
+Training:  12%| | 141/1200 [2:38:47<19:50:30, 67.45s/it, loss=-0.0956, reward=-1
+Training:  12%| | 141/1200 [2:39:55<19:50:30, 67.45s/it, loss=-0.0877, reward=-1
+Training:  12%| | 142/1200 [2:39:55<19:49:31, 67.46s/it, loss=-0.0877, reward=-1
+Training:  12%| | 142/1200 [2:41:02<19:49:31, 67.46s/it, loss=-0.0898, reward=-1
+Training:  12%| | 143/1200 [2:41:02<19:48:21, 67.46s/it, loss=-0.0898, reward=-1
+Training:  12%| | 143/1200 [2:42:09<19:48:21, 67.46s/it, loss=-0.0730, reward=-1
+Training:  12%| | 144/1200 [2:42:09<19:47:04, 67.45s/it, loss=-0.0730, reward=-1
+Training:  12%| | 144/1200 [2:43:17<19:47:04, 67.45s/it, loss=-0.0660, reward=-1
+Training:  12%| | 145/1200 [2:43:17<19:45:59, 67.45s/it, loss=-0.0660, reward=-1
+Training:  12%| | 145/1200 [2:44:24<19:45:59, 67.45s/it, loss=-0.0580, reward=-1
+Training:  12%| | 146/1200 [2:44:24<19:44:50, 67.45s/it, loss=-0.0580, reward=-1
+Training:  12%| | 146/1200 [2:45:32<19:44:50, 67.45s/it, loss=-0.0637, reward=-1
+Training:  12%| | 147/1200 [2:45:32<19:43:41, 67.45s/it, loss=-0.0637, reward=-1
+Training:  12%| | 147/1200 [2:46:39<19:43:41, 67.45s/it, loss=-0.0542, reward=-1
+Training:  12%| | 148/1200 [2:46:39<19:43:07, 67.48s/it, loss=-0.0542, reward=-1
+Training:  12%| | 148/1200 [2:47:47<19:43:07, 67.48s/it, loss=-0.0516, reward=-1
+Training:  12%| | 149/1200 [2:47:47<19:41:53, 67.47s/it, loss=-0.0516, reward=-1
+Training:  12%| | 149/1200 [2:48:54<19:41:53, 67.47s/it, loss=-0.0554, reward=-1
+Training:  12%|▏| 150/1200 [2:48:54<19:40:44, 67.47s/it, loss=-0.0554, reward=-1
+Training:  12%|▏| 150/1200 [2:50:02<19:40:44, 67.47s/it, loss=-0.0722, reward=-1
+Training:  13%|▏| 151/1200 [2:50:02<19:39:34, 67.47s/it, loss=-0.0722, reward=-1
+Training:  13%|▏| 151/1200 [2:51:09<19:39:34, 67.47s/it, loss=-0.0764, reward=-1
+Training:  13%|▏| 152/1200 [2:51:09<19:38:25, 67.47s/it, loss=-0.0764, reward=-1
+Training:  13%|▏| 152/1200 [2:52:17<19:38:25, 67.47s/it, loss=-0.0759, reward=-1
+Training:  13%|▏| 153/1200 [2:52:17<19:37:09, 67.46s/it, loss=-0.0759, reward=-1
+Training:  13%|▏| 153/1200 [2:53:24<19:37:09, 67.46s/it, loss=-0.0859, reward=-1
+Training:  13%|▏| 154/1200 [2:53:24<19:35:58, 67.46s/it, loss=-0.0859, reward=-1
+Training:  13%|▏| 154/1200 [2:54:32<19:35:58, 67.46s/it, loss=-0.0768, reward=-1
+Training:  13%|▏| 155/1200 [2:54:32<19:35:13, 67.48s/it, loss=-0.0768, reward=-1
+Training:  13%|▏| 155/1200 [2:55:39<19:35:13, 67.48s/it, loss=-0.0665, reward=-1
+Training:  13%|▏| 156/1200 [2:55:39<19:34:05, 67.48s/it, loss=-0.0665, reward=-1
+Training:  13%|▏| 156/1200 [2:56:46<19:34:05, 67.48s/it, loss=-0.0675, reward=-1
+Training:  13%|▏| 157/1200 [2:56:46<19:32:55, 67.47s/it, loss=-0.0675, reward=-1
+Training:  13%|▏| 157/1200 [2:57:54<19:32:55, 67.47s/it, loss=-0.0764, reward=-1
+Training:  13%|▏| 158/1200 [2:57:54<19:31:42, 67.47s/it, loss=-0.0764, reward=-1
+Training:  13%|▏| 158/1200 [2:59:01<19:31:42, 67.47s/it, loss=-0.1050, reward=-1
+Training:  13%|▏| 159/1200 [2:59:01<19:30:34, 67.47s/it, loss=-0.1050, reward=-1
+Training:  13%|▏| 159/1200 [3:00:09<19:30:34, 67.47s/it, loss=-0.0901, reward=-1
+Training:  13%|▏| 160/1200 [3:00:09<19:29:29, 67.47s/it, loss=-0.0901, reward=-1
+Training:  13%|▏| 160/1200 [3:01:16<19:29:29, 67.47s/it, loss=-0.0759, reward=-1
+Training:  13%|▏| 161/1200 [3:01:16<19:28:08, 67.46s/it, loss=-0.0759, reward=-1
+Training:  13%|▏| 161/1200 [3:02:24<19:28:08, 67.46s/it, loss=-0.0717, reward=-1
+Training:  14%|▏| 162/1200 [3:02:24<19:27:13, 67.47s/it, loss=-0.0717, reward=-1
+Training:  14%|▏| 162/1200 [3:03:31<19:27:13, 67.47s/it, loss=-0.0613, reward=-1
+Training:  14%|▏| 163/1200 [3:03:31<19:26:06, 67.47s/it, loss=-0.0613, reward=-1
+Training:  14%|▏| 163/1200 [3:04:39<19:26:06, 67.47s/it, loss=-0.0594, reward=-1
+Training:  14%|▏| 164/1200 [3:04:39<19:24:45, 67.46s/it, loss=-0.0594, reward=-1
+Training:  14%|▏| 164/1200 [3:05:46<19:24:45, 67.46s/it, loss=-0.0707, reward=-1
+Training:  14%|▏| 165/1200 [3:05:46<19:23:24, 67.44s/it, loss=-0.0707, reward=-1
+Training:  14%|▏| 165/1200 [3:06:54<19:23:24, 67.44s/it, loss=-0.0712, reward=-1
+Training:  14%|▏| 166/1200 [3:06:54<19:22:13, 67.44s/it, loss=-0.0712, reward=-1
+Training:  14%|▏| 166/1200 [3:08:01<19:22:13, 67.44s/it, loss=-0.0628, reward=-1
+Training:  14%|▏| 167/1200 [3:08:01<19:20:55, 67.43s/it, loss=-0.0628, reward=-1
+Training:  14%|▏| 167/1200 [3:09:08<19:20:55, 67.43s/it, loss=-0.0771, reward=-1
+Training:  14%|▏| 168/1200 [3:09:08<19:19:42, 67.43s/it, loss=-0.0771, reward=-1
+Training:  14%|▏| 168/1200 [3:10:16<19:19:42, 67.43s/it, loss=-0.0808, reward=-1
+Training:  14%|▏| 169/1200 [3:10:16<19:18:30, 67.42s/it, loss=-0.0808, reward=-1
+Training:  14%|▏| 169/1200 [3:11:23<19:18:30, 67.42s/it, loss=-0.0693, reward=-1
+Training:  14%|▏| 170/1200 [3:11:23<19:17:50, 67.45s/it, loss=-0.0693, reward=-1
+Training:  14%|▏| 170/1200 [3:12:31<19:17:50, 67.45s/it, loss=-0.0756, reward=-1
+Training:  14%|▏| 171/1200 [3:12:31<19:16:29, 67.43s/it, loss=-0.0756, reward=-1
+Training:  14%|▏| 171/1200 [3:13:38<19:16:29, 67.43s/it, loss=-0.0780, reward=-1
+Training:  14%|▏| 172/1200 [3:13:38<19:15:14, 67.43s/it, loss=-0.0780, reward=-1
+Training:  14%|▏| 172/1200 [3:14:46<19:15:14, 67.43s/it, loss=-0.0811, reward=-1
+Training:  14%|▏| 173/1200 [3:14:46<19:14:01, 67.42s/it, loss=-0.0811, reward=-1
+Training:  14%|▏| 173/1200 [3:15:53<19:14:01, 67.42s/it, loss=-0.0971, reward=-1
+Training:  14%|▏| 174/1200 [3:15:53<19:12:53, 67.42s/it, loss=-0.0971, reward=-1
+Training:  14%|▏| 174/1200 [3:17:00<19:12:53, 67.42s/it, loss=-0.0702, reward=-1
+Training:  15%|▏| 175/1200 [3:17:00<19:11:41, 67.42s/it, loss=-0.0702, reward=-1
+Training:  15%|▏| 175/1200 [3:18:08<19:11:41, 67.42s/it, loss=-0.0665, reward=-1
+Training:  15%|▏| 176/1200 [3:18:08<19:10:31, 67.41s/it, loss=-0.0665, reward=-1
+Training:  15%|▏| 176/1200 [3:19:15<19:10:31, 67.41s/it, loss=-0.0716, reward=-1
+Training:  15%|▏| 177/1200 [3:19:15<19:09:29, 67.42s/it, loss=-0.0716, reward=-1
+Training:  15%|▏| 177/1200 [3:20:23<19:09:29, 67.42s/it, loss=-0.0662, reward=-1
+Training:  15%|▏| 178/1200 [3:20:23<19:08:29, 67.43s/it, loss=-0.0662, reward=-1
+Training:  15%|▏| 178/1200 [3:21:30<19:08:29, 67.43s/it, loss=-0.0664, reward=-1
+Training:  15%|▏| 179/1200 [3:21:30<19:08:13, 67.48s/it, loss=-0.0664, reward=-1
+Training:  15%|▏| 179/1200 [3:22:38<19:08:13, 67.48s/it, loss=-0.0540, reward=-1
+Training:  15%|▏| 180/1200 [3:22:38<19:07:06, 67.48s/it, loss=-0.0540, reward=-1
+Training:  15%|▏| 180/1200 [3:23:45<19:07:06, 67.48s/it, loss=-0.0623, reward=-1
+Training:  15%|▏| 181/1200 [3:23:45<19:05:44, 67.46s/it, loss=-0.0623, reward=-1
+Training:  15%|▏| 181/1200 [3:24:53<19:05:44, 67.46s/it, loss=-0.0704, reward=-1
+Training:  15%|▏| 182/1200 [3:24:53<19:04:27, 67.45s/it, loss=-0.0704, reward=-1
+Training:  15%|▏| 182/1200 [3:26:00<19:04:27, 67.45s/it, loss=-0.0767, reward=-1
+Training:  15%|▏| 183/1200 [3:26:00<19:03:14, 67.45s/it, loss=-0.0767, reward=-1
+Training:  15%|▏| 183/1200 [3:27:07<19:03:14, 67.45s/it, loss=-0.0738, reward=-1
+Training:  15%|▏| 184/1200 [3:27:07<19:01:59, 67.44s/it, loss=-0.0738, reward=-1
+Training:  15%|▏| 184/1200 [3:28:15<19:01:59, 67.44s/it, loss=-0.0713, reward=-1
+Training:  15%|▏| 185/1200 [3:28:15<19:01:02, 67.45s/it, loss=-0.0713, reward=-1
+Training:  15%|▏| 185/1200 [3:29:23<19:01:02, 67.45s/it, loss=-0.0629, reward=-1
+Training:  16%|▏| 186/1200 [3:29:23<19:00:50, 67.51s/it, loss=-0.0629, reward=-1
+Training:  16%|▏| 186/1200 [3:30:30<19:00:50, 67.51s/it, loss=-0.0579, reward=-1
+Training:  16%|▏| 187/1200 [3:30:30<19:00:18, 67.54s/it, loss=-0.0579, reward=-1
+Training:  16%|▏| 187/1200 [3:31:38<19:00:18, 67.54s/it, loss=-0.0724, reward=-1
+Training:  16%|▏| 188/1200 [3:31:38<18:59:41, 67.57s/it, loss=-0.0724, reward=-1
+Training:  16%|▏| 188/1200 [3:32:45<18:59:41, 67.57s/it, loss=-0.0673, reward=-1
+Training:  16%|▏| 189/1200 [3:32:45<18:58:52, 67.59s/it, loss=-0.0673, reward=-1
+Training:  16%|▏| 189/1200 [3:33:53<18:58:52, 67.59s/it, loss=-0.0764, reward=-1
+Training:  16%|▏| 190/1200 [3:33:53<18:57:53, 67.60s/it, loss=-0.0764, reward=-1
+Training:  16%|▏| 190/1200 [3:35:01<18:57:53, 67.60s/it, loss=-0.0673, reward=-1
+Training:  16%|▏| 191/1200 [3:35:01<18:56:54, 67.61s/it, loss=-0.0673, reward=-1
+Training:  16%|▏| 191/1200 [3:36:08<18:56:54, 67.61s/it, loss=-0.0666, reward=-1
+Training:  16%|▏| 192/1200 [3:36:08<18:56:14, 67.63s/it, loss=-0.0666, reward=-1
+Training:  16%|▏| 192/1200 [3:37:16<18:56:14, 67.63s/it, loss=-0.0559, reward=-1
+Training:  16%|▏| 193/1200 [3:37:16<18:55:09, 67.64s/it, loss=-0.0559, reward=-1
+Training:  16%|▏| 193/1200 [3:38:24<18:55:09, 67.64s/it, loss=-0.0811, reward=-1
+Training:  16%|▏| 194/1200 [3:38:24<18:54:09, 67.64s/it, loss=-0.0811, reward=-1
+Training:  16%|▏| 194/1200 [3:39:31<18:54:09, 67.64s/it, loss=-0.0893, reward=-1
+Training:  16%|▏| 195/1200 [3:39:31<18:53:03, 67.65s/it, loss=-0.0893, reward=-1
+Training:  16%|▏| 195/1200 [3:40:39<18:53:03, 67.65s/it, loss=-0.0754, reward=-1
+Training:  16%|▏| 196/1200 [3:40:39<18:51:38, 67.63s/it, loss=-0.0754, reward=-1
+Training:  16%|▏| 196/1200 [3:41:46<18:51:38, 67.63s/it, loss=-0.0703, reward=-1
+Training:  16%|▏| 197/1200 [3:41:46<18:49:30, 67.57s/it, loss=-0.0703, reward=-1
+Training:  16%|▏| 197/1200 [3:42:54<18:49:30, 67.57s/it, loss=-0.0843, reward=-1
+Training:  16%|▏| 198/1200 [3:42:54<18:47:41, 67.53s/it, loss=-0.0843, reward=-1
+Training:  16%|▏| 198/1200 [3:44:01<18:47:41, 67.53s/it, loss=-0.0784, reward=-1
+Training:  17%|▏| 199/1200 [3:44:01<18:46:11, 67.50s/it, loss=-0.0784, reward=-1
+Training:  17%|▏| 199/1200 [3:45:09<18:46:11, 67.50s/it, loss=-0.0798, reward=-1Saved checkpoint to checkpoints/ecspnet_N20_epoch2000.pt
+
+20288.9s	97	
+Training:  17%|▏| 200/1200 [3:45:09<18:44:47, 67.49s/it, loss=-0.0798, reward=-1
+Training:  17%|▏| 200/1200 [3:46:16<18:44:47, 67.49s/it, loss=-0.0853, reward=-1
+Training:  17%|▏| 201/1200 [3:46:16<18:43:25, 67.47s/it, loss=-0.0853, reward=-1
+Training:  17%|▏| 201/1200 [3:47:24<18:43:25, 67.47s/it, loss=-0.0884, reward=-1
+Training:  17%|▏| 202/1200 [3:47:24<18:42:08, 67.46s/it, loss=-0.0884, reward=-1
+Training:  17%|▏| 202/1200 [3:48:31<18:42:08, 67.46s/it, loss=-0.0907, reward=-1
+Training:  17%|▏| 203/1200 [3:48:31<18:40:47, 67.45s/it, loss=-0.0907, reward=-1
+Training:  17%|▏| 203/1200 [3:49:38<18:40:47, 67.45s/it, loss=-0.0878, reward=-1
+Training:  17%|▏| 204/1200 [3:49:38<18:39:32, 67.44s/it, loss=-0.0878, reward=-1
+Training:  17%|▏| 204/1200 [3:50:46<18:39:32, 67.44s/it, loss=-0.0899, reward=-1
+Training:  17%|▏| 205/1200 [3:50:46<18:38:26, 67.44s/it, loss=-0.0899, reward=-1
+Training:  17%|▏| 205/1200 [3:51:53<18:38:26, 67.44s/it, loss=-0.0887, reward=-1
+Training:  17%|▏| 206/1200 [3:51:53<18:37:22, 67.45s/it, loss=-0.0887, reward=-1
+Training:  17%|▏| 206/1200 [3:53:01<18:37:22, 67.45s/it, loss=-0.0903, reward=-1
+Training:  17%|▏| 207/1200 [3:53:01<18:36:12, 67.44s/it, loss=-0.0903, reward=-1
+Training:  17%|▏| 207/1200 [3:54:08<18:36:12, 67.44s/it, loss=-0.0942, reward=-1
+Training:  17%|▏| 208/1200 [3:54:08<18:34:58, 67.44s/it, loss=-0.0942, reward=-1
+Training:  17%|▏| 208/1200 [3:55:16<18:34:58, 67.44s/it, loss=-0.0859, reward=-1
+Training:  17%|▏| 209/1200 [3:55:16<18:33:43, 67.43s/it, loss=-0.0859, reward=-1
+Training:  17%|▏| 209/1200 [3:56:23<18:33:43, 67.43s/it, loss=-0.0870, reward=-1
+Training:  18%|▏| 210/1200 [3:56:23<18:32:36, 67.43s/it, loss=-0.0870, reward=-1
+Training:  18%|▏| 210/1200 [3:57:30<18:32:36, 67.43s/it, loss=-0.0868, reward=-1
+Training:  18%|▏| 211/1200 [3:57:30<18:31:26, 67.43s/it, loss=-0.0868, reward=-1
+Training:  18%|▏| 211/1200 [3:58:38<18:31:26, 67.43s/it, loss=-0.0806, reward=-1
+Training:  18%|▏| 212/1200 [3:58:38<18:30:10, 67.42s/it, loss=-0.0806, reward=-1
+Training:  18%|▏| 212/1200 [3:59:45<18:30:10, 67.42s/it, loss=-0.0857, reward=-1
+Training:  18%|▏| 213/1200 [3:59:45<18:29:00, 67.42s/it, loss=-0.0857, reward=-1
+Training:  18%|▏| 213/1200 [4:00:53<18:29:00, 67.42s/it, loss=-0.0865, reward=-1
+Training:  18%|▏| 214/1200 [4:00:53<18:28:19, 67.44s/it, loss=-0.0865, reward=-1
+Training:  18%|▏| 214/1200 [4:02:00<18:28:19, 67.44s/it, loss=-0.0848, reward=-1
+Training:  18%|▏| 215/1200 [4:02:00<18:27:09, 67.44s/it, loss=-0.0848, reward=-1
+Training:  18%|▏| 215/1200 [4:03:08<18:27:09, 67.44s/it, loss=-0.0790, reward=-1
+Training:  18%|▏| 216/1200 [4:03:08<18:25:58, 67.44s/it, loss=-0.0790, reward=-1
+Training:  18%|▏| 216/1200 [4:04:15<18:25:58, 67.44s/it, loss=-0.0824, reward=-1
+Training:  18%|▏| 217/1200 [4:04:15<18:25:15, 67.46s/it, loss=-0.0824, reward=-1
+Training:  18%|▏| 217/1200 [4:05:23<18:25:15, 67.46s/it, loss=-0.0850, reward=-1
+Training:  18%|▏| 218/1200 [4:05:23<18:24:03, 67.46s/it, loss=-0.0850, reward=-1
+Training:  18%|▏| 218/1200 [4:06:30<18:24:03, 67.46s/it, loss=-0.0850, reward=-1
+Training:  18%|▏| 219/1200 [4:06:30<18:22:42, 67.44s/it, loss=-0.0850, reward=-1
+Training:  18%|▏| 219/1200 [4:07:37<18:22:42, 67.44s/it, loss=-0.0771, reward=-1
+Training:  18%|▏| 220/1200 [4:07:37<18:21:28, 67.44s/it, loss=-0.0771, reward=-1
+Training:  18%|▏| 220/1200 [4:08:45<18:21:28, 67.44s/it, loss=-0.0832, reward=-1
+Training:  18%|▏| 221/1200 [4:08:45<18:20:09, 67.43s/it, loss=-0.0832, reward=-1
+Training:  18%|▏| 221/1200 [4:09:52<18:20:09, 67.43s/it, loss=-0.0783, reward=-1
+Training:  18%|▏| 222/1200 [4:09:52<18:19:18, 67.44s/it, loss=-0.0783, reward=-1
+Training:  18%|▏| 222/1200 [4:11:00<18:19:18, 67.44s/it, loss=-0.0831, reward=-1
+Training:  19%|▏| 223/1200 [4:11:00<18:18:41, 67.47s/it, loss=-0.0831, reward=-1
+Training:  19%|▏| 223/1200 [4:12:07<18:18:41, 67.47s/it, loss=-0.0759, reward=-1
+Training:  19%|▏| 224/1200 [4:12:07<18:17:53, 67.49s/it, loss=-0.0759, reward=-1
+Training:  19%|▏| 224/1200 [4:13:15<18:17:53, 67.49s/it, loss=-0.0825, reward=-1
+Training:  19%|▏| 225/1200 [4:13:15<18:16:59, 67.51s/it, loss=-0.0825, reward=-1
+Training:  19%|▏| 225/1200 [4:14:22<18:16:59, 67.51s/it, loss=-0.0812, reward=-1
+Training:  19%|▏| 226/1200 [4:14:22<18:15:56, 67.51s/it, loss=-0.0812, reward=-1
+Training:  19%|▏| 226/1200 [4:15:30<18:15:56, 67.51s/it, loss=-0.0779, reward=-1
+Training:  19%|▏| 227/1200 [4:15:30<18:14:52, 67.52s/it, loss=-0.0779, reward=-1
+Training:  19%|▏| 227/1200 [4:16:37<18:14:52, 67.52s/it, loss=-0.0836, reward=-1
+Training:  19%|▏| 228/1200 [4:16:37<18:13:48, 67.52s/it, loss=-0.0836, reward=-1
+Training:  19%|▏| 228/1200 [4:17:45<18:13:48, 67.52s/it, loss=-0.0857, reward=-1
+Training:  19%|▏| 229/1200 [4:17:45<18:12:41, 67.52s/it, loss=-0.0857, reward=-1
+Training:  19%|▏| 229/1200 [4:18:53<18:12:41, 67.52s/it, loss=-0.0795, reward=-1
+Training:  19%|▏| 230/1200 [4:18:53<18:11:39, 67.52s/it, loss=-0.0795, reward=-1
+Training:  19%|▏| 230/1200 [4:20:00<18:11:39, 67.52s/it, loss=-0.0916, reward=-1
+Training:  19%|▏| 231/1200 [4:20:00<18:10:32, 67.53s/it, loss=-0.0916, reward=-1
+Training:  19%|▏| 231/1200 [4:21:08<18:10:32, 67.53s/it, loss=-0.0899, reward=-1
+Training:  19%|▏| 232/1200 [4:21:08<18:09:26, 67.53s/it, loss=-0.0899, reward=-1
+Training:  19%|▏| 232/1200 [4:22:15<18:09:26, 67.53s/it, loss=-0.0858, reward=-1
+Training:  19%|▏| 233/1200 [4:22:15<18:08:18, 67.53s/it, loss=-0.0858, reward=-1
+Training:  19%|▏| 233/1200 [4:23:23<18:08:18, 67.53s/it, loss=-0.0871, reward=-1
+Training:  20%|▏| 234/1200 [4:23:23<18:07:10, 67.53s/it, loss=-0.0871, reward=-1
+Training:  20%|▏| 234/1200 [4:24:30<18:07:10, 67.53s/it, loss=-0.0852, reward=-1
+Training:  20%|▏| 235/1200 [4:24:30<18:06:03, 67.53s/it, loss=-0.0852, reward=-1
+Training:  20%|▏| 235/1200 [4:25:38<18:06:03, 67.53s/it, loss=-0.0946, reward=-1
+Training:  20%|▏| 236/1200 [4:25:38<18:05:23, 67.56s/it, loss=-0.0946, reward=-1
+Training:  20%|▏| 236/1200 [4:26:45<18:05:23, 67.56s/it, loss=-0.0860, reward=-1
+Training:  20%|▏| 237/1200 [4:26:45<18:04:06, 67.55s/it, loss=-0.0860, reward=-1
+Training:  20%|▏| 237/1200 [4:27:53<18:04:06, 67.55s/it, loss=-0.0890, reward=-1
+Training:  20%|▏| 238/1200 [4:27:53<18:02:55, 67.54s/it, loss=-0.0890, reward=-1
+Training:  20%|▏| 238/1200 [4:29:00<18:02:55, 67.54s/it, loss=-0.0829, reward=-1
+Training:  20%|▏| 239/1200 [4:29:00<18:01:43, 67.54s/it, loss=-0.0829, reward=-1
+Training:  20%|▏| 239/1200 [4:30:08<18:01:43, 67.54s/it, loss=-0.0864, reward=-1
+Training:  20%|▏| 240/1200 [4:30:08<18:00:40, 67.54s/it, loss=-0.0864, reward=-1
+Training:  20%|▏| 240/1200 [4:31:15<18:00:40, 67.54s/it, loss=-0.0838, reward=-1
+Training:  20%|▏| 241/1200 [4:31:15<17:59:31, 67.54s/it, loss=-0.0838, reward=-1
+Training:  20%|▏| 241/1200 [4:32:23<17:59:31, 67.54s/it, loss=-0.0855, reward=-1
+Training:  20%|▏| 242/1200 [4:32:23<17:58:21, 67.54s/it, loss=-0.0855, reward=-1
+Training:  20%|▏| 242/1200 [4:33:31<17:58:21, 67.54s/it, loss=-0.0831, reward=-1
+Training:  20%|▏| 243/1200 [4:33:31<17:57:11, 67.54s/it, loss=-0.0831, reward=-1
+Training:  20%|▏| 243/1200 [4:34:38<17:57:11, 67.54s/it, loss=-0.0891, reward=-1
+Training:  20%|▏| 244/1200 [4:34:38<17:56:02, 67.53s/it, loss=-0.0891, reward=-1
+Training:  20%|▏| 244/1200 [4:35:46<17:56:02, 67.53s/it, loss=-0.0891, reward=-1
+Training:  20%|▏| 245/1200 [4:35:46<17:55:00, 67.54s/it, loss=-0.0891, reward=-1
+Training:  20%|▏| 245/1200 [4:36:53<17:55:00, 67.54s/it, loss=-0.0858, reward=-1
+Training:  20%|▏| 246/1200 [4:36:53<17:54:12, 67.56s/it, loss=-0.0858, reward=-1
+Training:  20%|▏| 246/1200 [4:38:01<17:54:12, 67.56s/it, loss=-0.0844, reward=-1
+Training:  21%|▏| 247/1200 [4:38:01<17:53:16, 67.57s/it, loss=-0.0844, reward=-1
+Training:  21%|▏| 247/1200 [4:39:08<17:53:16, 67.57s/it, loss=-0.0765, reward=-1
+Training:  21%|▏| 248/1200 [4:39:08<17:52:21, 67.59s/it, loss=-0.0765, reward=-1
+Training:  21%|▏| 248/1200 [4:40:16<17:52:21, 67.59s/it, loss=-0.0821, reward=-1
+Training:  21%|▏| 249/1200 [4:40:16<17:51:23, 67.60s/it, loss=-0.0821, reward=-1
+Training:  21%|▏| 249/1200 [4:41:24<17:51:23, 67.60s/it, loss=-0.0811, reward=-1
+Training:  21%|▏| 250/1200 [4:41:24<17:50:18, 67.60s/it, loss=-0.0811, reward=-1
+Training:  21%|▏| 250/1200 [4:42:31<17:50:18, 67.60s/it, loss=-0.0844, reward=-1
+Training:  21%|▏| 251/1200 [4:42:31<17:49:14, 67.60s/it, loss=-0.0844, reward=-1
+Training:  21%|▏| 251/1200 [4:43:39<17:49:14, 67.60s/it, loss=-0.0794, reward=-1
+Training:  21%|▏| 252/1200 [4:43:39<17:48:13, 67.61s/it, loss=-0.0794, reward=-1
+Training:  21%|▏| 252/1200 [4:44:47<17:48:13, 67.61s/it, loss=-0.0846, reward=-1
+Training:  21%|▏| 253/1200 [4:44:47<17:47:34, 67.64s/it, loss=-0.0846, reward=-1
+Training:  21%|▏| 253/1200 [4:45:54<17:47:34, 67.64s/it, loss=-0.0831, reward=-1
+Training:  21%|▏| 254/1200 [4:45:54<17:46:26, 67.64s/it, loss=-0.0831, reward=-1
+Training:  21%|▏| 254/1200 [4:47:02<17:46:26, 67.64s/it, loss=-0.0910, reward=-1
+Training:  21%|▏| 255/1200 [4:47:02<17:45:15, 67.64s/it, loss=-0.0910, reward=-1
+Training:  21%|▏| 255/1200 [4:48:09<17:45:15, 67.64s/it, loss=-0.0834, reward=-1
+Training:  21%|▏| 256/1200 [4:48:09<17:43:59, 67.63s/it, loss=-0.0834, reward=-1
+Training:  21%|▏| 256/1200 [4:49:17<17:43:59, 67.63s/it, loss=-0.0843, reward=-1
+Training:  21%|▏| 257/1200 [4:49:17<17:42:49, 67.62s/it, loss=-0.0843, reward=-1
+Training:  21%|▏| 257/1200 [4:50:25<17:42:49, 67.62s/it, loss=-0.0837, reward=-1
+Training:  22%|▏| 258/1200 [4:50:25<17:42:00, 67.64s/it, loss=-0.0837, reward=-1
+Training:  22%|▏| 258/1200 [4:51:32<17:42:00, 67.64s/it, loss=-0.0819, reward=-1
+Training:  22%|▏| 259/1200 [4:51:32<17:40:45, 67.64s/it, loss=-0.0819, reward=-1
+Training:  22%|▏| 259/1200 [4:52:40<17:40:45, 67.64s/it, loss=-0.0828, reward=-1
+Training:  22%|▏| 260/1200 [4:52:40<17:39:28, 67.63s/it, loss=-0.0828, reward=-1
+Training:  22%|▏| 260/1200 [4:53:48<17:39:28, 67.63s/it, loss=-0.0835, reward=-1
+Training:  22%|▏| 261/1200 [4:53:48<17:38:19, 67.62s/it, loss=-0.0835, reward=-1
+Training:  22%|▏| 261/1200 [4:54:55<17:38:19, 67.62s/it, loss=-0.0801, reward=-1
+Training:  22%|▏| 262/1200 [4:54:55<17:37:07, 67.62s/it, loss=-0.0801, reward=-1
+Training:  22%|▏| 262/1200 [4:56:03<17:37:07, 67.62s/it, loss=-0.0781, reward=-1
+Training:  22%|▏| 263/1200 [4:56:03<17:35:58, 67.62s/it, loss=-0.0781, reward=-1
+Training:  22%|▏| 263/1200 [4:57:10<17:35:58, 67.62s/it, loss=-0.0751, reward=-1
+Training:  22%|▏| 264/1200 [4:57:10<17:34:46, 67.61s/it, loss=-0.0751, reward=-1
+Training:  22%|▏| 264/1200 [4:58:18<17:34:46, 67.61s/it, loss=-0.0817, reward=-1
+Training:  22%|▏| 265/1200 [4:58:18<17:33:35, 67.61s/it, loss=-0.0817, reward=-1
+Training:  22%|▏| 265/1200 [4:59:26<17:33:35, 67.61s/it, loss=-0.0754, reward=-1
+Training:  22%|▏| 266/1200 [4:59:26<17:32:28, 67.61s/it, loss=-0.0754, reward=-1
+Training:  22%|▏| 266/1200 [5:00:33<17:32:28, 67.61s/it, loss=-0.0828, reward=-1
+Training:  22%|▏| 267/1200 [5:00:33<17:31:21, 67.61s/it, loss=-0.0828, reward=-1
+Training:  22%|▏| 267/1200 [5:01:41<17:31:21, 67.61s/it, loss=-0.0913, reward=-1
+Training:  22%|▏| 268/1200 [5:01:41<17:30:22, 67.62s/it, loss=-0.0913, reward=-1
+Training:  22%|▏| 268/1200 [5:02:49<17:30:22, 67.62s/it, loss=-0.0760, reward=-1
+Training:  22%|▏| 269/1200 [5:02:49<17:29:13, 67.62s/it, loss=-0.0760, reward=-1
+Training:  22%|▏| 269/1200 [5:03:56<17:29:13, 67.62s/it, loss=-0.0785, reward=-1
+Training:  22%|▏| 270/1200 [5:03:56<17:28:05, 67.62s/it, loss=-0.0785, reward=-1
+Training:  22%|▏| 270/1200 [5:05:04<17:28:05, 67.62s/it, loss=-0.0818, reward=-1
+Training:  23%|▏| 271/1200 [5:05:04<17:27:03, 67.62s/it, loss=-0.0818, reward=-1
+Training:  23%|▏| 271/1200 [5:06:11<17:27:03, 67.62s/it, loss=-0.0784, reward=-1
+Training:  23%|▏| 272/1200 [5:06:11<17:25:58, 67.63s/it, loss=-0.0784, reward=-1
+Training:  23%|▏| 272/1200 [5:07:19<17:25:58, 67.63s/it, loss=-0.0801, reward=-1
+Training:  23%|▏| 273/1200 [5:07:19<17:24:54, 67.63s/it, loss=-0.0801, reward=-1
+Training:  23%|▏| 273/1200 [5:08:27<17:24:54, 67.63s/it, loss=-0.0833, reward=-1
+Training:  23%|▏| 274/1200 [5:08:27<17:23:57, 67.64s/it, loss=-0.0833, reward=-1
+Training:  23%|▏| 274/1200 [5:09:34<17:23:57, 67.64s/it, loss=-0.0793, reward=-1
+Training:  23%|▏| 275/1200 [5:09:34<17:22:35, 67.63s/it, loss=-0.0793, reward=-1
+Training:  23%|▏| 275/1200 [5:10:42<17:22:35, 67.63s/it, loss=-0.0824, reward=-1
+Training:  23%|▏| 276/1200 [5:10:42<17:21:11, 67.61s/it, loss=-0.0824, reward=-1
+Training:  23%|▏| 276/1200 [5:11:49<17:21:11, 67.61s/it, loss=-0.0759, reward=-1
+Training:  23%|▏| 277/1200 [5:11:49<17:19:52, 67.60s/it, loss=-0.0759, reward=-1
+Training:  23%|▏| 277/1200 [5:12:57<17:19:52, 67.60s/it, loss=-0.0854, reward=-1
+Training:  23%|▏| 278/1200 [5:12:57<17:18:36, 67.59s/it, loss=-0.0854, reward=-1
+Training:  23%|▏| 278/1200 [5:14:05<17:18:36, 67.59s/it, loss=-0.0793, reward=-1
+Training:  23%|▏| 279/1200 [5:14:05<17:17:21, 67.58s/it, loss=-0.0793, reward=-1
+Training:  23%|▏| 279/1200 [5:15:12<17:17:21, 67.58s/it, loss=-0.0854, reward=-1
+Training:  23%|▏| 280/1200 [5:15:12<17:16:12, 67.58s/it, loss=-0.0854, reward=-1
+Training:  23%|▏| 280/1200 [5:16:20<17:16:12, 67.58s/it, loss=-0.0778, reward=-1
+Training:  23%|▏| 281/1200 [5:16:20<17:15:29, 67.61s/it, loss=-0.0778, reward=-1
+Training:  23%|▏| 281/1200 [5:17:27<17:15:29, 67.61s/it, loss=-0.0843, reward=-1
+Training:  24%|▏| 282/1200 [5:17:27<17:14:12, 67.60s/it, loss=-0.0843, reward=-1
+Training:  24%|▏| 282/1200 [5:18:35<17:14:12, 67.60s/it, loss=-0.0919, reward=-1
+Training:  24%|▏| 283/1200 [5:18:35<17:13:00, 67.59s/it, loss=-0.0919, reward=-1
+Training:  24%|▏| 283/1200 [5:19:43<17:13:00, 67.59s/it, loss=-0.0803, reward=-1
+Training:  24%|▏| 284/1200 [5:19:43<17:11:51, 67.59s/it, loss=-0.0803, reward=-1
+Training:  24%|▏| 284/1200 [5:20:50<17:11:51, 67.59s/it, loss=-0.0794, reward=-1
+Training:  24%|▏| 285/1200 [5:20:50<17:10:40, 67.59s/it, loss=-0.0794, reward=-1
+Training:  24%|▏| 285/1200 [5:21:58<17:10:40, 67.59s/it, loss=-0.0860, reward=-1
+Training:  24%|▏| 286/1200 [5:21:58<17:09:28, 67.58s/it, loss=-0.0860, reward=-1
+Training:  24%|▏| 286/1200 [5:23:05<17:09:28, 67.58s/it, loss=-0.0810, reward=-1
+Training:  24%|▏| 287/1200 [5:23:05<17:08:17, 67.58s/it, loss=-0.0810, reward=-1
+Training:  24%|▏| 287/1200 [5:24:13<17:08:17, 67.58s/it, loss=-0.0868, reward=-1
+Training:  24%|▏| 288/1200 [5:24:13<17:07:13, 67.58s/it, loss=-0.0868, reward=-1
+Training:  24%|▏| 288/1200 [5:25:20<17:07:13, 67.58s/it, loss=-0.0812, reward=-1
+Training:  24%|▏| 289/1200 [5:25:20<17:06:08, 67.58s/it, loss=-0.0812, reward=-1
+Training:  24%|▏| 289/1200 [5:26:28<17:06:08, 67.58s/it, loss=-0.0864, reward=-1
+Training:  24%|▏| 290/1200 [5:26:28<17:04:36, 67.56s/it, loss=-0.0864, reward=-1
+Training:  24%|▏| 290/1200 [5:27:35<17:04:36, 67.56s/it, loss=-0.0872, reward=-1
+Training:  24%|▏| 291/1200 [5:27:35<17:03:02, 67.53s/it, loss=-0.0872, reward=-1
+Training:  24%|▏| 291/1200 [5:28:43<17:03:02, 67.53s/it, loss=-0.0805, reward=-1
+Training:  24%|▏| 292/1200 [5:28:43<17:01:52, 67.53s/it, loss=-0.0805, reward=-1
+Training:  24%|▏| 292/1200 [5:29:50<17:01:52, 67.53s/it, loss=-0.0816, reward=-1
+Training:  24%|▏| 293/1200 [5:29:50<17:00:28, 67.51s/it, loss=-0.0816, reward=-1
+Training:  24%|▏| 293/1200 [5:30:58<17:00:28, 67.51s/it, loss=-0.0860, reward=-1
+Training:  24%|▏| 294/1200 [5:30:58<16:59:09, 67.49s/it, loss=-0.0860, reward=-1
+Training:  24%|▏| 294/1200 [5:32:05<16:59:09, 67.49s/it, loss=-0.0888, reward=-1
+Training:  25%|▏| 295/1200 [5:32:05<16:58:23, 67.52s/it, loss=-0.0888, reward=-1
+Training:  25%|▏| 295/1200 [5:33:13<16:58:23, 67.52s/it, loss=-0.0873, reward=-1
+Training:  25%|▏| 296/1200 [5:33:13<16:56:59, 67.50s/it, loss=-0.0873, reward=-1
+Training:  25%|▏| 296/1200 [5:34:20<16:56:59, 67.50s/it, loss=-0.0780, reward=-1
+Training:  25%|▏| 297/1200 [5:34:20<16:55:34, 67.48s/it, loss=-0.0780, reward=-1
+Training:  25%|▏| 297/1200 [5:35:28<16:55:34, 67.48s/it, loss=-0.0841, reward=-1
+Training:  25%|▏| 298/1200 [5:35:28<16:54:16, 67.47s/it, loss=-0.0841, reward=-1
+Training:  25%|▏| 298/1200 [5:36:35<16:54:16, 67.47s/it, loss=-0.0845, reward=-1
+Training:  25%|▏| 299/1200 [5:36:35<16:53:02, 67.46s/it, loss=-0.0845, reward=-1
+Training:  25%|▏| 299/1200 [5:37:43<16:53:02, 67.46s/it, loss=-0.0833, reward=-1Saved checkpoint to checkpoints/ecspnet_N20_epoch2100.pt
+
+27040.4s	98	
+Training:  25%|▎| 300/1200 [5:37:43<16:51:55, 67.46s/it, loss=-0.0833, reward=-1
+Training:  25%|▎| 300/1200 [5:38:50<16:51:55, 67.46s/it, loss=-0.0808, reward=-1
+Training:  25%|▎| 301/1200 [5:38:50<16:50:54, 67.47s/it, loss=-0.0808, reward=-1
+Training:  25%|▎| 301/1200 [5:39:58<16:50:54, 67.47s/it, loss=-0.0777, reward=-1
+Training:  25%|▎| 302/1200 [5:39:58<16:49:57, 67.48s/it, loss=-0.0777, reward=-1
+Training:  25%|▎| 302/1200 [5:41:05<16:49:57, 67.48s/it, loss=-0.0841, reward=-1
+Training:  25%|▎| 303/1200 [5:41:05<16:49:14, 67.51s/it, loss=-0.0841, reward=-1
+Training:  25%|▎| 303/1200 [5:42:13<16:49:14, 67.51s/it, loss=-0.0744, reward=-1
+Training:  25%|▎| 304/1200 [5:42:13<16:48:02, 67.50s/it, loss=-0.0744, reward=-1
+Training:  25%|▎| 304/1200 [5:43:20<16:48:02, 67.50s/it, loss=-0.0747, reward=-1
+Training:  25%|▎| 305/1200 [5:43:20<16:46:56, 67.50s/it, loss=-0.0747, reward=-1
+Training:  25%|▎| 305/1200 [5:44:28<16:46:56, 67.50s/it, loss=-0.0818, reward=-1
+Training:  26%|▎| 306/1200 [5:44:28<16:45:43, 67.50s/it, loss=-0.0818, reward=-1
+Training:  26%|▎| 306/1200 [5:45:35<16:45:43, 67.50s/it, loss=-0.0770, reward=-1
+Training:  26%|▎| 307/1200 [5:45:35<16:44:39, 67.50s/it, loss=-0.0770, reward=-1
+Training:  26%|▎| 307/1200 [5:46:43<16:44:39, 67.50s/it, loss=-0.0809, reward=-1
+Training:  26%|▎| 308/1200 [5:46:43<16:44:03, 67.54s/it, loss=-0.0809, reward=-1
+Training:  26%|▎| 308/1200 [5:47:51<16:44:03, 67.54s/it, loss=-0.0900, reward=-1
+Training:  26%|▎| 309/1200 [5:47:51<16:43:22, 67.57s/it, loss=-0.0900, reward=-1
+Training:  26%|▎| 309/1200 [5:48:58<16:43:22, 67.57s/it, loss=-0.0823, reward=-1
+Training:  26%|▎| 310/1200 [5:48:58<16:42:19, 67.57s/it, loss=-0.0823, reward=-1
+Training:  26%|▎| 310/1200 [5:50:06<16:42:19, 67.57s/it, loss=-0.0793, reward=-1
+Training:  26%|▎| 311/1200 [5:50:06<16:41:27, 67.59s/it, loss=-0.0793, reward=-1
+Training:  26%|▎| 311/1200 [5:51:13<16:41:27, 67.59s/it, loss=-0.0821, reward=-1
+Training:  26%|▎| 312/1200 [5:51:13<16:40:34, 67.61s/it, loss=-0.0821, reward=-1
+Training:  26%|▎| 312/1200 [5:52:21<16:40:34, 67.61s/it, loss=-0.0781, reward=-1
+Training:  26%|▎| 313/1200 [5:52:21<16:39:24, 67.60s/it, loss=-0.0781, reward=-1
+Training:  26%|▎| 313/1200 [5:53:29<16:39:24, 67.60s/it, loss=-0.0755, reward=-1
+Training:  26%|▎| 314/1200 [5:53:29<16:38:19, 67.61s/it, loss=-0.0755, reward=-1
+Training:  26%|▎| 314/1200 [5:54:36<16:38:19, 67.61s/it, loss=-0.0738, reward=-1
+Training:  26%|▎| 315/1200 [5:54:36<16:37:12, 67.61s/it, loss=-0.0738, reward=-1
+Training:  26%|▎| 315/1200 [5:55:44<16:37:12, 67.61s/it, loss=-0.0735, reward=-1
+Training:  26%|▎| 316/1200 [5:55:44<16:36:08, 67.61s/it, loss=-0.0735, reward=-1
+Training:  26%|▎| 316/1200 [5:56:51<16:36:08, 67.61s/it, loss=-0.0783, reward=-1
+Training:  26%|▎| 317/1200 [5:56:51<16:35:06, 67.62s/it, loss=-0.0783, reward=-1
+Training:  26%|▎| 317/1200 [5:57:59<16:35:06, 67.62s/it, loss=-0.0783, reward=-1
+Training:  26%|▎| 318/1200 [5:57:59<16:33:59, 67.62s/it, loss=-0.0783, reward=-1
+Training:  26%|▎| 318/1200 [5:59:07<16:33:59, 67.62s/it, loss=-0.0778, reward=-1
+Training:  27%|▎| 319/1200 [5:59:07<16:32:53, 67.62s/it, loss=-0.0778, reward=-1
+Training:  27%|▎| 319/1200 [6:00:14<16:32:53, 67.62s/it, loss=-0.0791, reward=-1
+Training:  27%|▎| 320/1200 [6:00:14<16:31:44, 67.62s/it, loss=-0.0791, reward=-1
+Training:  27%|▎| 320/1200 [6:01:22<16:31:44, 67.62s/it, loss=-0.0797, reward=-1
+Training:  27%|▎| 321/1200 [6:01:22<16:30:35, 67.62s/it, loss=-0.0797, reward=-1
+Training:  27%|▎| 321/1200 [6:02:30<16:30:35, 67.62s/it, loss=-0.0792, reward=-1
+Training:  27%|▎| 322/1200 [6:02:30<16:29:24, 67.61s/it, loss=-0.0792, reward=-1
+Training:  27%|▎| 322/1200 [6:03:37<16:29:24, 67.61s/it, loss=-0.0749, reward=-1
+Training:  27%|▎| 323/1200 [6:03:37<16:28:19, 67.62s/it, loss=-0.0749, reward=-1
+Training:  27%|▎| 323/1200 [6:04:45<16:28:19, 67.62s/it, loss=-0.0825, reward=-1
+Training:  27%|▎| 324/1200 [6:04:45<16:27:08, 67.61s/it, loss=-0.0825, reward=-1
+Training:  27%|▎| 324/1200 [6:05:52<16:27:08, 67.61s/it, loss=-0.0868, reward=-1
+Training:  27%|▎| 325/1200 [6:05:52<16:26:21, 67.64s/it, loss=-0.0868, reward=-1
+Training:  27%|▎| 325/1200 [6:07:00<16:26:21, 67.64s/it, loss=-0.0788, reward=-1
+Training:  27%|▎| 326/1200 [6:07:00<16:25:18, 67.64s/it, loss=-0.0788, reward=-1
+Training:  27%|▎| 326/1200 [6:08:08<16:25:18, 67.64s/it, loss=-0.0808, reward=-1
+Training:  27%|▎| 327/1200 [6:08:08<16:24:09, 67.64s/it, loss=-0.0808, reward=-1
+Training:  27%|▎| 327/1200 [6:09:15<16:24:09, 67.64s/it, loss=-0.0723, reward=-1
+Training:  27%|▎| 328/1200 [6:09:15<16:23:00, 67.64s/it, loss=-0.0723, reward=-1
+Training:  27%|▎| 328/1200 [6:10:23<16:23:00, 67.64s/it, loss=-0.0786, reward=-1
+Training:  27%|▎| 329/1200 [6:10:23<16:21:54, 67.64s/it, loss=-0.0786, reward=-1
+Training:  27%|▎| 329/1200 [6:11:31<16:21:54, 67.64s/it, loss=-0.0758, reward=-1
+Training:  28%|▎| 330/1200 [6:11:31<16:20:45, 67.64s/it, loss=-0.0758, reward=-1
+Training:  28%|▎| 330/1200 [6:12:38<16:20:45, 67.64s/it, loss=-0.0748, reward=-1
+Training:  28%|▎| 331/1200 [6:12:38<16:19:40, 67.64s/it, loss=-0.0748, reward=-1
+Training:  28%|▎| 331/1200 [6:13:46<16:19:40, 67.64s/it, loss=-0.0833, reward=-1
+Training:  28%|▎| 332/1200 [6:13:46<16:18:37, 67.65s/it, loss=-0.0833, reward=-1
+Training:  28%|▎| 332/1200 [6:14:54<16:18:37, 67.65s/it, loss=-0.0795, reward=-1
+Training:  28%|▎| 333/1200 [6:14:54<16:17:27, 67.64s/it, loss=-0.0795, reward=-1
+Training:  28%|▎| 333/1200 [6:16:01<16:17:27, 67.64s/it, loss=-0.0821, reward=-1
+Training:  28%|▎| 334/1200 [6:16:01<16:16:23, 67.65s/it, loss=-0.0821, reward=-1
+Training:  28%|▎| 334/1200 [6:17:09<16:16:23, 67.65s/it, loss=-0.0794, reward=-1
+Training:  28%|▎| 335/1200 [6:17:09<16:15:12, 67.64s/it, loss=-0.0794, reward=-1
+Training:  28%|▎| 335/1200 [6:18:17<16:15:12, 67.64s/it, loss=-0.0834, reward=-1
+Training:  28%|▎| 336/1200 [6:18:17<16:14:04, 67.64s/it, loss=-0.0834, reward=-1
+Training:  28%|▎| 336/1200 [6:19:24<16:14:04, 67.64s/it, loss=-0.0777, reward=-1
+Training:  28%|▎| 337/1200 [6:19:24<16:12:32, 67.62s/it, loss=-0.0777, reward=-1
+Training:  28%|▎| 337/1200 [6:20:31<16:12:32, 67.62s/it, loss=-0.0820, reward=-1
+Training:  28%|▎| 338/1200 [6:20:31<16:10:33, 67.56s/it, loss=-0.0820, reward=-1
+Training:  28%|▎| 338/1200 [6:21:39<16:10:33, 67.56s/it, loss=-0.0866, reward=-1
+Training:  28%|▎| 339/1200 [6:21:39<16:09:08, 67.54s/it, loss=-0.0866, reward=-1
+Training:  28%|▎| 339/1200 [6:22:46<16:09:08, 67.54s/it, loss=-0.0868, reward=-1
+Training:  28%|▎| 340/1200 [6:22:46<16:07:39, 67.51s/it, loss=-0.0868, reward=-1
+Training:  28%|▎| 340/1200 [6:23:54<16:07:39, 67.51s/it, loss=-0.0781, reward=-1
+Training:  28%|▎| 341/1200 [6:23:54<16:06:05, 67.48s/it, loss=-0.0781, reward=-1
+Training:  28%|▎| 341/1200 [6:25:01<16:06:05, 67.48s/it, loss=-0.0721, reward=-1
+Training:  28%|▎| 342/1200 [6:25:01<16:04:36, 67.46s/it, loss=-0.0721, reward=-1
+Training:  28%|▎| 342/1200 [6:26:09<16:04:36, 67.46s/it, loss=-0.0775, reward=-1
+Training:  29%|▎| 343/1200 [6:26:09<16:03:21, 67.45s/it, loss=-0.0775, reward=-1
+Training:  29%|▎| 343/1200 [6:27:16<16:03:21, 67.45s/it, loss=-0.0749, reward=-1
+Training:  29%|▎| 344/1200 [6:27:16<16:02:04, 67.44s/it, loss=-0.0749, reward=-1
+Training:  29%|▎| 344/1200 [6:28:23<16:02:04, 67.44s/it, loss=-0.0747, reward=-1
+Training:  29%|▎| 345/1200 [6:28:23<16:00:49, 67.43s/it, loss=-0.0747, reward=-1
+Training:  29%|▎| 345/1200 [6:29:31<16:00:49, 67.43s/it, loss=-0.0803, reward=-1
+Training:  29%|▎| 346/1200 [6:29:31<15:59:37, 67.42s/it, loss=-0.0803, reward=-1
+Training:  29%|▎| 346/1200 [6:30:38<15:59:37, 67.42s/it, loss=-0.0765, reward=-1
+Training:  29%|▎| 347/1200 [6:30:38<15:58:47, 67.44s/it, loss=-0.0765, reward=-1
+Training:  29%|▎| 347/1200 [6:31:46<15:58:47, 67.44s/it, loss=-0.0737, reward=-1
+Training:  29%|▎| 348/1200 [6:31:46<15:57:34, 67.43s/it, loss=-0.0737, reward=-1
+Training:  29%|▎| 348/1200 [6:32:53<15:57:34, 67.43s/it, loss=-0.0810, reward=-1
+Training:  29%|▎| 349/1200 [6:32:53<15:56:20, 67.43s/it, loss=-0.0810, reward=-1
+Training:  29%|▎| 349/1200 [6:34:01<15:56:20, 67.43s/it, loss=-0.0730, reward=-1
+Training:  29%|▎| 350/1200 [6:34:01<15:55:05, 67.42s/it, loss=-0.0730, reward=-1
+Training:  29%|▎| 350/1200 [6:35:08<15:55:05, 67.42s/it, loss=-0.0869, reward=-1
+Training:  29%|▎| 351/1200 [6:35:08<15:53:53, 67.41s/it, loss=-0.0869, reward=-1
+Training:  29%|▎| 351/1200 [6:36:15<15:53:53, 67.41s/it, loss=-0.0823, reward=-1
+Training:  29%|▎| 352/1200 [6:36:15<15:52:49, 67.42s/it, loss=-0.0823, reward=-1
+Training:  29%|▎| 352/1200 [6:37:23<15:52:49, 67.42s/it, loss=-0.0799, reward=-1
+Training:  29%|▎| 353/1200 [6:37:23<15:51:50, 67.43s/it, loss=-0.0799, reward=-1
+Training:  29%|▎| 353/1200 [6:38:30<15:51:50, 67.43s/it, loss=-0.0876, reward=-1
+Training:  30%|▎| 354/1200 [6:38:30<15:50:48, 67.43s/it, loss=-0.0876, reward=-1
+Training:  30%|▎| 354/1200 [6:39:38<15:50:48, 67.43s/it, loss=-0.0784, reward=-1
+Training:  30%|▎| 355/1200 [6:39:38<15:49:58, 67.45s/it, loss=-0.0784, reward=-1
+Training:  30%|▎| 355/1200 [6:40:45<15:49:58, 67.45s/it, loss=-0.0797, reward=-1
+Training:  30%|▎| 356/1200 [6:40:45<15:48:58, 67.46s/it, loss=-0.0797, reward=-1
+Training:  30%|▎| 356/1200 [6:41:53<15:48:58, 67.46s/it, loss=-0.0795, reward=-1
+Training:  30%|▎| 357/1200 [6:41:53<15:47:55, 67.47s/it, loss=-0.0795, reward=-1
+Training:  30%|▎| 357/1200 [6:43:00<15:47:55, 67.47s/it, loss=-0.0786, reward=-1
+Training:  30%|▎| 358/1200 [6:43:00<15:46:55, 67.48s/it, loss=-0.0786, reward=-1
+Training:  30%|▎| 358/1200 [6:44:08<15:46:55, 67.48s/it, loss=-0.0743, reward=-1
+Training:  30%|▎| 359/1200 [6:44:08<15:45:47, 67.48s/it, loss=-0.0743, reward=-1
+Training:  30%|▎| 359/1200 [6:45:15<15:45:47, 67.48s/it, loss=-0.0803, reward=-1
+Training:  30%|▎| 360/1200 [6:45:15<15:44:42, 67.48s/it, loss=-0.0803, reward=-1
+Training:  30%|▎| 360/1200 [6:46:23<15:44:42, 67.48s/it, loss=-0.0743, reward=-1
+Training:  30%|▎| 361/1200 [6:46:23<15:43:40, 67.49s/it, loss=-0.0743, reward=-1
+Training:  30%|▎| 361/1200 [6:47:30<15:43:40, 67.49s/it, loss=-0.0754, reward=-1
+Training:  30%|▎| 362/1200 [6:47:30<15:42:36, 67.49s/it, loss=-0.0754, reward=-1
+Training:  30%|▎| 362/1200 [6:48:38<15:42:36, 67.49s/it, loss=-0.0782, reward=-1
+Training:  30%|▎| 363/1200 [6:48:38<15:41:25, 67.49s/it, loss=-0.0782, reward=-1
+Training:  30%|▎| 363/1200 [6:49:45<15:41:25, 67.49s/it, loss=-0.0756, reward=-1
+Training:  30%|▎| 364/1200 [6:49:45<15:40:16, 67.48s/it, loss=-0.0756, reward=-1
+Training:  30%|▎| 364/1200 [6:50:53<15:40:16, 67.48s/it, loss=-0.0836, reward=-1
+Training:  30%|▎| 365/1200 [6:50:53<15:39:05, 67.48s/it, loss=-0.0836, reward=-1
+Training:  30%|▎| 365/1200 [6:52:00<15:39:05, 67.48s/it, loss=-0.0829, reward=-1
+Training:  30%|▎| 366/1200 [6:52:00<15:37:59, 67.48s/it, loss=-0.0829, reward=-1
+Training:  30%|▎| 366/1200 [6:53:08<15:37:59, 67.48s/it, loss=-0.0810, reward=-1
+Training:  31%|▎| 367/1200 [6:53:08<15:36:49, 67.48s/it, loss=-0.0810, reward=-1
+Training:  31%|▎| 367/1200 [6:54:15<15:36:49, 67.48s/it, loss=-0.0855, reward=-1
+Training:  31%|▎| 368/1200 [6:54:15<15:35:40, 67.48s/it, loss=-0.0855, reward=-1
+Training:  31%|▎| 368/1200 [6:55:23<15:35:40, 67.48s/it, loss=-0.0792, reward=-1
+Training:  31%|▎| 369/1200 [6:55:23<15:34:52, 67.50s/it, loss=-0.0792, reward=-1
+Training:  31%|▎| 369/1200 [6:56:30<15:34:52, 67.50s/it, loss=-0.0819, reward=-1
+Training:  31%|▎| 370/1200 [6:56:30<15:33:44, 67.50s/it, loss=-0.0819, reward=-1
+Training:  31%|▎| 370/1200 [6:57:38<15:33:44, 67.50s/it, loss=-0.0781, reward=-1
+Training:  31%|▎| 371/1200 [6:57:38<15:32:39, 67.50s/it, loss=-0.0781, reward=-1
+Training:  31%|▎| 371/1200 [6:58:45<15:32:39, 67.50s/it, loss=-0.0879, reward=-1
+Training:  31%|▎| 372/1200 [6:58:45<15:31:32, 67.50s/it, loss=-0.0879, reward=-1
+Training:  31%|▎| 372/1200 [6:59:53<15:31:32, 67.50s/it, loss=-0.0792, reward=-1
+Training:  31%|▎| 373/1200 [6:59:53<15:30:11, 67.49s/it, loss=-0.0792, reward=-1
+Training:  31%|▎| 373/1200 [7:01:00<15:30:11, 67.49s/it, loss=-0.0795, reward=-1
+Training:  31%|▎| 374/1200 [7:01:00<15:28:55, 67.48s/it, loss=-0.0795, reward=-1
+Training:  31%|▎| 374/1200 [7:02:08<15:28:55, 67.48s/it, loss=-0.0776, reward=-1
+Training:  31%|▎| 375/1200 [7:02:08<15:27:55, 67.49s/it, loss=-0.0776, reward=-1
+Training:  31%|▎| 375/1200 [7:03:15<15:27:55, 67.49s/it, loss=-0.0787, reward=-1
+Training:  31%|▎| 376/1200 [7:03:15<15:26:44, 67.48s/it, loss=-0.0787, reward=-1
+Training:  31%|▎| 376/1200 [7:04:23<15:26:44, 67.48s/it, loss=-0.0775, reward=-1
+Training:  31%|▎| 377/1200 [7:04:23<15:25:37, 67.48s/it, loss=-0.0775, reward=-1
+Training:  31%|▎| 377/1200 [7:05:30<15:25:37, 67.48s/it, loss=-0.0856, reward=-1
+Training:  32%|▎| 378/1200 [7:05:30<15:24:28, 67.48s/it, loss=-0.0856, reward=-1
+Training:  32%|▎| 378/1200 [7:06:37<15:24:28, 67.48s/it, loss=-0.0805, reward=-1
+Training:  32%|▎| 379/1200 [7:06:37<15:23:15, 67.47s/it, loss=-0.0805, reward=-1
+Training:  32%|▎| 379/1200 [7:07:45<15:23:15, 67.47s/it, loss=-0.0783, reward=-1
+Training:  32%|▎| 380/1200 [7:07:45<15:22:01, 67.47s/it, loss=-0.0783, reward=-1
+Training:  32%|▎| 380/1200 [7:08:52<15:22:01, 67.47s/it, loss=-0.0818, reward=-1
+Training:  32%|▎| 381/1200 [7:08:52<15:20:49, 67.46s/it, loss=-0.0818, reward=-1
+Training:  32%|▎| 381/1200 [7:10:00<15:20:49, 67.46s/it, loss=-0.0860, reward=-1
+Training:  32%|▎| 382/1200 [7:10:00<15:19:39, 67.46s/it, loss=-0.0860, reward=-1
+Training:  32%|▎| 382/1200 [7:11:07<15:19:39, 67.46s/it, loss=-0.0805, reward=-1
+Training:  32%|▎| 383/1200 [7:11:07<15:18:28, 67.45s/it, loss=-0.0805, reward=-1
+Training:  32%|▎| 383/1200 [7:12:15<15:18:28, 67.45s/it, loss=-0.0832, reward=-1
+Training:  32%|▎| 384/1200 [7:12:15<15:17:27, 67.46s/it, loss=-0.0832, reward=-1
+Training:  32%|▎| 384/1200 [7:13:22<15:17:27, 67.46s/it, loss=-0.0815, reward=-1
+Training:  32%|▎| 385/1200 [7:13:22<15:16:47, 67.49s/it, loss=-0.0815, reward=-1
+Training:  32%|▎| 385/1200 [7:14:30<15:16:47, 67.49s/it, loss=-0.0767, reward=-1
+Training:  32%|▎| 386/1200 [7:14:30<15:15:46, 67.50s/it, loss=-0.0767, reward=-1
+Training:  32%|▎| 386/1200 [7:15:37<15:15:46, 67.50s/it, loss=-0.0823, reward=-1
+Training:  32%|▎| 387/1200 [7:15:37<15:14:30, 67.49s/it, loss=-0.0823, reward=-1
+Training:  32%|▎| 387/1200 [7:16:45<15:14:30, 67.49s/it, loss=-0.0850, reward=-1
+Training:  32%|▎| 388/1200 [7:16:45<15:13:34, 67.51s/it, loss=-0.0850, reward=-1
+Training:  32%|▎| 388/1200 [7:17:52<15:13:34, 67.51s/it, loss=-0.0760, reward=-1
+Training:  32%|▎| 389/1200 [7:17:52<15:12:20, 67.50s/it, loss=-0.0760, reward=-1
+Training:  32%|▎| 389/1200 [7:19:00<15:12:20, 67.50s/it, loss=-0.0770, reward=-1
+Training:  32%|▎| 390/1200 [7:19:00<15:11:01, 67.48s/it, loss=-0.0770, reward=-1
+Training:  32%|▎| 390/1200 [7:20:07<15:11:01, 67.48s/it, loss=-0.0774, reward=-1
+Training:  33%|▎| 391/1200 [7:20:07<15:10:04, 67.50s/it, loss=-0.0774, reward=-1
+Training:  33%|▎| 391/1200 [7:21:15<15:10:04, 67.50s/it, loss=-0.0770, reward=-1
+Training:  33%|▎| 392/1200 [7:21:15<15:08:41, 67.48s/it, loss=-0.0770, reward=-1
+Training:  33%|▎| 392/1200 [7:22:22<15:08:41, 67.48s/it, loss=-0.0852, reward=-1
+Training:  33%|▎| 393/1200 [7:22:22<15:07:22, 67.46s/it, loss=-0.0852, reward=-1
+Training:  33%|▎| 393/1200 [7:23:30<15:07:22, 67.46s/it, loss=-0.0754, reward=-1
+Training:  33%|▎| 394/1200 [7:23:30<15:06:10, 67.46s/it, loss=-0.0754, reward=-1
+Training:  33%|▎| 394/1200 [7:24:37<15:06:10, 67.46s/it, loss=-0.0789, reward=-1
+Training:  33%|▎| 395/1200 [7:24:37<15:05:02, 67.46s/it, loss=-0.0789, reward=-1
+Training:  33%|▎| 395/1200 [7:25:45<15:05:02, 67.46s/it, loss=-0.0720, reward=-1
+Training:  33%|▎| 396/1200 [7:25:45<15:03:55, 67.46s/it, loss=-0.0720, reward=-1
+Training:  33%|▎| 396/1200 [7:26:52<15:03:55, 67.46s/it, loss=-0.0886, reward=-1
+Training:  33%|▎| 397/1200 [7:26:52<15:02:42, 67.45s/it, loss=-0.0886, reward=-1
+Training:  33%|▎| 397/1200 [7:27:59<15:02:42, 67.45s/it, loss=-0.0812, reward=-1
+Training:  33%|▎| 398/1200 [7:27:59<15:01:32, 67.45s/it, loss=-0.0812, reward=-1
+Training:  33%|▎| 398/1200 [7:29:07<15:01:32, 67.45s/it, loss=-0.0836, reward=-1
+Training:  33%|▎| 399/1200 [7:29:07<15:00:23, 67.45s/it, loss=-0.0836, reward=-1
+Training:  33%|▎| 399/1200 [7:30:14<15:00:23, 67.45s/it, loss=-0.0776, reward=-1Saved checkpoint to checkpoints/ecspnet_N20_epoch2200.pt
+
+33792.4s	99	
+Training:  33%|▎| 400/1200 [7:30:14<14:59:23, 67.45s/it, loss=-0.0776, reward=-1
+Training:  33%|▎| 400/1200 [7:31:22<14:59:23, 67.45s/it, loss=-0.0834, reward=-1
+Training:  33%|▎| 401/1200 [7:31:22<14:58:11, 67.45s/it, loss=-0.0834, reward=-1
+Training:  33%|▎| 401/1200 [7:32:29<14:58:11, 67.45s/it, loss=-0.0828, reward=-1
+Training:  34%|▎| 402/1200 [7:32:29<14:57:01, 67.44s/it, loss=-0.0828, reward=-1
+Training:  34%|▎| 402/1200 [7:33:37<14:57:01, 67.44s/it, loss=-0.0807, reward=-1
+Training:  34%|▎| 403/1200 [7:33:37<14:55:54, 67.45s/it, loss=-0.0807, reward=-1
+Training:  34%|▎| 403/1200 [7:34:44<14:55:54, 67.45s/it, loss=-0.0730, reward=-1
+Training:  34%|▎| 404/1200 [7:34:44<14:54:53, 67.45s/it, loss=-0.0730, reward=-1
+Training:  34%|▎| 404/1200 [7:35:52<14:54:53, 67.45s/it, loss=-0.0822, reward=-1
+Training:  34%|▎| 405/1200 [7:35:52<14:54:08, 67.48s/it, loss=-0.0822, reward=-1
+Training:  34%|▎| 405/1200 [7:36:59<14:54:08, 67.48s/it, loss=-0.0773, reward=-1
+Training:  34%|▎| 406/1200 [7:36:59<14:53:00, 67.48s/it, loss=-0.0773, reward=-1
+Training:  34%|▎| 406/1200 [7:38:07<14:53:00, 67.48s/it, loss=-0.0855, reward=-1
+Training:  34%|▎| 407/1200 [7:38:07<14:51:50, 67.48s/it, loss=-0.0855, reward=-1
+Training:  34%|▎| 407/1200 [7:39:14<14:51:50, 67.48s/it, loss=-0.0772, reward=-1
+Training:  34%|▎| 408/1200 [7:39:14<14:50:43, 67.48s/it, loss=-0.0772, reward=-1
+Training:  34%|▎| 408/1200 [7:40:22<14:50:43, 67.48s/it, loss=-0.0817, reward=-1
+Training:  34%|▎| 409/1200 [7:40:22<14:49:31, 67.47s/it, loss=-0.0817, reward=-1
+Training:  34%|▎| 409/1200 [7:41:29<14:49:31, 67.47s/it, loss=-0.0827, reward=-1
+Training:  34%|▎| 410/1200 [7:41:29<14:48:21, 67.47s/it, loss=-0.0827, reward=-1
+Training:  34%|▎| 410/1200 [7:42:36<14:48:21, 67.47s/it, loss=-0.0830, reward=-1
+Training:  34%|▎| 411/1200 [7:42:36<14:47:11, 67.47s/it, loss=-0.0830, reward=-1
+Training:  34%|▎| 411/1200 [7:43:44<14:47:11, 67.47s/it, loss=-0.0799, reward=-1
+Training:  34%|▎| 412/1200 [7:43:44<14:46:00, 67.46s/it, loss=-0.0799, reward=-1
+Training:  34%|▎| 412/1200 [7:44:51<14:46:00, 67.46s/it, loss=-0.0744, reward=-1
+Training:  34%|▎| 413/1200 [7:44:51<14:45:13, 67.49s/it, loss=-0.0744, reward=-1
+Training:  34%|▎| 413/1200 [7:45:59<14:45:13, 67.49s/it, loss=-0.0783, reward=-1
+Training:  34%|▎| 414/1200 [7:45:59<14:43:51, 67.47s/it, loss=-0.0783, reward=-1
+Training:  34%|▎| 414/1200 [7:47:06<14:43:51, 67.47s/it, loss=-0.0789, reward=-1
+Training:  35%|▎| 415/1200 [7:47:06<14:42:57, 67.49s/it, loss=-0.0789, reward=-1
+Training:  35%|▎| 415/1200 [7:48:14<14:42:57, 67.49s/it, loss=-0.0789, reward=-1
+Training:  35%|▎| 416/1200 [7:48:14<14:41:41, 67.48s/it, loss=-0.0789, reward=-1
+Training:  35%|▎| 416/1200 [7:49:21<14:41:41, 67.48s/it, loss=-0.0786, reward=-1
+Training:  35%|▎| 417/1200 [7:49:21<14:40:23, 67.46s/it, loss=-0.0786, reward=-1
+Training:  35%|▎| 417/1200 [7:50:29<14:40:23, 67.46s/it, loss=-0.0841, reward=-1
+Training:  35%|▎| 418/1200 [7:50:29<14:39:10, 67.46s/it, loss=-0.0841, reward=-1
+Training:  35%|▎| 418/1200 [7:51:36<14:39:10, 67.46s/it, loss=-0.0794, reward=-1
+Training:  35%|▎| 419/1200 [7:51:36<14:37:53, 67.44s/it, loss=-0.0794, reward=-1
+Training:  35%|▎| 419/1200 [7:52:44<14:37:53, 67.44s/it, loss=-0.0752, reward=-1
+Training:  35%|▎| 420/1200 [7:52:44<14:36:56, 67.46s/it, loss=-0.0752, reward=-1
+Training:  35%|▎| 420/1200 [7:53:51<14:36:56, 67.46s/it, loss=-0.0887, reward=-1
+Training:  35%|▎| 421/1200 [7:53:51<14:36:01, 67.47s/it, loss=-0.0887, reward=-1
+Training:  35%|▎| 421/1200 [7:54:59<14:36:01, 67.47s/it, loss=-0.0772, reward=-1
+Training:  35%|▎| 422/1200 [7:54:59<14:35:02, 67.48s/it, loss=-0.0772, reward=-1
+Training:  35%|▎| 422/1200 [7:56:06<14:35:02, 67.48s/it, loss=-0.0819, reward=-1
+Training:  35%|▎| 423/1200 [7:56:06<14:33:53, 67.48s/it, loss=-0.0819, reward=-1
+Training:  35%|▎| 423/1200 [7:57:14<14:33:53, 67.48s/it, loss=-0.0777, reward=-1
+Training:  35%|▎| 424/1200 [7:57:14<14:32:47, 67.48s/it, loss=-0.0777, reward=-1
+Training:  35%|▎| 424/1200 [7:58:21<14:32:47, 67.48s/it, loss=-0.0738, reward=-1
+Training:  35%|▎| 425/1200 [7:58:21<14:31:50, 67.50s/it, loss=-0.0738, reward=-1
+Training:  35%|▎| 425/1200 [7:59:29<14:31:50, 67.50s/it, loss=-0.0774, reward=-1
+Training:  36%|▎| 426/1200 [7:59:29<14:31:51, 67.59s/it, loss=-0.0774, reward=-1
+Training:  36%|▎| 426/1200 [8:00:37<14:31:51, 67.59s/it, loss=-0.0810, reward=-1
+Training:  36%|▎| 427/1200 [8:00:37<14:31:51, 67.67s/it, loss=-0.0810, reward=-1
+Training:  36%|▎| 427/1200 [8:01:45<14:31:51, 67.67s/it, loss=-0.0855, reward=-1
+Training:  36%|▎| 428/1200 [8:01:45<14:31:21, 67.72s/it, loss=-0.0855, reward=-1
+Training:  36%|▎| 428/1200 [8:02:52<14:31:21, 67.72s/it, loss=-0.0809, reward=-1
+Training:  36%|▎| 429/1200 [8:02:52<14:30:37, 67.75s/it, loss=-0.0809, reward=-1
+Training:  36%|▎| 429/1200 [8:04:00<14:30:37, 67.75s/it, loss=-0.0775, reward=-1
+Training:  36%|▎| 430/1200 [8:04:00<14:29:44, 67.77s/it, loss=-0.0775, reward=-1
+Training:  36%|▎| 430/1200 [8:05:08<14:29:44, 67.77s/it, loss=-0.0858, reward=-1
+Training:  36%|▎| 431/1200 [8:05:08<14:28:29, 67.76s/it, loss=-0.0858, reward=-1
+Training:  36%|▎| 431/1200 [8:06:16<14:28:29, 67.76s/it, loss=-0.0800, reward=-1
+Training:  36%|▎| 432/1200 [8:06:16<14:27:02, 67.74s/it, loss=-0.0800, reward=-1
+Training:  36%|▎| 432/1200 [8:07:23<14:27:02, 67.74s/it, loss=-0.0865, reward=-1
+Training:  36%|▎| 433/1200 [8:07:23<14:24:46, 67.65s/it, loss=-0.0865, reward=-1
+Training:  36%|▎| 433/1200 [8:08:31<14:24:46, 67.65s/it, loss=-0.0824, reward=-1
+Training:  36%|▎| 434/1200 [8:08:31<14:22:54, 67.59s/it, loss=-0.0824, reward=-1
+Training:  36%|▎| 434/1200 [8:09:38<14:22:54, 67.59s/it, loss=-0.0842, reward=-1
+Training:  36%|▎| 435/1200 [8:09:38<14:21:51, 67.60s/it, loss=-0.0842, reward=-1
+Training:  36%|▎| 435/1200 [8:10:46<14:21:51, 67.60s/it, loss=-0.0860, reward=-1
+Training:  36%|▎| 436/1200 [8:10:46<14:20:10, 67.55s/it, loss=-0.0860, reward=-1
+Training:  36%|▎| 436/1200 [8:11:53<14:20:10, 67.55s/it, loss=-0.0844, reward=-1
+Training:  36%|▎| 437/1200 [8:11:53<14:18:35, 67.52s/it, loss=-0.0844, reward=-1
+Training:  36%|▎| 437/1200 [8:13:01<14:18:35, 67.52s/it, loss=-0.0851, reward=-1
+Training:  36%|▎| 438/1200 [8:13:01<14:17:06, 67.49s/it, loss=-0.0851, reward=-1
+Training:  36%|▎| 438/1200 [8:14:08<14:17:06, 67.49s/it, loss=-0.0851, reward=-1
+Training:  37%|▎| 439/1200 [8:14:08<14:15:45, 67.47s/it, loss=-0.0851, reward=-1
+Training:  37%|▎| 439/1200 [8:15:15<14:15:45, 67.47s/it, loss=-0.0844, reward=-1
+Training:  37%|▎| 440/1200 [8:15:15<14:14:27, 67.46s/it, loss=-0.0844, reward=-1
+Training:  37%|▎| 440/1200 [8:16:23<14:14:27, 67.46s/it, loss=-0.0894, reward=-1
+Training:  37%|▎| 441/1200 [8:16:23<14:13:15, 67.45s/it, loss=-0.0894, reward=-1
+Training:  37%|▎| 441/1200 [8:17:30<14:13:15, 67.45s/it, loss=-0.0880, reward=-1
+Training:  37%|▎| 442/1200 [8:17:30<14:12:04, 67.45s/it, loss=-0.0880, reward=-1
+Training:  37%|▎| 442/1200 [8:18:38<14:12:04, 67.45s/it, loss=-0.0853, reward=-1
+Training:  37%|▎| 443/1200 [8:18:38<14:10:52, 67.44s/it, loss=-0.0853, reward=-1
+Training:  37%|▎| 443/1200 [8:19:45<14:10:52, 67.44s/it, loss=-0.0827, reward=-1
+Training:  37%|▎| 444/1200 [8:19:45<14:09:44, 67.44s/it, loss=-0.0827, reward=-1
+Training:  37%|▎| 444/1200 [8:20:53<14:09:44, 67.44s/it, loss=-0.0794, reward=-1
+Training:  37%|▎| 445/1200 [8:20:53<14:08:35, 67.44s/it, loss=-0.0794, reward=-1
+Training:  37%|▎| 445/1200 [8:22:00<14:08:35, 67.44s/it, loss=-0.0785, reward=-1
+Training:  37%|▎| 446/1200 [8:22:00<14:07:26, 67.44s/it, loss=-0.0785, reward=-1
+Training:  37%|▎| 446/1200 [8:23:07<14:07:26, 67.44s/it, loss=-0.0841, reward=-1
+Training:  37%|▎| 447/1200 [8:23:07<14:06:21, 67.44s/it, loss=-0.0841, reward=-1
+Training:  37%|▎| 447/1200 [8:24:15<14:06:21, 67.44s/it, loss=-0.0774, reward=-1
+Training:  37%|▎| 448/1200 [8:24:15<14:05:11, 67.44s/it, loss=-0.0774, reward=-1
+Training:  37%|▎| 448/1200 [8:25:22<14:05:11, 67.44s/it, loss=-0.0846, reward=-1
+Training:  37%|▎| 449/1200 [8:25:22<14:03:59, 67.43s/it, loss=-0.0846, reward=-1
+Training:  37%|▎| 449/1200 [8:26:30<14:03:59, 67.43s/it, loss=-0.0846, reward=-1
+Training:  38%|▍| 450/1200 [8:26:30<14:02:57, 67.44s/it, loss=-0.0846, reward=-1
+Training:  38%|▍| 450/1200 [8:27:37<14:02:57, 67.44s/it, loss=-0.0849, reward=-1
+Training:  38%|▍| 451/1200 [8:27:37<14:01:48, 67.43s/it, loss=-0.0849, reward=-1
+Training:  38%|▍| 451/1200 [8:28:45<14:01:48, 67.43s/it, loss=-0.0847, reward=-1
+Training:  38%|▍| 452/1200 [8:28:45<14:00:39, 67.43s/it, loss=-0.0847, reward=-1
+Training:  38%|▍| 452/1200 [8:29:52<14:00:39, 67.43s/it, loss=-0.0866, reward=-1
+Training:  38%|▍| 453/1200 [8:29:52<13:59:31, 67.43s/it, loss=-0.0866, reward=-1
+Training:  38%|▍| 453/1200 [8:30:59<13:59:31, 67.43s/it, loss=-0.0792, reward=-1
+Training:  38%|▍| 454/1200 [8:30:59<13:58:29, 67.44s/it, loss=-0.0792, reward=-1
+Training:  38%|▍| 454/1200 [8:32:07<13:58:29, 67.44s/it, loss=-0.0814, reward=-1
+Training:  38%|▍| 455/1200 [8:32:07<13:57:32, 67.45s/it, loss=-0.0814, reward=-1
+Training:  38%|▍| 455/1200 [8:33:14<13:57:32, 67.45s/it, loss=-0.0794, reward=-1
+Training:  38%|▍| 456/1200 [8:33:14<13:56:26, 67.46s/it, loss=-0.0794, reward=-1
+Training:  38%|▍| 456/1200 [8:34:22<13:56:26, 67.46s/it, loss=-0.0808, reward=-1
+Training:  38%|▍| 457/1200 [8:34:22<13:55:34, 67.48s/it, loss=-0.0808, reward=-1
+Training:  38%|▍| 457/1200 [8:35:29<13:55:34, 67.48s/it, loss=-0.0764, reward=-1
+Training:  38%|▍| 458/1200 [8:35:29<13:54:19, 67.47s/it, loss=-0.0764, reward=-1
+Training:  38%|▍| 458/1200 [8:36:37<13:54:19, 67.47s/it, loss=-0.0759, reward=-1
+Training:  38%|▍| 459/1200 [8:36:37<13:53:03, 67.45s/it, loss=-0.0759, reward=-1
+Training:  38%|▍| 459/1200 [8:37:44<13:53:03, 67.45s/it, loss=-0.0826, reward=-1
+Training:  38%|▍| 460/1200 [8:37:44<13:51:52, 67.45s/it, loss=-0.0826, reward=-1
+Training:  38%|▍| 460/1200 [8:38:52<13:51:52, 67.45s/it, loss=-0.0743, reward=-1
+Training:  38%|▍| 461/1200 [8:38:52<13:50:39, 67.44s/it, loss=-0.0743, reward=-1
+Training:  38%|▍| 461/1200 [8:39:59<13:50:39, 67.44s/it, loss=-0.0757, reward=-1
+Training:  38%|▍| 462/1200 [8:39:59<13:49:30, 67.44s/it, loss=-0.0757, reward=-1
+Training:  38%|▍| 462/1200 [8:41:07<13:49:30, 67.44s/it, loss=-0.0745, reward=-1
+Training:  39%|▍| 463/1200 [8:41:07<13:48:21, 67.44s/it, loss=-0.0745, reward=-1
+Training:  39%|▍| 463/1200 [8:42:14<13:48:21, 67.44s/it, loss=-0.0751, reward=-1
+Training:  39%|▍| 464/1200 [8:42:14<13:47:12, 67.44s/it, loss=-0.0751, reward=-1
+Training:  39%|▍| 464/1200 [8:43:21<13:47:12, 67.44s/it, loss=-0.0758, reward=-1
+Training:  39%|▍| 465/1200 [8:43:21<13:46:03, 67.43s/it, loss=-0.0758, reward=-1
+Training:  39%|▍| 465/1200 [8:44:29<13:46:03, 67.43s/it, loss=-0.0693, reward=-1
+Training:  39%|▍| 466/1200 [8:44:29<13:44:53, 67.43s/it, loss=-0.0693, reward=-1
+Training:  39%|▍| 466/1200 [8:45:36<13:44:53, 67.43s/it, loss=-0.0729, reward=-1
+Training:  39%|▍| 467/1200 [8:45:36<13:43:49, 67.43s/it, loss=-0.0729, reward=-1
+Training:  39%|▍| 467/1200 [8:46:44<13:43:49, 67.43s/it, loss=-0.0714, reward=-1
+Training:  39%|▍| 468/1200 [8:46:44<13:42:42, 67.43s/it, loss=-0.0714, reward=-1
+Training:  39%|▍| 468/1200 [8:47:51<13:42:42, 67.43s/it, loss=-0.0764, reward=-1
+Training:  39%|▍| 469/1200 [8:47:51<13:41:37, 67.44s/it, loss=-0.0764, reward=-1
+Training:  39%|▍| 469/1200 [8:48:59<13:41:37, 67.44s/it, loss=-0.0762, reward=-1
+Training:  39%|▍| 470/1200 [8:48:59<13:40:31, 67.44s/it, loss=-0.0762, reward=-1
+Training:  39%|▍| 470/1200 [8:50:06<13:40:31, 67.44s/it, loss=-0.0721, reward=-1
+Training:  39%|▍| 471/1200 [8:50:06<13:39:24, 67.44s/it, loss=-0.0721, reward=-1
+Training:  39%|▍| 471/1200 [8:51:13<13:39:24, 67.44s/it, loss=-0.0842, reward=-1
+Training:  39%|▍| 472/1200 [8:51:13<13:38:11, 67.43s/it, loss=-0.0842, reward=-1
+Training:  39%|▍| 472/1200 [8:52:21<13:38:11, 67.43s/it, loss=-0.0772, reward=-1
+Training:  39%|▍| 473/1200 [8:52:21<13:37:05, 67.44s/it, loss=-0.0772, reward=-1
+Training:  39%|▍| 473/1200 [8:53:28<13:37:05, 67.44s/it, loss=-0.0722, reward=-1
+Training:  40%|▍| 474/1200 [8:53:28<13:36:14, 67.46s/it, loss=-0.0722, reward=-1
+Training:  40%|▍| 474/1200 [8:54:36<13:36:14, 67.46s/it, loss=-0.0802, reward=-1
+Training:  40%|▍| 475/1200 [8:54:36<13:35:38, 67.50s/it, loss=-0.0802, reward=-1
+Training:  40%|▍| 475/1200 [8:55:44<13:35:38, 67.50s/it, loss=-0.0762, reward=-1
+Training:  40%|▍| 476/1200 [8:55:44<13:34:53, 67.53s/it, loss=-0.0762, reward=-1
+Training:  40%|▍| 476/1200 [8:56:51<13:34:53, 67.53s/it, loss=-0.0773, reward=-1
+Training:  40%|▍| 477/1200 [8:56:51<13:33:59, 67.55s/it, loss=-0.0773, reward=-1
+Training:  40%|▍| 477/1200 [8:57:59<13:33:59, 67.55s/it, loss=-0.0735, reward=-1
+Training:  40%|▍| 478/1200 [8:57:59<13:33:03, 67.57s/it, loss=-0.0735, reward=-1
+Training:  40%|▍| 478/1200 [8:59:06<13:33:03, 67.57s/it, loss=-0.0776, reward=-1
+Training:  40%|▍| 479/1200 [8:59:06<13:32:19, 67.60s/it, loss=-0.0776, reward=-1
+Training:  40%|▍| 479/1200 [9:00:14<13:32:19, 67.60s/it, loss=-0.0756, reward=-1
+Training:  40%|▍| 480/1200 [9:00:14<13:31:06, 67.59s/it, loss=-0.0756, reward=-1
+Training:  40%|▍| 480/1200 [9:01:22<13:31:06, 67.59s/it, loss=-0.0746, reward=-1
+Training:  40%|▍| 481/1200 [9:01:22<13:30:02, 67.60s/it, loss=-0.0746, reward=-1
+Training:  40%|▍| 481/1200 [9:02:29<13:30:02, 67.60s/it, loss=-0.0766, reward=-1
+Training:  40%|▍| 482/1200 [9:02:29<13:28:55, 67.60s/it, loss=-0.0766, reward=-1
+Training:  40%|▍| 482/1200 [9:03:37<13:28:55, 67.60s/it, loss=-0.0822, reward=-1
+Training:  40%|▍| 483/1200 [9:03:37<13:27:49, 67.60s/it, loss=-0.0822, reward=-1
+Training:  40%|▍| 483/1200 [9:04:44<13:27:49, 67.60s/it, loss=-0.0894, reward=-1
+Training:  40%|▍| 484/1200 [9:04:44<13:26:45, 67.61s/it, loss=-0.0894, reward=-1
+Training:  40%|▍| 484/1200 [9:05:52<13:26:45, 67.61s/it, loss=-0.0883, reward=-1
+Training:  40%|▍| 485/1200 [9:05:52<13:25:40, 67.61s/it, loss=-0.0883, reward=-1
+Training:  40%|▍| 485/1200 [9:07:00<13:25:40, 67.61s/it, loss=-0.0844, reward=-1
+Training:  40%|▍| 486/1200 [9:07:00<13:24:35, 67.61s/it, loss=-0.0844, reward=-1
+Training:  40%|▍| 486/1200 [9:08:07<13:24:35, 67.61s/it, loss=-0.0919, reward=-1
+Training:  41%|▍| 487/1200 [9:08:07<13:23:25, 67.61s/it, loss=-0.0919, reward=-1
+Training:  41%|▍| 487/1200 [9:09:15<13:23:25, 67.61s/it, loss=-0.0843, reward=-1
+Training:  41%|▍| 488/1200 [9:09:15<13:22:11, 67.60s/it, loss=-0.0843, reward=-1
+Training:  41%|▍| 488/1200 [9:10:22<13:22:11, 67.60s/it, loss=-0.0821, reward=-1
+Training:  41%|▍| 489/1200 [9:10:22<13:21:00, 67.60s/it, loss=-0.0821, reward=-1
+Training:  41%|▍| 489/1200 [9:11:30<13:21:00, 67.60s/it, loss=-0.0859, reward=-1
+Training:  41%|▍| 490/1200 [9:11:30<13:19:52, 67.59s/it, loss=-0.0859, reward=-1
+Training:  41%|▍| 490/1200 [9:12:38<13:19:52, 67.59s/it, loss=-0.0825, reward=-1
+Training:  41%|▍| 491/1200 [9:12:38<13:18:47, 67.60s/it, loss=-0.0825, reward=-1
+Training:  41%|▍| 491/1200 [9:13:45<13:18:47, 67.60s/it, loss=-0.0733, reward=-1
+Training:  41%|▍| 492/1200 [9:13:45<13:17:46, 67.61s/it, loss=-0.0733, reward=-1
+Training:  41%|▍| 492/1200 [9:14:53<13:17:46, 67.61s/it, loss=-0.0776, reward=-1
+Training:  41%|▍| 493/1200 [9:14:53<13:16:38, 67.61s/it, loss=-0.0776, reward=-1
+Training:  41%|▍| 493/1200 [9:16:01<13:16:38, 67.61s/it, loss=-0.0814, reward=-1
+Training:  41%|▍| 494/1200 [9:16:01<13:15:31, 67.61s/it, loss=-0.0814, reward=-1
+Training:  41%|▍| 494/1200 [9:17:08<13:15:31, 67.61s/it, loss=-0.0839, reward=-1
+Training:  41%|▍| 495/1200 [9:17:08<13:14:26, 67.61s/it, loss=-0.0839, reward=-1
+Training:  41%|▍| 495/1200 [9:18:16<13:14:26, 67.61s/it, loss=-0.0821, reward=-1
+Training:  41%|▍| 496/1200 [9:18:16<13:13:18, 67.61s/it, loss=-0.0821, reward=-1
+Training:  41%|▍| 496/1200 [9:19:23<13:13:18, 67.61s/it, loss=-0.0877, reward=-1
+Training:  41%|▍| 497/1200 [9:19:23<13:12:11, 67.61s/it, loss=-0.0877, reward=-1
+Training:  41%|▍| 497/1200 [9:20:31<13:12:11, 67.61s/it, loss=-0.0829, reward=-1
+Training:  42%|▍| 498/1200 [9:20:31<13:11:05, 67.61s/it, loss=-0.0829, reward=-1
+Training:  42%|▍| 498/1200 [9:21:39<13:11:05, 67.61s/it, loss=-0.0839, reward=-1
+Training:  42%|▍| 499/1200 [9:21:39<13:10:04, 67.62s/it, loss=-0.0839, reward=-1
+Training:  42%|▍| 499/1200 [9:22:46<13:10:04, 67.62s/it, loss=-0.0839, reward=-1Saved checkpoint to checkpoints/ecspnet_N20_epoch2300.pt
+
+40042.4s	100	
+Training:  42%|▍| 500/1200 [9:22:46<13:08:54, 67.62s/it, loss=-0.0839, reward=-1
+Training:  42%|▍| 500/1200 [9:23:54<13:08:54, 67.62s/it, loss=-0.0817, reward=-1
+Training:  42%|▍| 501/1200 [9:23:54<13:08:02, 67.64s/it, loss=-0.0817, reward=-1
+Training:  42%|▍| 501/1200 [9:25:02<13:08:02, 67.64s/it, loss=-0.0820, reward=-1
+Training:  42%|▍| 502/1200 [9:25:02<13:06:47, 67.63s/it, loss=-0.0820, reward=-1
+Training:  42%|▍| 502/1200 [9:26:09<13:06:47, 67.63s/it, loss=-0.0810, reward=-1
+Training:  42%|▍| 503/1200 [9:26:09<13:05:35, 67.63s/it, loss=-0.0810, reward=-1
+Training:  42%|▍| 503/1200 [9:27:17<13:05:35, 67.63s/it, loss=-0.0833, reward=-1
+Training:  42%|▍| 504/1200 [9:27:17<13:04:27, 67.63s/it, loss=-0.0833, reward=-1
+Training:  42%|▍| 504/1200 [9:28:24<13:04:27, 67.63s/it, loss=-0.0800, reward=-1
+Training:  42%|▍| 505/1200 [9:28:24<13:03:20, 67.63s/it, loss=-0.0800, reward=-1
+Training:  42%|▍| 505/1200 [9:29:32<13:03:20, 67.63s/it, loss=-0.0807, reward=-1
+Training:  42%|▍| 506/1200 [9:29:32<13:02:05, 67.62s/it, loss=-0.0807, reward=-1
+Training:  42%|▍| 506/1200 [9:30:40<13:02:05, 67.62s/it, loss=-0.0814, reward=-1
+Training:  42%|▍| 507/1200 [9:30:40<13:00:40, 67.59s/it, loss=-0.0814, reward=-1
+Training:  42%|▍| 507/1200 [9:31:47<13:00:40, 67.59s/it, loss=-0.0833, reward=-1
+Training:  42%|▍| 508/1200 [9:31:47<12:59:32, 67.59s/it, loss=-0.0833, reward=-1
+Training:  42%|▍| 508/1200 [9:32:55<12:59:32, 67.59s/it, loss=-0.0849, reward=-1
+Training:  42%|▍| 509/1200 [9:32:55<12:58:22, 67.59s/it, loss=-0.0849, reward=-1
+Training:  42%|▍| 509/1200 [9:34:02<12:58:22, 67.59s/it, loss=-0.0808, reward=-1
+Training:  42%|▍| 510/1200 [9:34:02<12:57:14, 67.59s/it, loss=-0.0808, reward=-1
+Training:  42%|▍| 510/1200 [9:35:10<12:57:14, 67.59s/it, loss=-0.0784, reward=-1
+Training:  43%|▍| 511/1200 [9:35:10<12:56:05, 67.58s/it, loss=-0.0784, reward=-1
+Training:  43%|▍| 511/1200 [9:36:17<12:56:05, 67.58s/it, loss=-0.0833, reward=-1
+Training:  43%|▍| 512/1200 [9:36:17<12:54:55, 67.58s/it, loss=-0.0833, reward=-1
+Training:  43%|▍| 512/1200 [9:37:25<12:54:55, 67.58s/it, loss=-0.0802, reward=-1
+Training:  43%|▍| 513/1200 [9:37:25<12:53:48, 67.58s/it, loss=-0.0802, reward=-1
+Training:  43%|▍| 513/1200 [9:38:33<12:53:48, 67.58s/it, loss=-0.0821, reward=-1
+Training:  43%|▍| 514/1200 [9:38:33<12:52:42, 67.58s/it, loss=-0.0821, reward=-1
+Training:  43%|▍| 514/1200 [9:39:40<12:52:42, 67.58s/it, loss=-0.0810, reward=-1
+Training:  43%|▍| 515/1200 [9:39:40<12:51:37, 67.59s/it, loss=-0.0810, reward=-1
+Training:  43%|▍| 515/1200 [9:40:48<12:51:37, 67.59s/it, loss=-0.0783, reward=-1
+Training:  43%|▍| 516/1200 [9:40:48<12:50:25, 67.58s/it, loss=-0.0783, reward=-1
+Training:  43%|▍| 516/1200 [9:41:55<12:50:25, 67.58s/it, loss=-0.0844, reward=-1
+Training:  43%|▍| 517/1200 [9:41:55<12:49:17, 67.58s/it, loss=-0.0844, reward=-1
+Training:  43%|▍| 517/1200 [9:43:03<12:49:17, 67.58s/it, loss=-0.0813, reward=-1
+Training:  43%|▍| 518/1200 [9:43:03<12:48:08, 67.58s/it, loss=-0.0813, reward=-1
+Training:  43%|▍| 518/1200 [9:44:11<12:48:08, 67.58s/it, loss=-0.0837, reward=-1
+Training:  43%|▍| 519/1200 [9:44:11<12:47:02, 67.58s/it, loss=-0.0837, reward=-1
+Training:  43%|▍| 519/1200 [9:45:18<12:47:02, 67.58s/it, loss=-0.0849, reward=-1
+Training:  43%|▍| 520/1200 [9:45:18<12:45:58, 67.59s/it, loss=-0.0849, reward=-1
+Training:  43%|▍| 520/1200 [9:46:26<12:45:58, 67.59s/it, loss=-0.0813, reward=-1
+Training:  43%|▍| 521/1200 [9:46:26<12:44:52, 67.59s/it, loss=-0.0813, reward=-1
+Training:  43%|▍| 521/1200 [9:47:33<12:44:52, 67.59s/it, loss=-0.0809, reward=-1
+Training:  44%|▍| 522/1200 [9:47:33<12:43:43, 67.59s/it, loss=-0.0809, reward=-1
+Training:  44%|▍| 522/1200 [9:48:41<12:43:43, 67.59s/it, loss=-0.0779, reward=-1
+Training:  44%|▍| 523/1200 [9:48:41<12:42:35, 67.59s/it, loss=-0.0779, reward=-1
+Training:  44%|▍| 523/1200 [9:49:49<12:42:35, 67.59s/it, loss=-0.0845, reward=-1
+Training:  44%|▍| 524/1200 [9:49:49<12:41:46, 67.61s/it, loss=-0.0845, reward=-1
+Training:  44%|▍| 524/1200 [9:50:56<12:41:46, 67.61s/it, loss=-0.0777, reward=-1
+Training:  44%|▍| 525/1200 [9:50:56<12:40:35, 67.61s/it, loss=-0.0777, reward=-1
+Training:  44%|▍| 525/1200 [9:52:04<12:40:35, 67.61s/it, loss=-0.0707, reward=-1
+Training:  44%|▍| 526/1200 [9:52:04<12:39:24, 67.60s/it, loss=-0.0707, reward=-1
+Training:  44%|▍| 526/1200 [9:53:11<12:39:24, 67.60s/it, loss=-0.0784, reward=-1
+Training:  44%|▍| 527/1200 [9:53:11<12:38:14, 67.60s/it, loss=-0.0784, reward=-1
+Training:  44%|▍| 527/1200 [9:54:19<12:38:14, 67.60s/it, loss=-0.0819, reward=-1
+Training:  44%|▍| 528/1200 [9:54:19<12:37:01, 67.59s/it, loss=-0.0819, reward=-1
+Training:  44%|▍| 528/1200 [9:55:27<12:37:01, 67.59s/it, loss=-0.0824, reward=-1
+Training:  44%|▍| 529/1200 [9:55:27<12:35:53, 67.59s/it, loss=-0.0824, reward=-1
+Training:  44%|▍| 529/1200 [9:56:34<12:35:53, 67.59s/it, loss=-0.0734, reward=-1
+Training:  44%|▍| 530/1200 [9:56:34<12:34:46, 67.59s/it, loss=-0.0734, reward=-1
+Training:  44%|▍| 530/1200 [9:57:42<12:34:46, 67.59s/it, loss=-0.0796, reward=-1
+Training:  44%|▍| 531/1200 [9:57:42<12:33:36, 67.59s/it, loss=-0.0796, reward=-1
+Training:  44%|▍| 531/1200 [9:58:49<12:33:36, 67.59s/it, loss=-0.0783, reward=-1
+Training:  44%|▍| 532/1200 [9:58:49<12:32:30, 67.59s/it, loss=-0.0783, reward=-1
+Training:  44%|▍| 532/1200 [9:59:57<12:32:30, 67.59s/it, loss=-0.0835, reward=-1
+Training:  44%|▍| 533/1200 [9:59:57<12:31:23, 67.59s/it, loss=-0.0835, reward=-1
+Training:  44%|▍| 533/1200 [10:01:04<12:31:23, 67.59s/it, loss=-0.0737, reward=-
+Training:  44%|▍| 534/1200 [10:01:04<12:30:17, 67.59s/it, loss=-0.0737, reward=-
+Training:  44%|▍| 534/1200 [10:02:12<12:30:17, 67.59s/it, loss=-0.0737, reward=-
+Training:  45%|▍| 535/1200 [10:02:12<12:29:07, 67.59s/it, loss=-0.0737, reward=-
+Training:  45%|▍| 535/1200 [10:03:20<12:29:07, 67.59s/it, loss=-0.0758, reward=-
+Training:  45%|▍| 536/1200 [10:03:20<12:28:05, 67.60s/it, loss=-0.0758, reward=-
+Training:  45%|▍| 536/1200 [10:04:27<12:28:05, 67.60s/it, loss=-0.0816, reward=-
+Training:  45%|▍| 537/1200 [10:04:27<12:27:06, 67.61s/it, loss=-0.0816, reward=-
+Training:  45%|▍| 537/1200 [10:05:35<12:27:06, 67.61s/it, loss=-0.0813, reward=-
+Training:  45%|▍| 538/1200 [10:05:35<12:25:56, 67.61s/it, loss=-0.0813, reward=-
+Training:  45%|▍| 538/1200 [10:06:42<12:25:56, 67.61s/it, loss=-0.0781, reward=-
+Training:  45%|▍| 539/1200 [10:06:42<12:24:45, 67.60s/it, loss=-0.0781, reward=-
+Training:  45%|▍| 539/1200 [10:07:50<12:24:45, 67.60s/it, loss=-0.0829, reward=-
+Training:  45%|▍| 540/1200 [10:07:50<12:23:36, 67.60s/it, loss=-0.0829, reward=-
+Training:  45%|▍| 540/1200 [10:08:58<12:23:36, 67.60s/it, loss=-0.0702, reward=-
+Training:  45%|▍| 541/1200 [10:08:58<12:22:26, 67.60s/it, loss=-0.0702, reward=-
+Training:  45%|▍| 541/1200 [10:10:05<12:22:26, 67.60s/it, loss=-0.0790, reward=-
+Training:  45%|▍| 542/1200 [10:10:05<12:21:18, 67.60s/it, loss=-0.0790, reward=-
+Training:  45%|▍| 542/1200 [10:11:13<12:21:18, 67.60s/it, loss=-0.0777, reward=-
+Training:  45%|▍| 543/1200 [10:11:13<12:20:07, 67.59s/it, loss=-0.0777, reward=-
+Training:  45%|▍| 543/1200 [10:12:20<12:20:07, 67.59s/it, loss=-0.0811, reward=-
+Training:  45%|▍| 544/1200 [10:12:20<12:18:55, 67.58s/it, loss=-0.0811, reward=-
+Training:  45%|▍| 544/1200 [10:13:28<12:18:55, 67.58s/it, loss=-0.0763, reward=-
+Training:  45%|▍| 545/1200 [10:13:28<12:17:39, 67.57s/it, loss=-0.0763, reward=-
+Training:  45%|▍| 545/1200 [10:14:36<12:17:39, 67.57s/it, loss=-0.0805, reward=-
+Training:  46%|▍| 546/1200 [10:14:36<12:16:55, 67.61s/it, loss=-0.0805, reward=-
+Training:  46%|▍| 546/1200 [10:15:43<12:16:55, 67.61s/it, loss=-0.0834, reward=-
+Training:  46%|▍| 547/1200 [10:15:43<12:15:40, 67.60s/it, loss=-0.0834, reward=-
+Training:  46%|▍| 547/1200 [10:16:51<12:15:40, 67.60s/it, loss=-0.0876, reward=-
+Training:  46%|▍| 548/1200 [10:16:51<12:14:40, 67.61s/it, loss=-0.0876, reward=-
+Training:  46%|▍| 548/1200 [10:17:59<12:14:40, 67.61s/it, loss=-0.0772, reward=-
+Training:  46%|▍| 549/1200 [10:17:59<12:13:40, 67.62s/it, loss=-0.0772, reward=-
+Training:  46%|▍| 549/1200 [10:19:06<12:13:40, 67.62s/it, loss=-0.0813, reward=-
+Training:  46%|▍| 550/1200 [10:19:06<12:12:36, 67.63s/it, loss=-0.0813, reward=-
+Training:  46%|▍| 550/1200 [10:20:14<12:12:36, 67.63s/it, loss=-0.0833, reward=-
+Training:  46%|▍| 551/1200 [10:20:14<12:11:24, 67.62s/it, loss=-0.0833, reward=-
+Training:  46%|▍| 551/1200 [10:21:21<12:11:24, 67.62s/it, loss=-0.0831, reward=-
+Training:  46%|▍| 552/1200 [10:21:21<12:10:14, 67.61s/it, loss=-0.0831, reward=-
+Training:  46%|▍| 552/1200 [10:22:29<12:10:14, 67.61s/it, loss=-0.0815, reward=-
+Training:  46%|▍| 553/1200 [10:22:29<12:09:00, 67.60s/it, loss=-0.0815, reward=-
+Training:  46%|▍| 553/1200 [10:23:37<12:09:00, 67.60s/it, loss=-0.0870, reward=-
+Training:  46%|▍| 554/1200 [10:23:37<12:07:46, 67.60s/it, loss=-0.0870, reward=-
+Training:  46%|▍| 554/1200 [10:24:44<12:07:46, 67.60s/it, loss=-0.0905, reward=-
+Training:  46%|▍| 555/1200 [10:24:44<12:06:34, 67.59s/it, loss=-0.0905, reward=-
+Training:  46%|▍| 555/1200 [10:25:52<12:06:34, 67.59s/it, loss=-0.0834, reward=-
+Training:  46%|▍| 556/1200 [10:25:52<12:05:34, 67.60s/it, loss=-0.0834, reward=-
+Training:  46%|▍| 556/1200 [10:26:59<12:05:34, 67.60s/it, loss=-0.0834, reward=-
+Training:  46%|▍| 557/1200 [10:26:59<12:04:28, 67.60s/it, loss=-0.0834, reward=-
+Training:  46%|▍| 557/1200 [10:28:07<12:04:28, 67.60s/it, loss=-0.0848, reward=-
+Training:  46%|▍| 558/1200 [10:28:07<12:03:19, 67.60s/it, loss=-0.0848, reward=-
+Training:  46%|▍| 558/1200 [10:29:15<12:03:19, 67.60s/it, loss=-0.0778, reward=-
+Training:  47%|▍| 559/1200 [10:29:15<12:02:17, 67.61s/it, loss=-0.0778, reward=-
+Training:  47%|▍| 559/1200 [10:30:22<12:02:17, 67.61s/it, loss=-0.0815, reward=-
+Training:  47%|▍| 560/1200 [10:30:22<12:01:06, 67.60s/it, loss=-0.0815, reward=-
+Training:  47%|▍| 560/1200 [10:31:30<12:01:06, 67.60s/it, loss=-0.0816, reward=-
+Training:  47%|▍| 561/1200 [10:31:30<12:00:04, 67.61s/it, loss=-0.0816, reward=-
+Training:  47%|▍| 561/1200 [10:32:37<12:00:04, 67.61s/it, loss=-0.0788, reward=-
+Training:  47%|▍| 562/1200 [10:32:37<11:59:06, 67.63s/it, loss=-0.0788, reward=-
+Training:  47%|▍| 562/1200 [10:33:45<11:59:06, 67.63s/it, loss=-0.0830, reward=-
+Training:  47%|▍| 563/1200 [10:33:45<11:58:01, 67.63s/it, loss=-0.0830, reward=-
+Training:  47%|▍| 563/1200 [10:34:53<11:58:01, 67.63s/it, loss=-0.0911, reward=-
+Training:  47%|▍| 564/1200 [10:34:53<11:56:49, 67.63s/it, loss=-0.0911, reward=-
+Training:  47%|▍| 564/1200 [10:36:00<11:56:49, 67.63s/it, loss=-0.0829, reward=-
+Training:  47%|▍| 565/1200 [10:36:00<11:55:40, 67.62s/it, loss=-0.0829, reward=-
+Training:  47%|▍| 565/1200 [10:37:08<11:55:40, 67.62s/it, loss=-0.0843, reward=-
+Training:  47%|▍| 566/1200 [10:37:08<11:54:30, 67.62s/it, loss=-0.0843, reward=-
+Training:  47%|▍| 566/1200 [10:38:16<11:54:30, 67.62s/it, loss=-0.0894, reward=-
+Training:  47%|▍| 567/1200 [10:38:16<11:53:24, 67.62s/it, loss=-0.0894, reward=-
+Training:  47%|▍| 567/1200 [10:39:23<11:53:24, 67.62s/it, loss=-0.0755, reward=-
+Training:  47%|▍| 568/1200 [10:39:23<11:52:23, 67.63s/it, loss=-0.0755, reward=-
+Training:  47%|▍| 568/1200 [10:40:31<11:52:23, 67.63s/it, loss=-0.0795, reward=-
+Training:  47%|▍| 569/1200 [10:40:31<11:50:47, 67.59s/it, loss=-0.0795, reward=-
+Training:  47%|▍| 569/1200 [10:41:38<11:50:47, 67.59s/it, loss=-0.0867, reward=-
+Training:  48%|▍| 570/1200 [10:41:38<11:49:45, 67.60s/it, loss=-0.0867, reward=-
+Training:  48%|▍| 570/1200 [10:42:46<11:49:45, 67.60s/it, loss=-0.0824, reward=-
+Training:  48%|▍| 571/1200 [10:42:46<11:48:56, 67.63s/it, loss=-0.0824, reward=-
+Training:  48%|▍| 571/1200 [10:43:54<11:48:56, 67.63s/it, loss=-0.0866, reward=-
+Training:  48%|▍| 572/1200 [10:43:54<11:48:01, 67.65s/it, loss=-0.0866, reward=-
+Training:  48%|▍| 572/1200 [10:45:01<11:48:01, 67.65s/it, loss=-0.0799, reward=-
+Training:  48%|▍| 573/1200 [10:45:01<11:47:03, 67.66s/it, loss=-0.0799, reward=-
+Training:  48%|▍| 573/1200 [10:46:09<11:47:03, 67.66s/it, loss=-0.0782, reward=-
+Training:  48%|▍| 574/1200 [10:46:09<11:46:01, 67.67s/it, loss=-0.0782, reward=-
+Training:  48%|▍| 574/1200 [10:47:17<11:46:01, 67.67s/it, loss=-0.0810, reward=-
+Training:  48%|▍| 575/1200 [10:47:17<11:44:19, 67.62s/it, loss=-0.0810, reward=-
+Training:  48%|▍| 575/1200 [10:48:24<11:44:19, 67.62s/it, loss=-0.0830, reward=-
+Training:  48%|▍| 576/1200 [10:48:24<11:43:07, 67.61s/it, loss=-0.0830, reward=-
+Training:  48%|▍| 576/1200 [10:49:32<11:43:07, 67.61s/it, loss=-0.0812, reward=-
+Training:  48%|▍| 577/1200 [10:49:32<11:42:15, 67.63s/it, loss=-0.0812, reward=-
+Training:  48%|▍| 577/1200 [10:50:40<11:42:15, 67.63s/it, loss=-0.0807, reward=-
+Training:  48%|▍| 578/1200 [10:50:40<11:41:21, 67.66s/it, loss=-0.0807, reward=-
+Training:  48%|▍| 578/1200 [10:51:47<11:41:21, 67.66s/it, loss=-0.0850, reward=-
+Training:  48%|▍| 579/1200 [10:51:47<11:40:22, 67.67s/it, loss=-0.0850, reward=-
+Training:  48%|▍| 579/1200 [10:52:55<11:40:22, 67.67s/it, loss=-0.0775, reward=-
+Training:  48%|▍| 580/1200 [10:52:55<11:39:20, 67.68s/it, loss=-0.0775, reward=-
+Training:  48%|▍| 580/1200 [10:54:03<11:39:20, 67.68s/it, loss=-0.0837, reward=-
+Training:  48%|▍| 581/1200 [10:54:03<11:37:48, 67.64s/it, loss=-0.0837, reward=-
+Training:  48%|▍| 581/1200 [10:55:10<11:37:48, 67.64s/it, loss=-0.0919, reward=-
+Training:  48%|▍| 582/1200 [10:55:10<11:36:24, 67.61s/it, loss=-0.0919, reward=-
+Training:  48%|▍| 582/1200 [10:56:18<11:36:24, 67.61s/it, loss=-0.0865, reward=-
+Training:  49%|▍| 583/1200 [10:56:18<11:35:32, 67.64s/it, loss=-0.0865, reward=-
+Training:  49%|▍| 583/1200 [10:57:25<11:35:32, 67.64s/it, loss=-0.0861, reward=-
+Training:  49%|▍| 584/1200 [10:57:25<11:34:42, 67.67s/it, loss=-0.0861, reward=-
+Training:  49%|▍| 584/1200 [10:58:33<11:34:42, 67.67s/it, loss=-0.0873, reward=-
+Training:  49%|▍| 585/1200 [10:58:33<11:33:43, 67.68s/it, loss=-0.0873, reward=-
+Training:  49%|▍| 585/1200 [10:59:41<11:33:43, 67.68s/it, loss=-0.0840, reward=-
+Training:  49%|▍| 586/1200 [10:59:41<11:32:39, 67.69s/it, loss=-0.0840, reward=-
+Training:  49%|▍| 586/1200 [11:00:48<11:32:39, 67.69s/it, loss=-0.0916, reward=-
+Training:  49%|▍| 587/1200 [11:00:48<11:31:11, 67.65s/it, loss=-0.0916, reward=-
+Training:  49%|▍| 587/1200 [11:01:56<11:31:11, 67.65s/it, loss=-0.0980, reward=-
+Training:  49%|▍| 588/1200 [11:01:56<11:29:41, 67.62s/it, loss=-0.0980, reward=-
+Training:  49%|▍| 588/1200 [11:03:04<11:29:41, 67.62s/it, loss=-0.0848, reward=-
+Training:  49%|▍| 589/1200 [11:03:04<11:28:48, 67.64s/it, loss=-0.0848, reward=-
+Training:  49%|▍| 589/1200 [11:04:12<11:28:48, 67.64s/it, loss=-0.0869, reward=-
+Training:  49%|▍| 590/1200 [11:04:12<11:28:10, 67.69s/it, loss=-0.0869, reward=-
+Training:  49%|▍| 590/1200 [11:05:19<11:28:10, 67.69s/it, loss=-0.0913, reward=-
+Training:  49%|▍| 591/1200 [11:05:19<11:27:02, 67.69s/it, loss=-0.0913, reward=-
+Training:  49%|▍| 591/1200 [11:06:27<11:27:02, 67.69s/it, loss=-0.0971, reward=-
+Training:  49%|▍| 592/1200 [11:06:27<11:26:05, 67.71s/it, loss=-0.0971, reward=-
