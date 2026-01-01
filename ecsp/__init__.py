@@ -34,6 +34,15 @@ from .infer import (
     visualize_pareto_front,
 )
 
+from .evaluate_n20 import (
+    run_full_evaluation,
+    generate_test_cases,
+    ecspnet_inference,
+    greedy_baseline,
+    nsga2_baseline,
+    compute_c_metric,
+)
+
 __version__ = "2.3.0-AUTO-RESUME"
 print(f"[ECSP Package v{__version__}] Auto-resume enabled for Kaggle")
 
