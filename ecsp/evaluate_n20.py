@@ -440,44 +440,46 @@ def greedy_baseline(
 
 
 # ============================================================================
-# Baseline: NSGA-II (Geatpy Implementation - Paper-Exact)
-# Uses Geatpy library as specified in the original paper.
-# Install: pip install geatpy
+# Baseline: NSGA-II (Pymoo Implementation)
+# Uses Pymoo library for Python 3.12+ compatibility.
+# Install: pip install pymoo
 # ============================================================================
 
-# Check for Geatpy availability
+# Check for Pymoo availability
 try:
-    import geatpy as ea
+    from pymoo.algorithms.moo.nsga2 import NSGA2
+    from pymoo.core.problem import ElementwiseProblem
+    from pymoo.optimize import minimize
+    from pymoo.operators.sampling.rnd import PermutationRandomSampling
+    from pymoo.operators.crossover.ox import OrderCrossover
+    from pymoo.operators.mutation.inversion import InversionMutation
+    from pymoo.termination import get_termination
 
-    GEATPY_AVAILABLE = True
+    PYMOO_AVAILABLE = True
 except ImportError:
-    GEATPY_AVAILABLE = False
+    PYMOO_AVAILABLE = False
     warnings.warn(
-        "Geatpy not installed. Install with: pip install geatpy\n"
-        "NSGA-II baseline will not be available."
+        "Pymoo not installed. Install with: pip install pymoo\n"
+        "NSGA-II baseline will use random search fallback."
     )
 
 
-class ECSPProblem(ea.Problem if GEATPY_AVAILABLE else object):
+class ECSPProblemPymoo(ElementwiseProblem if PYMOO_AVAILABLE else object):
     """
-    ECSP Problem definition for Geatpy NSGA-II.
+    ECSP Problem definition for Pymoo NSGA-II.
 
     Decision Variables:
-    - Permutation P: Job sequence (N integers representing task order)
-    - Binary vector B: Wait modes (N binary values, 0=no wait, 1=wait)
-
-    Encoding: We use a combined approach:
-    - Variables 0 to N-1: Permutation encoding (P type in Geatpy)
-    - Variables N to 2N-1: Binary encoding (RI type, integers 0 or 1)
+    - Permutation of N tasks (order to schedule)
+    - For each task, we use a greedy mode decision based on price
 
     Objectives (both minimization):
-    - f1: Total Weighted Waiting Time (TWT)
+    - f1: Total Waiting Time (TWT)
     - f2: Energy Cost (EEC)
     """
 
     def __init__(self, tasks: np.ndarray, n_jobs: int = N):
         """
-        Initialize the ECSP problem.
+        Initialize the ECSP problem for Pymoo.
 
         Args:
             tasks: Task array of shape [N, 5] with features [p1, p2, p3, P_high, P_low]
@@ -486,201 +488,114 @@ class ECSPProblem(ea.Problem if GEATPY_AVAILABLE else object):
         self.tasks = tasks.copy()
         self.n_jobs = n_jobs
 
-        # Problem name
-        name = "ECSP_Problem"
-
-        # Number of objectives (TWT and EEC)
-        M = 2
-
-        # Optimization direction: 1 = minimize, -1 = maximize
-        maxormins = [1, 1]  # Minimize both TWT and EEC
-
-        # Total decision variables: N (permutation) + N (binary modes)
-        Dim = 2 * n_jobs
-
-        # Variable types:
-        # 0 = continuous, 1 = discrete integer
-        # For permutation + binary, all are integers
-        varTypes = np.ones(Dim, dtype=int)
-
-        # Variable bounds
-        # Permutation part: 0 to N-1 (handled specially by Geatpy P encoding)
-        # Binary part: 0 or 1
-        lb = np.zeros(Dim)
-        ub = np.concatenate(
-            [
-                np.full(n_jobs, n_jobs - 1),  # Permutation: 0 to N-1
-                np.ones(n_jobs),  # Binary: 0 or 1
-            ]
+        # Pymoo ElementwiseProblem setup
+        # We optimize task ordering (permutation) and modes together
+        # Using 2*N integer variables: first N for permutation ranking, next N for modes
+        super().__init__(
+            n_var=2 * n_jobs,
+            n_obj=2,
+            n_ieq_constr=0,
+            xl=np.concatenate([np.zeros(n_jobs), np.zeros(n_jobs)]),
+            xu=np.concatenate([np.full(n_jobs, n_jobs - 1), np.ones(n_jobs)]),
+            vtype=int,
         )
 
-        # Boundary inclusion: 1 = include boundary
-        lbin = np.ones(Dim, dtype=int)
-        ubin = np.ones(Dim, dtype=int)
-
-        # Call parent constructor
-        ea.Problem.__init__(self, name, M, maxormins, Dim, varTypes, lb, ub, lbin, ubin)
-
-    def evalVars(self, Vars: np.ndarray) -> np.ndarray:
+    def _evaluate(self, x, out, *args, **kwargs):
         """
-        Evaluate decision variables (vectorized for batch evaluation).
-
-        This is the preferred method for Geatpy as it supports batch evaluation
-        and parallelization more efficiently than aimFunc.
+        Evaluate a single solution.
 
         Args:
-            Vars: Decision variable matrix [pop_size, 2*N]
-                  Vars[:, :N] = permutation indices
-                  Vars[:, N:] = binary wait modes
-
-        Returns:
-            ObjV: Objective values [pop_size, 2] with columns [TWT, EEC]
+            x: Decision variables [2*N] - first N are permutation ranks, next N are modes
+            out: Output dictionary for objectives
         """
-        pop_size = Vars.shape[0]
-        ObjV = np.zeros((pop_size, 2))
+        n = self.n_jobs
 
-        for i in range(pop_size):
-            # Extract permutation and modes
-            perm = Vars[i, : self.n_jobs].astype(int)
-            modes = Vars[i, self.n_jobs :].astype(int)
+        # Extract permutation (convert ranking to actual permutation)
+        perm_ranks = x[:n]
+        perm = np.argsort(perm_ranks)  # Convert ranks to permutation
 
-            # Evaluate using environment
-            twt, eec = self._evaluate_schedule(perm, modes)
-            ObjV[i, 0] = twt
-            ObjV[i, 1] = eec
+        # Extract modes (0 or 1)
+        modes = x[n:].astype(int)
 
-        return ObjV
-
-    def _evaluate_schedule(
-        self, perm: np.ndarray, modes: np.ndarray
-    ) -> Tuple[float, float]:
-        """
-        Evaluate a single schedule using ECSPEnv.
-
-        Args:
-            perm: Task permutation (order to schedule tasks)
-            modes: Wait modes for each task (0=no wait, 1=wait after step1)
-
-        Returns:
-            (twt, eec): Total weighted waiting time and energy cost
-        """
-        env = ECSPEnv(N=self.n_jobs)
+        # Evaluate using environment
+        env = ECSPEnv(N=n)
         env.reset(options={"tasks": self.tasks.copy(), "w": 0.5})
 
-        for i in range(self.n_jobs):
+        for i in range(n):
             task_idx = perm[i]
-            mode = modes[task_idx]  # Mode corresponds to the task, not position
+            mode = modes[task_idx]  # Mode corresponds to the task
             action = task_idx * 2 + mode
             env.step(action)
 
-        return env.get_final_metrics()
+        twt, eec = env.get_final_metrics()
+        out["F"] = [twt, eec]
 
 
-def run_geatpy_nsga2(
+def run_pymoo_nsga2(
     tasks: np.ndarray,
     population_size: int,
     generations: int,
     n_jobs: int = N,
-    use_parallel: bool = True,
-    num_workers: int = None,
     seed: int = None,
 ) -> Tuple[ParetoFront, float]:
     """
-    Run Geatpy NSGA-II for ECSP problem.
-
-    This uses the paper-exact Geatpy library implementation of NSGA-II.
+    Run Pymoo NSGA-II for ECSP problem.
 
     Args:
         tasks: Task array [N, 5]
-        population_size: NSGA-II population size (NIND)
-        generations: Number of generations (MAXGEN)
+        population_size: NSGA-II population size
+        generations: Number of generations
         n_jobs: Number of jobs
-        use_parallel: Enable multiprocessing parallelization
-        num_workers: Number of parallel workers (None = auto)
         seed: Random seed for reproducibility
 
     Returns:
         ParetoFront: Non-dominated solutions
         float: Runtime in seconds
     """
-    if not GEATPY_AVAILABLE:
-        raise ImportError("Geatpy is not installed. Install with: pip install geatpy")
+    if not PYMOO_AVAILABLE:
+        raise ImportError("Pymoo is not installed. Install with: pip install pymoo")
 
     start_time = time.time()
 
     # Create problem instance
-    problem = ECSPProblem(tasks, n_jobs)
+    problem = ECSPProblemPymoo(tasks, n_jobs)
 
-    # Encoding setup for mixed permutation + binary
-    # We use two Field objects: one for permutation, one for binary
+    # Create NSGA-II algorithm with integer-friendly operators
+    from pymoo.operators.sampling.rnd import IntegerRandomSampling
+    from pymoo.operators.crossover.sbx import SBX
+    from pymoo.operators.mutation.pm import PM
+    from pymoo.operators.repair.rounding import RoundingRepair
 
-    # Encoding for permutation part (P = permutation)
-    Encoding1 = "P"  # Permutation encoding
-    Field1 = ea.crtfld(
-        Encoding1,
-        problem.varTypes[:n_jobs],
-        problem.ranges[:, :n_jobs],
-        problem.borders[:, :n_jobs],
+    algorithm = NSGA2(
+        pop_size=population_size,
+        sampling=IntegerRandomSampling(),
+        crossover=SBX(prob=0.9, eta=15, repair=RoundingRepair()),
+        mutation=PM(prob=1.0 / (2 * n_jobs), eta=20, repair=RoundingRepair()),
+        eliminate_duplicates=True,
     )
 
-    # Encoding for binary part (RI = real integer)
-    Encoding2 = "RI"  # Real integer encoding
-    Field2 = ea.crtfld(
-        Encoding2,
-        problem.varTypes[n_jobs:],
-        problem.ranges[:, n_jobs:],
-        problem.borders[:, n_jobs:],
-    )
-
-    # Combined encoding using 'OB' (ordered binary) for mixed types
-    # Actually, Geatpy handles this better with a single RI encoding and custom init
-    Encoding = "RI"
-    Field = ea.crtfld(Encoding, problem.varTypes, problem.ranges, problem.borders)
-
-    # Create population with custom initialization
-    population = ea.Population(Encoding, Field, population_size)
-
-    # Initialize with valid permutations + random binary
-    init_chrom = np.zeros((population_size, 2 * n_jobs))
-    for i in range(population_size):
-        # Random permutation for first N variables
-        init_chrom[i, :n_jobs] = np.random.permutation(n_jobs)
-        # Random binary for next N variables
-        init_chrom[i, n_jobs:] = np.random.randint(0, 2, n_jobs)
-
-    population.Chrom = init_chrom
-    population.Phen = population.Chrom.copy()
-
-    # Set random seed if provided
+    # Set seed if provided
     if seed is not None:
         np.random.seed(seed)
 
-    # Create NSGA-II algorithm instance
-    algorithm = ea.moea_NSGA2_templet(
-        problem,
-        population,
-        MAXGEN=generations,
-        logTras=0,  # No logging output
-        drawing=0,  # No plots
-    )
-
-    # Custom recombination for mixed encoding
-    algorithm.recOper = ea.Xovpmx(XOVR=0.9)  # PMX crossover for permutation
-    algorithm.mutOper = ea.Mutswap(Pm=0.1)  # Swap mutation
-
     # Run optimization
-    [NDSet, population] = algorithm.run()
+    termination = get_termination("n_gen", generations)
+    res = minimize(
+        problem,
+        algorithm,
+        termination,
+        seed=seed,
+        verbose=False,
+    )
 
     solution_time = time.time() - start_time
 
-    # Extract Pareto front from NDSet
-    if NDSet is not None and NDSet.sizes > 0:
-        pareto_points = NDSet.ObjV
-        pareto_solutions = [Solution(twt=p[0], eec=p[1]) for p in pareto_points]
+    # Extract Pareto front from results
+    if res.F is not None and len(res.F) > 0:
+        pareto_solutions = [Solution(twt=p[0], eec=p[1]) for p in res.F]
     else:
-        # Fallback: extract from final population
-        pareto_points = get_pareto_front(population.ObjV)
-        pareto_solutions = [Solution(twt=p[0], eec=p[1]) for p in pareto_points]
+        # Fallback: return empty
+        pareto_solutions = []
 
     return ParetoFront(solutions=pareto_solutions), solution_time
 
@@ -691,10 +606,10 @@ def nsga2_baseline(
     generations: int,
 ) -> Tuple[ParetoFront, float]:
     """
-    NSGA-II baseline using Geatpy library (paper-exact implementation).
+    NSGA-II baseline using Pymoo library.
 
-    Uses Geatpy's NSGA-II implementation as specified in the original paper.
-    Falls back to a simple random search if Geatpy is not available.
+    Uses Pymoo's NSGA-II implementation (Python 3.12+ compatible).
+    Falls back to a simple random search if Pymoo is not available.
 
     Args:
         tasks: Task array [N, 5] with features [p1, p2, p3, P_high, P_low]
@@ -705,13 +620,13 @@ def nsga2_baseline(
         ParetoFront: Non-dominated solutions found
         float: Runtime in seconds
     """
-    if GEATPY_AVAILABLE:
-        return run_geatpy_nsga2(tasks, population_size, generations)
+    if PYMOO_AVAILABLE:
+        return run_pymoo_nsga2(tasks, population_size, generations)
     else:
         # Fallback: simple random search (not paper-exact)
         warnings.warn(
-            "Geatpy not available. Using random search fallback. "
-            "Install geatpy for paper-exact results: pip install geatpy"
+            "Pymoo not available. Using random search fallback. "
+            "Install pymoo for NSGA-II results: pip install pymoo"
         )
         return _random_search_fallback(tasks, population_size * generations)
 
