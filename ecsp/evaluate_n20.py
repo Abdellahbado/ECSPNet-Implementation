@@ -17,17 +17,28 @@ import json
 import time
 import copy
 import numpy as np
-import torch
 import matplotlib.pyplot as plt
-from typing import List, Tuple, Dict, Optional
+from typing import List, Tuple, Dict, Optional, Any
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from scipy import stats
 import warnings
 
+try:
+    import torch  # type: ignore
+
+    TORCH_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    torch = None  # type: ignore
+    TORCH_AVAILABLE = False
+
 from .data import generate_instance, generate_tou_pattern, TRAINING_CONFIG, ENV_CONFIG
 from .env import ECSPEnv
-from .model import ECSPNet
+
+if TORCH_AVAILABLE:
+    from .model import ECSPNet
+else:  # pragma: no cover
+    ECSPNet = object  # type: ignore
 
 # ============================================================================
 # Constants from Paper
@@ -77,7 +88,10 @@ class ParetoFront:
 # ============================================================================
 
 
-def generate_test_cases(save_dir: str = "test_cases") -> List[np.ndarray]:
+def generate_test_cases(
+    save_dir: str = "test_cases",
+    sampling: str = "round",
+) -> List[np.ndarray]:
     """
     Generate and save 3 test cases for N=20.
     Each case is saved to disk to ensure reproducibility.
@@ -96,7 +110,8 @@ def generate_test_cases(save_dir: str = "test_cases") -> List[np.ndarray]:
     cases = []
 
     for case_idx in range(NUM_TEST_CASES):
-        case_path = os.path.join(save_dir, f"case_{case_idx}_n{N}.npy")
+        # Include sampling mode in filename to avoid mixing cached instances.
+        case_path = os.path.join(save_dir, f"case_{case_idx}_n{N}_{sampling}.npy")
 
         if os.path.exists(case_path):
             # Load existing case
@@ -105,7 +120,7 @@ def generate_test_cases(save_dir: str = "test_cases") -> List[np.ndarray]:
         else:
             # Generate new case with fixed seed for reproducibility
             np.random.seed(42 + case_idx)
-            tasks = generate_instance(N)
+            tasks = generate_instance(N, sampling=sampling)
             np.save(case_path, tasks)
             print(f"Generated and saved test case {case_idx} to {case_path}")
 
@@ -114,11 +129,13 @@ def generate_test_cases(save_dir: str = "test_cases") -> List[np.ndarray]:
     return cases
 
 
-def load_test_cases(save_dir: str = "test_cases") -> List[np.ndarray]:
-    """Load existing test cases."""
+def load_test_cases(
+    save_dir: str = "test_cases", sampling: str = "round"
+) -> List[np.ndarray]:
+    """Load existing test cases for a given sampling mode."""
     cases = []
     for case_idx in range(NUM_TEST_CASES):
-        case_path = os.path.join(save_dir, f"case_{case_idx}_n{N}.npy")
+        case_path = os.path.join(save_dir, f"case_{case_idx}_n{N}_{sampling}.npy")
         if not os.path.exists(case_path):
             raise FileNotFoundError(
                 f"Test case {case_idx} not found. Run generate_test_cases first."
@@ -254,9 +271,9 @@ def compute_c_metric(A: np.ndarray, B: np.ndarray) -> float:
 
 
 def ecspnet_inference(
-    model: ECSPNet,
+    model: Any,
     tasks: np.ndarray,
-    device: torch.device,
+    device: Any,
     B: int = B_SOLUTIONS,
     beta: float = BETA,
 ) -> Tuple[ParetoFront, float]:
@@ -273,6 +290,10 @@ def ecspnet_inference(
     Returns:
         Pareto front and solution time
     """
+    if not TORCH_AVAILABLE:
+        raise ImportError(
+            "torch is required for ECSPNet inference. Install torch, or run baselines-only evaluation."
+        )
     model.eval()
     start_time = time.time()
 
@@ -360,9 +381,10 @@ def greedy_baseline(
         env = ECSPEnv(N=N)
         obs, _ = env.reset(options={"tasks": tasks.copy(), "w": w})
 
-        # Track current objective value
+        # Track current scalarized objective value (Tchebycheff style).
+        # Paper narrows objective ranges by multiplying EEC by 2 for calculation.
         current_twt, current_eec = 0.0, 0.0
-        current_obj = max(w * current_twt, (1 - w) * current_eec)
+        current_obj = max(w * current_twt, (1 - w) * (2.0 * current_eec))
 
         # Track which tasks have been scheduled IN ORDER (order matters for time!)
         scheduled_seq = []  # list of (task_idx, mode) in execution order
@@ -399,7 +421,7 @@ def greedy_baseline(
 
                     # Get resulting objectives
                     new_twt, new_eec = test_env.get_final_metrics()
-                    new_obj = max(w * new_twt, (1 - w) * new_eec)
+                    new_obj = max(w * new_twt, (1 - w) * (2.0 * new_eec))
 
                     delta_obj = new_obj - current_obj
                     action_scores.append((action, delta_obj, p2, task_idx, mode))
@@ -424,7 +446,7 @@ def greedy_baseline(
 
             # Update current objective
             current_twt, current_eec = env.get_final_metrics()
-            current_obj = max(w * current_twt, (1 - w) * current_eec)
+            current_obj = max(w * current_twt, (1 - w) * (2.0 * current_eec))
 
         twt, eec = env.get_final_metrics()
         solutions.append(Solution(twt=twt, eec=eec))
@@ -449,15 +471,23 @@ def greedy_baseline(
 try:
     from pymoo.algorithms.moo.nsga2 import NSGA2
     from pymoo.core.problem import ElementwiseProblem
+    from pymoo.core.sampling import Sampling
+    from pymoo.core.crossover import Crossover
+    from pymoo.core.mutation import Mutation
     from pymoo.optimize import minimize
-    from pymoo.operators.sampling.rnd import PermutationRandomSampling
-    from pymoo.operators.crossover.ox import OrderCrossover
-    from pymoo.operators.mutation.inversion import InversionMutation
     from pymoo.termination import get_termination
 
     PYMOO_AVAILABLE = True
 except ImportError:
     PYMOO_AVAILABLE = False
+    # Define minimal stubs so this module can be imported without pymoo.
+    NSGA2 = object  # type: ignore
+    ElementwiseProblem = object  # type: ignore
+    Sampling = object  # type: ignore
+    Crossover = object  # type: ignore
+    Mutation = object  # type: ignore
+    minimize = None  # type: ignore
+    get_termination = None  # type: ignore
     warnings.warn(
         "Pymoo not installed. Install with: pip install pymoo\n"
         "NSGA-II baseline will use random search fallback."
@@ -468,9 +498,9 @@ class ECSPProblemPymoo(ElementwiseProblem if PYMOO_AVAILABLE else object):
     """
     ECSP Problem definition for Pymoo NSGA-II.
 
-    Decision Variables:
-    - Permutation of N tasks (order to schedule)
-    - For each task, we use a greedy mode decision based on price
+    Decision Variables (paper-style mixed encoding):
+    - A permutation of N tasks (execution order)
+    - A binary vector of length N (mode per task: 0=no-wait, 1=wait)
 
     Objectives (both minimization):
     - f1: Total Waiting Time (TWT)
@@ -489,8 +519,9 @@ class ECSPProblemPymoo(ElementwiseProblem if PYMOO_AVAILABLE else object):
         self.n_jobs = n_jobs
 
         # Pymoo ElementwiseProblem setup
-        # We optimize task ordering (permutation) and modes together
-        # Using 2*N integer variables: first N for permutation ranking, next N for modes
+        # We encode as 2*N integer variables:
+        # - x[:N]   : permutation values in [0, N-1] (should be a true permutation)
+        # - x[N:2N] : mode bits in {0,1}
         super().__init__(
             n_var=2 * n_jobs,
             n_obj=2,
@@ -510,12 +541,8 @@ class ECSPProblemPymoo(ElementwiseProblem if PYMOO_AVAILABLE else object):
         """
         n = self.n_jobs
 
-        # Extract permutation (convert ranking to actual permutation)
-        perm_ranks = x[:n]
-        perm = np.argsort(perm_ranks)  # Convert ranks to permutation
-
-        # Extract modes (0 or 1)
-        modes = x[n:].astype(int)
+        perm = _repair_permutation(x[:n], n)
+        modes = np.clip(np.rint(x[n:]).astype(np.int64), 0, 1)
 
         # Evaluate using environment
         env = ECSPEnv(N=n)
@@ -529,6 +556,162 @@ class ECSPProblemPymoo(ElementwiseProblem if PYMOO_AVAILABLE else object):
 
         twt, eec = env.get_final_metrics()
         out["F"] = [twt, eec]
+
+
+def _repair_permutation(perm_like: np.ndarray, n: int) -> np.ndarray:
+    """Repair a possibly-invalid permutation vector into a valid permutation 0..n-1."""
+    v = np.rint(perm_like).astype(np.int64)
+    v = np.clip(v, 0, n - 1)
+
+    used = np.zeros(n, dtype=bool)
+    repaired = np.empty(n, dtype=np.int64)
+
+    # First pass: keep first occurrences
+    missing = []
+    for i in range(n):
+        if not used[v[i]]:
+            repaired[i] = v[i]
+            used[v[i]] = True
+        else:
+            repaired[i] = -1
+
+    # Collect missing values
+    missing = [k for k in range(n) if not used[k]]
+    mi = 0
+    for i in range(n):
+        if repaired[i] == -1:
+            repaired[i] = missing[mi]
+            mi += 1
+    return repaired
+
+
+def _pmx_crossover(p1: np.ndarray, p2: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """Partially Mapped Crossover (PMX) for permutations."""
+    n = len(p1)
+    a, b = np.sort(np.random.choice(n, size=2, replace=False))
+    if a == b:
+        return p1.copy(), p2.copy()
+
+    def make_child(pa, pb):
+        child = -np.ones(n, dtype=np.int64)
+        child[a:b] = pa[a:b]
+
+        mapping = {pb[i]: pa[i] for i in range(a, b)}
+
+        for i in range(n):
+            if a <= i < b:
+                continue
+            val = pb[i]
+            while val in mapping and val in child[a:b]:
+                val = mapping[val]
+            child[i] = val
+
+        # Fill any remaining -1 with missing values (safety)
+        if np.any(child == -1):
+            used = set(child[child != -1].tolist())
+            missing = [k for k in range(n) if k not in used]
+            mi = 0
+            for i in range(n):
+                if child[i] == -1:
+                    child[i] = missing[mi]
+                    mi += 1
+        return child
+
+    c1 = make_child(p1, p2)
+    c2 = make_child(p2, p1)
+    return c1, c2
+
+
+class ECSPPermutationBinarySampling(Sampling):
+    """Random sampling for [perm | binary] encoding."""
+
+    def __init__(self, n_jobs: int):
+        super().__init__()
+        self.n_jobs = n_jobs
+
+    def _do(self, problem, n_samples, **kwargs):
+        n = self.n_jobs
+        X = np.zeros((n_samples, 2 * n), dtype=np.int64)
+        for i in range(n_samples):
+            X[i, :n] = np.random.permutation(n)
+            X[i, n:] = np.random.randint(0, 2, size=n)
+        return X
+
+
+class ECSPPermutationBinaryCrossover(Crossover):
+    """PMX crossover for permutation part + uniform crossover for binary part."""
+
+    def __init__(self, n_jobs: int, prob: float = 0.9):
+        super().__init__(n_parents=2, n_offsprings=2)
+        self.n_jobs = n_jobs
+        self.prob = prob
+
+    def _do(self, problem, X, **kwargs):
+        # X shape: (n_parents, n_matings, n_var)
+        n = self.n_jobs
+        n_matings = X.shape[1]
+        off = np.empty((self.n_offsprings, n_matings, 2 * n), dtype=np.int64)
+
+        for k in range(n_matings):
+            p1 = X[0, k, :].astype(np.int64)
+            p2 = X[1, k, :].astype(np.int64)
+
+            perm1, bits1 = _repair_permutation(p1[:n], n), np.clip(p1[n:], 0, 1)
+            perm2, bits2 = _repair_permutation(p2[:n], n), np.clip(p2[n:], 0, 1)
+
+            if np.random.rand() < self.prob:
+                cperm1, cperm2 = _pmx_crossover(perm1, perm2)
+                mask = np.random.rand(n) < 0.5
+                cbits1 = np.where(mask, bits1, bits2)
+                cbits2 = np.where(mask, bits2, bits1)
+            else:
+                cperm1, cperm2 = perm1.copy(), perm2.copy()
+                cbits1, cbits2 = bits1.copy(), bits2.copy()
+
+            off[0, k, :n] = cperm1
+            off[0, k, n:] = cbits1
+            off[1, k, :n] = cperm2
+            off[1, k, n:] = cbits2
+
+        return off
+
+
+class ECSPPermutationBinaryMutation(Mutation):
+    """Inversion mutation for permutation + bitflip for binary."""
+
+    def __init__(
+        self,
+        n_jobs: int,
+        perm_mut_prob: float = None,
+        bit_mut_prob: float = None,
+    ):
+        super().__init__()
+        self.n_jobs = n_jobs
+        self.perm_mut_prob = (1.0 / n_jobs) if perm_mut_prob is None else perm_mut_prob
+        self.bit_mut_prob = (1.0 / n_jobs) if bit_mut_prob is None else bit_mut_prob
+
+    def _do(self, problem, X, **kwargs):
+        n = self.n_jobs
+        Y = X.astype(np.int64).copy()
+
+        for i in range(Y.shape[0]):
+            perm = _repair_permutation(Y[i, :n], n)
+            bits = np.clip(Y[i, n:], 0, 1)
+
+            # Permutation inversion mutation
+            if np.random.rand() < self.perm_mut_prob:
+                a, b = np.sort(np.random.choice(n, size=2, replace=False))
+                if a != b:
+                    perm[a:b] = perm[a:b][::-1]
+
+            # Bitflip mutation (per-bit)
+            flip = np.random.rand(n) < self.bit_mut_prob
+            bits = np.where(flip, 1 - bits, bits)
+
+            Y[i, :n] = perm
+            Y[i, n:] = bits
+
+        return Y
 
 
 def run_pymoo_nsga2(
@@ -560,17 +743,14 @@ def run_pymoo_nsga2(
     # Create problem instance
     problem = ECSPProblemPymoo(tasks, n_jobs)
 
-    # Create NSGA-II algorithm with integer-friendly operators
-    from pymoo.operators.sampling.rnd import IntegerRandomSampling
-    from pymoo.operators.crossover.sbx import SBX
-    from pymoo.operators.mutation.pm import PM
-    from pymoo.operators.repair.rounding import RoundingRepair
-
+    # Paper-style mixed decision variables:
+    # - permutation: PMX crossover + inversion mutation
+    # - binary: uniform crossover + bitflip mutation
     algorithm = NSGA2(
         pop_size=population_size,
-        sampling=IntegerRandomSampling(),
-        crossover=SBX(prob=0.9, eta=15, repair=RoundingRepair()),
-        mutation=PM(prob=1.0 / (2 * n_jobs), eta=20, repair=RoundingRepair()),
+        sampling=ECSPPermutationBinarySampling(n_jobs=n_jobs),
+        crossover=ECSPPermutationBinaryCrossover(n_jobs=n_jobs, prob=0.9),
+        mutation=ECSPPermutationBinaryMutation(n_jobs=n_jobs),
         eliminate_duplicates=True,
     )
 
@@ -592,9 +772,9 @@ def run_pymoo_nsga2(
 
     # Extract Pareto front from results
     if res.F is not None and len(res.F) > 0:
-        pareto_solutions = [Solution(twt=p[0], eec=p[1]) for p in res.F]
+        pts = get_pareto_front(np.asarray(res.F, dtype=np.float64))
+        pareto_solutions = [Solution(twt=float(p[0]), eec=float(p[1])) for p in pts]
     else:
-        # Fallback: return empty
         pareto_solutions = []
 
     return ParetoFront(solutions=pareto_solutions), solution_time
@@ -905,7 +1085,9 @@ def generate_time_table(time_results: Dict, methods: List[str]) -> str:
 def run_full_evaluation(
     model_path: str,
     output_dir: str = "evaluation_results",
-    device: str = "cuda" if torch.cuda.is_available() else "cpu",
+    device: str = "cuda" if TORCH_AVAILABLE and torch.cuda.is_available() else "cpu",
+    baselines_only: bool = False,
+    sampling: str = "round",
 ):
     """
     Run complete paper-exact evaluation for N=20.
@@ -916,7 +1098,21 @@ def run_full_evaluation(
         device: Torch device
     """
     os.makedirs(output_dir, exist_ok=True)
-    device = torch.device(device)
+
+    # If torch isn't available, we can only run baselines.
+    if not TORCH_AVAILABLE and not baselines_only:
+        warnings.warn("torch not available; running baselines only.")
+        baselines_only = True
+
+    if not TORCH_AVAILABLE and device != "cpu":
+        warnings.warn("torch not available; forcing device='cpu'.")
+        device = "cpu"
+
+    device = torch.device(device) if TORCH_AVAILABLE else "cpu"
+    if TORCH_AVAILABLE and isinstance(device, torch.device):
+        if device.type == "cuda" and not torch.cuda.is_available():
+            warnings.warn("CUDA requested but not available; using CPU.")
+            device = torch.device("cpu")
 
     print("=" * 60)
     print("Paper-Exact Evaluation Suite for N=20")
@@ -926,26 +1122,30 @@ def run_full_evaluation(
     print(f"  β = {BETA} (truncation)")
     print(f"  HV reference = {HV_REFERENCE}")
     print(f"  α = {SIGNIFICANCE_LEVEL} (Wilcoxon)")
+    print(f"  sampling = {sampling}")
 
-    # NOTE: ECSPNet loading is skipped for baseline-only evaluation
-    # Uncomment below to include ECSPNet inference
-    # print("\n1. Loading trained model...")
-    # model = ECSPNet(
-    #     d_model=TRAINING_CONFIG["d_model"],
-    #     num_heads=TRAINING_CONFIG["num_heads"],
-    #     num_blocks=TRAINING_CONFIG["num_blocks"],
-    # ).to(device)
-    # checkpoint = torch.load(model_path, map_location=device, weights_only=False)
-    # if "model_state_dict" in checkpoint:
-    #     model.load_state_dict(checkpoint["model_state_dict"])
-    # else:
-    #     model.load_state_dict(checkpoint)
-    # model.eval()
-    # print(f"   Loaded model from {model_path}")
+    model = None
+    if not baselines_only:
+        print("\n1. Loading trained model...")
+        model = ECSPNet(
+            d_model=TRAINING_CONFIG["d_model"],
+            num_heads=TRAINING_CONFIG["num_heads"],
+            num_blocks=TRAINING_CONFIG["num_blocks"],
+        ).to(device)
+        checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+        if "model_state_dict" in checkpoint:
+            model.load_state_dict(checkpoint["model_state_dict"])
+        else:
+            model.load_state_dict(checkpoint)
+        model.eval()
+        print(f"   Loaded model from {model_path}")
 
     # Generate/load test cases
     print("\n1. Loading test cases...")
-    test_cases = generate_test_cases(os.path.join(output_dir, "test_cases"))
+    test_cases = generate_test_cases(
+        os.path.join(output_dir, "test_cases"),
+        sampling=sampling,
+    )
 
     # Results storage
     results = {
@@ -955,8 +1155,10 @@ def run_full_evaluation(
         "pareto_fronts": {},
     }
 
-    # Baselines only (ECSPNet skipped for scaling validation)
-    methods = ["Greedy"]
+    methods: List[str] = []
+    if not baselines_only:
+        methods.append("ECSPNet")
+    methods.append("Greedy")
     for budget in MOEA_BUDGETS:
         methods.append(f"NSGA-II({budget[0]}x{budget[1]})")
 
@@ -972,16 +1174,17 @@ def run_full_evaluation(
 
         case_fronts = {}
 
-        # NOTE: ECSPNet inference skipped for baseline validation
-        # Uncomment to include:
-        # print("   - ECSPNet inference...")
-        # pf_ecspnet, time_ecspnet = ecspnet_inference(model, tasks, device)
-        # front_ecspnet = pf_ecspnet.to_array()
-        # results["hypervolume"]["ECSPNet"].append(compute_hypervolume(front_ecspnet))
-        # results["solution_times"]["ECSPNet"].append(time_ecspnet)
-        # results["pareto_fronts"]["ECSPNet"].append(front_ecspnet)
-        # case_fronts["ECSPNet"] = front_ecspnet
-        # print(f"     HV={results['hypervolume']['ECSPNet'][-1]:.4f}, Time={time_ecspnet:.2f}s, |P|={len(front_ecspnet)}")
+        if not baselines_only:
+            print("   - ECSPNet inference...")
+            pf_ecspnet, time_ecspnet = ecspnet_inference(model, tasks, device)
+            front_ecspnet = pf_ecspnet.to_array()
+            results["hypervolume"]["ECSPNet"].append(compute_hypervolume(front_ecspnet))
+            results["solution_times"]["ECSPNet"].append(time_ecspnet)
+            results["pareto_fronts"]["ECSPNet"].append(front_ecspnet)
+            case_fronts["ECSPNet"] = front_ecspnet
+            print(
+                f"     HV={results['hypervolume']['ECSPNet'][-1]:.4f}, Time={time_ecspnet:.2f}s, |P|={len(front_ecspnet)}"
+            )
 
         # Greedy
         print("   - Greedy baseline...")
@@ -1026,9 +1229,8 @@ def run_full_evaluation(
     print(f"   Saved hypervolume table to table_hypervolume.md")
 
     # Table V: C-metric
-    cm_table = generate_cmetric_table(
-        results["c_metric"], methods[1:]
-    )  # Exclude ECSPNet
+    baseline_methods = [m for m in methods if m != "ECSPNet"]
+    cm_table = generate_cmetric_table(results["c_metric"], baseline_methods)
     with open(os.path.join(output_dir, "table_cmetric.md"), "w") as f:
         f.write(cm_table)
     print(f"   Saved C-metric table to table_cmetric.md")
@@ -1072,6 +1274,37 @@ def run_full_evaluation(
     return results
 
 
+def run_sampling_comparison(
+    model_path: str,
+    output_dir: str = "evaluation_results",
+    device: str = "cpu",
+    baselines_only: bool = False,
+):
+    """Run evaluation twice: sampling='round' and sampling='choice'."""
+    out_round = os.path.join(output_dir, "sampling_round")
+    out_choice = os.path.join(output_dir, "sampling_choice")
+
+    print("\n=== Sampling comparison: round ===")
+    res_round = run_full_evaluation(
+        model_path=model_path,
+        output_dir=out_round,
+        device=device,
+        baselines_only=baselines_only,
+        sampling="round",
+    )
+
+    print("\n=== Sampling comparison: choice ===")
+    res_choice = run_full_evaluation(
+        model_path=model_path,
+        output_dir=out_choice,
+        device=device,
+        baselines_only=baselines_only,
+        sampling="choice",
+    )
+
+    return {"round": res_round, "choice": res_choice}
+
+
 # ============================================================================
 # CLI Entry Point
 # ============================================================================
@@ -1093,9 +1326,45 @@ if __name__ == "__main__":
         help="Output directory for results",
     )
     parser.add_argument(
-        "--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu"
+        "--device",
+        type=str,
+        default="cuda" if (TORCH_AVAILABLE and torch.cuda.is_available()) else "cpu",
+    )
+
+    parser.add_argument(
+        "--baselines-only",
+        action="store_true",
+        help="Skip ECSPNet inference and run Greedy/NSGA-II only",
+    )
+
+    parser.add_argument(
+        "--sampling",
+        type=str,
+        default="round",
+        choices=["round", "choice"],
+        help="Instance generation: 'round' (continuous then round to 0.1) or 'choice' (discrete-uniform on 0.1 grid)",
+    )
+
+    parser.add_argument(
+        "--compare-sampling",
+        action="store_true",
+        help="Run both sampling modes and save under output/sampling_round and output/sampling_choice",
     )
 
     args = parser.parse_args()
 
-    run_full_evaluation(args.model, args.output, args.device)
+    if args.compare_sampling:
+        run_sampling_comparison(
+            model_path=args.model,
+            output_dir=args.output,
+            device=args.device,
+            baselines_only=args.baselines_only,
+        )
+    else:
+        run_full_evaluation(
+            args.model,
+            args.output,
+            args.device,
+            baselines_only=args.baselines_only,
+            sampling=args.sampling,
+        )

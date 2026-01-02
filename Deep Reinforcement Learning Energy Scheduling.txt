@@ -1,0 +1,1058 @@
+﻿11490 IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+
+Deep Reinforcement Learning-Based
+Energy-Conscious Scheduling Under
+
+Time-of-Use Electricity Price
+Caixia Wang, Wenxuan Fang, Xin Dai , Renchu He , Wei Du , Senior Member, IEEE,
+
+and Yang Tang , Fellow, IEEE
+
+Abstract— In the context of carbon peaking and carbon has increasingly become a focal point for both academia and
+neutrality, green production scheduling that considers energy industry, especially with the growing emphasis on environmental
+has attracted increasing attention. Reinforcement learning (RL) concerns and advancing industrialization. Time-of-use (TOU)
+has emerged as a topic for developing efficient algorithms for electricity price policy is widely implemented to effectively
+solving complex combinatorial optimization problems, such as balance electricity supply and demand. For business managers,
+real-world shop scheduling problems. In this paper, we investigate appropriately responding to this policy by optimizing scheduling
+the energy-conscious scheduling problem (ECSP) under time-of- tasks can significantly reduce energy costs. This paper addresses
+use (TOU) electricity price with the goal of minimizing both a novel energy-conscious scheduling problem (ECSP) under
+the waiting time and extra electricity cost. A mathematical TOU electricity price, specifically arising from the electrode
+model is formulated, and an efficient deep RL (DRL)-based graphitization production process in graphite material man-
+optimization method is proposed to solve the problem effectively. ufacturing. We propose a deep reinforcement learning-based
+We design a novel ECSP network (ECSPNet) tailored to handle energy-saving scheduling optimization method, which integrates
+various ECSP scales based on the characteristics of the problem. considerations for both production efficiency and energy cost
+Moreover, the Tchebycheff decomposition method is used to indicators. By combining the unique characteristics of ECSP with
+solve the multi-objective optimization problems, complemented the decision-making capabilities of reinforcement learning and
+by the application of the policy gradient method from reinforce- the perception capabilities of deep learning, our method excels
+ment learning to train the ECSPNet without size limitations. in solution speed, efficiency, and adaptability. The effectiveness
+Experiments verify that the proposed ECSPNet outperforms and practical applicability of our method have been demonstrated
+state-of-the-art methods and is computationally efficient, even through experiments on actual enterprise cases of various scales.
+on instances of larger scales unseen in training. Real-world case The rapidly generated optimization scheduling plans can assist
+studies reveal that the proposed method can reduce annual enterprises in rationally arranging scheduling tasks while min-
+total electricity cost by approximately 30% while effectively imizing electricity cost. Looking ahead, our proposed method
+maximizing production efficiency. has the potential to address a wide range of energy-conscious
+
+scheduling problems under TOU electricity price policy.
+Note to Practitioners—Enhancing energy consciousness along-
+
+side improving production efficiency in manufacturing systems Index Terms— Deep reinforcement learning, energy-conscious
+scheduling problem, time of use electricity price, optimization
+algorithm.
+
+Received 4 November 2024; revised 29 December 2024; accepted 24
+January 2025. Date of publication 29 January 2025; date of current version
+11 April 2025. This article was recommended for publication by Associate I. INTRODUCTION
+Editor N. Frigerio and Editor X. Xie upon evaluation of the reviewers’
+comments. This work was supported in part by the National Natural Sci- WITH the development of economic globalization and
+ence Foundation of China under Grant 62293500, Grant U2441245, Grant the improvement of social productivity, energy is
+62293502, and Grant 62173144; in part by Shanghai Rising-Star Program
+under Grant 22QA1402400; in part by the Program of Introducing Talents evolving into an increasingly important resource for countries
+of Discipline to Universities (the 111 Project) under Grant B17017; in part worldwide. Energy shortages pose a threat to the overall
+by the Fundamental Research Funds for the Central Universities under Grant development of many nations. Manufacturing, which serves as
+222202517006; and in part by the State Key Laboratory of Industrial Con-
+trol Technology, China under Grant ICT2024A22. (Corresponding authors: the foundation of the economies in the majority of countries,
+Wei Du; Yang Tang.) accounts for approximately half of the global energy consump-
+
+Caixia Wang, Xin Dai, Wei Du, and Yang Tang are with the State Key tion [1], [2]. Therefore, it is of great practical significance to
+Laboratory of Industrial Control Technology and the Key Laboratory of
+Smart Manufacturing in Energy Chemical Process, Ministry of Education, carry out energy-conscious research from the perspective of
+East China University of Science and Technology, Shanghai 200237, China, energy-saving and environmental protection, and then subse-
+and also with Huzhou Institute of Industrial Control Technology, Huzhou quently reduce the energy consumption of industrial firms.
+313099, China (e-mail: y15220005@mail.ecust.edu.cn; xindai@ecust.edu.cn;
+duwei0203@gmail.com; tangtany@gmail.com). Electricity plays a crucial role as the primary energy source
+
+Wenxuan Fang is with the Trustworthy and General Artificial Intelligence in the manufacturing industry. Time-of-use (TOU) electricity
+Laboratory, Westlake University, Hangzhou, Zhejiang 310000, China (e-mail: price policy [3] is the most prevalent power load control
+fangwenxuan@westlake.edu.cn).
+
+Renchu He is with the School of Department of Automation, College of strategy used by many power providers to effectively balance
+Artificial Intelligence, China University of Petroleum, Beijing 102249, China electricity supply and demand, especially due to potential vari-
+(e-mail: rche@cup.edu.cn). ations in customer electricity consumption within a day. This
+
+This article has supplementary downloadable material available at
+https://doi.org/10.1109/TASE.2025.3536198, provided by the authors. policy strives to provide variable electricity rates that mirror
+
+Digital Object Identifier 10.1109/TASE.2025.3536198 demand fluctuations, thereby meeting demand during peak
+1558-3783 © 2025 IEEE. All rights reserved, including rights for text and data mining, and training of artificial intelligence
+
+and similar technologies. Personal use is permitted, but republication/redistribution requires IEEE permission.
+See https://www.ieee.org/publications/rights/index.html for more information.
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+WANG et al.: DRL-BASED ENERGY-CONSCIOUS SCHEDULING UNDER TIME-OF-USE ELECTRICITY PRICE 11491
+
+hours, enhancing the balance of electricity supply and demand, gathering and the search space. The ECSP poses a significant
+and improving grid reliability. Meanwhile, it can incentivize challenge to traditional optimization methods.
+manufacturers, particularly in sectors with high power usage, Table I summarizes recent research on energy-conscious
+to strategically coordinate production processes to efficiently scheduling problems. Some studies focus exclusively on the
+allocate power resources and lower total electricity cost (TEC). energy consumption of machines and jobs [14], [30]. Research
+
+In recent years, the importance of TOU electricity price addressing TOU electricity price has considered factors such as
+policy in optimizing production scheduling has grown sig- machine on/off states [13], energy consumption metrics [31],
+nificantly due to its advantages [4], [5], [6], [7]. The basic not-all-machine options [32], energy-critical operations [33],
+single-machine scheduling problem, when combined with and transportation and setup times [34] across various work-
+TOU electricity price considerations, has been proven to shops. However, there is a notable scarcity of studies that
+be NP-hard, posing significant challenges for finding solu- investigate time-varying energy consumption in operations
+tions and highlighting its research importance [8], [9], [10]. influenced by production temperature, which subsequently
+Research shows that mathematical programming methods are impacts electricity costs. Previous research has employed a
+limited to addressing small-scale problems [11], [12]. Heuris- range of methodologies [3], [9], [10], [16]; yet, the poten-
+tic methods are better suited for large-scale problems [13], tial of DRL [35], [36] in the context of TOU pricing for
+[14]. However, it’s important to note that the quality of energy-related job scheduling remains underexplored [37],
+the solution depends on the formulation of artificial rules. [38]. This gap highlights the challenge of addressing complex
+Scheduling methods based on evolutionary algorithms outper- multi-objective optimization problems in practical produc-
+form other methods in terms of solution quality quantity, and tion environments [39], [40]. Since the price of electricity
+distribution [15], [16], [17]. However, they are time-consuming varies over different periods, considering electricity costs
+when dealing with medium- and large-scale instances. There- in scheduling problems—while simultaneously incorporating
+fore, it is necessary to explore new methods that can provide waiting time—presents a compelling challenge [11], [41].
+faster solutions without compromising solution quality. This motivates the design of an efficient DRL-based opti-
+
+Reinforcement learning (RL) has garnered significant mization method that facilitates information gathering through
+attention recently due to its robust decision-making and opti- interactive exchanges with the environment. Our approach
+mization capabilities [18], [19], [20], [21]. If we consider aims to effectively integrate this knowledge to make informed
+a production scheduling problem as an RL environment, task decisions, ultimately achieving high-quality solutions that
+the agent can learn policies or rules through well-designed balance cost and efficiency.
+actions and states, along with substantial offline training Motivated by the above discussions, in this paper, we have
+and interaction with the environment. RL has emerged as a investigated the ECSP under TOU electricity price using a
+promising approach for enhancing the performance of schedul- DRL-based scheduling optimization method, with the objec-
+ing algorithms, demonstrating notable success in modeling tive of minimizing both the total waiting time (TWT),
+scheduling processes as markov decision processes (MDP) a measure of production efficiency, and extra electricity cost
+[22], [23], [24], [25]. A key advantage of RL-based scheduling (EEC), an indicator of energy costs. A novel network called
+algorithms is their ability to provide quick reaction times ECSPNet is proposed to solve the time-focused ECSP directly.
+and robust generalization after training. Deep reinforcement ECSPNet incorporates electricity price features into the model
+learning (DRL), a specialized subset of RL, further amplifies using the attention mechanism, departing from the com-
+these strengths by utilizing deep neural networks to manage mon encoder-decoder structure. This integration enhances the
+high-dimensional state and action spaces. Through iterative model’s generalizability and efficiency in solving large-scale
+interaction with dynamic, time-varying environments, DRL ECSP instances. By combining adaptability and computational
+excels at modeling complex decision-making processes and efficiency, DRL offers significant advantages over traditional
+identifying optimal actions to maximize rewards [26], [27], optimization methods, particularly in terms of accuracy and
+[28], [29]. scalability in complex scenarios. In this work, ECSPNet
+
+However, much of the existing DRL literature on schedul- leverages the robust decision-making capabilities of DRL
+ing problems remains overly simplified, often focusing on to effectively integrate problem-specific features, enabling
+problems with well-defined topological structures, while dynamic, time-series task decisions. This integration enhances
+overlooking real-world constraints. Furthermore, few DRL the optimization strategy and facilitates the rapid acquisition
+algorithms, particularly policy-based ones, are capable of of end-to-end solutions tailored to ECSP.
+effectively searching for optimal policies and generating end- The contributions of this paper can be summarized as
+to-end schedules when confronted with complex practical follows:
+optimization challenges. One of the more complex combinato- 1) To the best of our knowledge, this study is the first to
+rial optimization problems is the energy-conscious scheduling propose a mathematical model for the ECSP under TOU
+problem (ECSP) [30], which is influenced by TOU elec- electricity price, aimed at optimizing both waiting time
+tricity price. All operations in the ECSP related to high- and electricity cost concurrently.
+and low-energy consumption areas are completed sequentially 2) A novel DRL-based approach is developed. By incor-
+under TOU electricity price. The process primarily focuses porating the characteristics of ECSP and using the
+on time-based decision-making without explicit topological attention mechanism, we establish ECSPNet, an end-to-
+information, thereby increasing the complexity of information end framework that is not constrained by problem size,
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+11492 IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+
+TABLE I
+EXISTING RESEARCH ON SOLVING ENERGY-CONSCIOUS SCHEDULING PROBLEMS
+
+overcoming the problem of poor generalization ability. job consisting of fixed procedures divided into three stages
+We utilize the Tchebycheff decomposition method to based on varying energy consumption levels due to production
+simultaneously optimize conflicting objectives. DRL- temperature. These stages include a low-energy consumption
+based approach enables ECSPNet to exhibit powerful phase, a high-energy consumption phase, and a return to
+search capabilities in the solution space. low-energy consumption, where the high-energy consumption
+
+3) Extensive experiments conducted on various real-world stage significantly contributes to the overall production cost.
+case studies demonstrate the superior performance and The processing time for each step is predetermined, meaning
+computational efficiency of ECSPNet across all problem that once a job begins, it must complete all steps continuously
+scales. After minimal training, ECSPNet consistently within the specified time frame.
+outperforms state-of-the-art algorithms by delivering sta- In addition to the traditional objective of minimizing
+ble, high-quality solutions that minimize total electricity completion time in common shop scheduling problems, the
+cost while maximizing production efficiency. ECSP introduces a novel element by incorporating electric-
+
+The remainder of this paper is organized as follows. ity costs. This integration considers two key factors: power
+Section II provides the problem description and formulation. consumption [1] and TOU electricity price [11]. Specifically,
+Section III proposes the details of ECSPNet for solving the the operational process necessitates electricity usage, which
+ECSP, including its framework, model training, and enhance- involves constantly fluctuating energy consumption. Through-
+ment strategies. Section IV reports the experimental results out each job’s entire process, power consumption is dictated by
+and provides a comparative analysis. Finally, conclusions are its unique power curve. Different types of jobs exhibit distinct
+drawn in Section V. power curves, generally exhibiting fluctuations, often with
+
+sudden power spikes during certain phases of the electrical
+II. PROBLEM DESCRIPTION AND FORMULATION process, representing high-power states. Additionally, TOU
+
+A. Problem Description electricity price varies based on daily timeframes, leading
+The ECSP is defined as follows. A set of independent jobs is to fluctuations in unit-time electricity tariffs, with peaks and
+
+sequentially arranged on a machine in the workshop, with each troughs during different periods.
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+WANG et al.: DRL-BASED ENERGY-CONSCIOUS SCHEDULING UNDER TIME-OF-USE ELECTRICITY PRICE 11493
+
+Fig. 1. Processing procedure of jobs.
+
+Based on the aforementioned electrical properties of jobs, Indices and sets:
+it proves advantageous to incorporate brief power interrup- i Index of jobs, i ∈ {1, . . . , I }.
+tions, with a duration during the electrical process in the j Index of steps of each job, j ∈ {1, . . . , J }.
+actual production of the enterprise, and the cooling and power t Index of time slots, t ∈ {1, . . . , T }.
+consumption impact is negligible. Fig. 1 offers an overview
+of the comprehensive working process within the workshop, Parameters
+spanning from semi-finished to finished products. This depic- E Pt Electricity price in time slot t .
+tion encompasses the influence of job energy consumption H L Price Numerical bounds to distinguish between high
+and TOU electricity price. The ECSP aims to determine the and low electricity prices.
+optimal processing sequence of jobs and execution methods for H Poweri The high power consumption of job i .
+each job, considering whether the high-energy consumption M A large enough positive integer.
+step of job should wait. Using the three-field notation [42], the pi, j The processing time of step j of job i .
+ECSP can be represented by 1|TOU, PI|{TWT, EEC}, where T L Length of each time slot.
+‘1’ indicates a single machine, ‘TOU’ refers to the time-of-use T PW The maximum time of all jobs to temporarily
+electricity price, ‘PI’ signifies the brief power interruptions, interrupt power supply.
+‘TWT’ represents the total waiting time, and ‘EEC’ denotes
+the total extra electricity cost. Continuous variables
+
+There are several assumptions and constraints within the EEC The total extra electricity cost of jobs.
+operation. TWT The total waiting time of jobs.
+
+1) Each job is independent and can start processing at time ECi The extra electricity cost of job i .
+zero. P I Ti Starting time of power interruption of job i .
+
+2) The workshop accommodates only one job at a time. P RTi Ending time of power interruption of job i .
+3) Each job requires processing in the workshop once and P STi Starting time of power supply of job i .
+
+only once. PT stepi, j Starting time of power supply of step j of job
+4) All jobs follow identical processing procedures. i .
+5) Upon entering the workshop, each job must complete all W Ti The waiting time of job i .
+
+procedures. Binary variables
+6) Except for recording the interruption time, any negligi-
+
+ble impact of short interruptions on power consumption P Ht =1 if time slot t is a high price zone, 0 other-
+during the job’s processing is disregarded. wise.
+
+P HCi,t =1 if the high power consumption step of job
+i is processing in time slot t , 0 otherwise.
+
+B. Problem Formulation P Ii,t =1 if job i starts to interrupt power supply in
+In this section, we present the mathematical model for the time slot t , 0 otherwise.
+
+ECSP. First, we summarize the relevant parameters and define P Ri,t =1 if job i starts to reinstate power supply in
+the decision variables used in the formulation. time slot t , 0 otherwise.
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+11494 IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+
+∑
+P Si,t =1 if job i starts to energize in time slot t ,
+
+∑ Pstepi, j,t ≤ 1,∀t, (26)
+0 otherwise. i∈I j∈J
+
+Pstepi, j,t =1 if step j of job i is processing in time slot
+t , 0 otherwise. Pstepi, j,t = pi, j ,∀i, j, (27)
+
+PWi,t =1 if job i is waiting in time slot t , 0 otherwise. t∈T
+
+P HCi,t = Pstepi,2,∑t ,∀i, t, ∑ (28)
+Based on the above notations, the mixed integer linear P STi = P STi−1 + pi−1, j + PWi−1,t ,∀i, (29)
+
+programming (MILP) model of the ECSP is formulated as j∈J t∈T
+follows: ∑ PT stepi,1 = P STi ,∀i, (30)
+
+n PT stepi,2 = PT stepi,1 + pi,1 +W Ti ,∀i, (31)
+min TWT = W Ti ,∀i, (1)
+
+∑ PT step
+i i,3 = PT stepi,2 + pi,2,∀i, (32)
+=1
+n where Eqs. (3)-(4) minimize the cumulative waiting time and
+
+min EEC = ECi ,∀i, (2) the additional electricity cost incurred by jobs in the workshop.
+i=1 Eqs. (5)-(7) define the starting times for energizing, power
+
+s.t. W Ti =∑P RTi − P I Ti ,∀i, (3) interruption, reinstatement, and the starting time of the step
+ECi = (E Pt × H Poweri × P Ht × P HCi,t (4) in each job, respectively. Eqs. (8)-(11) constrain the starting
+
+t∈T time of the step in each job. Eqs. (12) ensures that each
+× (1−∑PWi job starts only once. Eqs. (13)-(15) constrain the power to
+
+,t )),∀i,
+be interrupted at most once. Eqs. (16)-(17) guarantee the
+
+P STi = T L ×∑ t × P Si,t ,∀i, (5) relationship between the interrupting time and the starting time
+t∈T of each job. Eqs. (18)-(23) define the continuity of the power
+
+P I Ti = T L × ∑t × P Ii,t ,∀i, (6) interrupt waiting stage, and constrain the maximum duration
+t∈T of power interruption. Eqs. (24)-(25) define the high and low
+
+P RTi = T L × t∑× P Ri,t ,∀i, (7) electricity price zones. Eqs. (26)-(27) constrain the processing
+t∈T time of each job. Eq. (28) defines the relationship between
+
+P steps and the high power consumption of jobs. Eq. (29) ensures
+
+∑T stepi, j = T L × t × Pstepi, j,t ,∀i, j, (8)
+t∈T that jobs are processed sequentially. Eqs. (30)-(32) ensure that
+
+the steps of each job are processed in the prescribed sequence,
+Pstepi, j,t ′ ≥ Pstepi, j,t ,∀i, j, t, (9) and define the time order for each step of jobs.
+
+t ′∈t Thus, the MILP formulation of ECSP can be described
+PT stepi, j ≥ T L × t × Pstepi, j,t ,∀i, j, t, (10) by minimizing the objective functions (1)-(2) simultaneously,
+PT stepi, j ≤ T L × t + M × 1− Pstepi, j,t ,∀i, j, t,
+
+∑ subject to constraints (3)-(32). In practical calculations, con-
+(11) sidering multiplying (2) by 2 serves to narrow the range and
+
+maintain both objective functions on a similar scale. Given the
+
+∑ P Si,t = 1,∀i, (12)
+t∈T complexity of the single-machine scheduling problem under
+
+TOU electricity price, which is known to be strongly NP-
+
+∑ P Ii,t ≤ 1,∀i, (13)
+hard [8], [43], and considering the advantages of DRL in
+
+t∈T
+sequential decision-making scheduling problems, we propose
+
+∑ P Ri,t ≤ 1,∀i, (14) a DRL-based algorithm in the following section to optimize
+t∈T ∑ the ECSP.
+
+P Ii,t = P Ri,t ,∀i, (15) In the actual manufacturing enterprise related to the ECSP,
+t∈T t∈T ∑ the electrode graphitization production process for graphite
+P I Ti ≤ P STi + pi,1 + M × (1−∑ P Ii,t ),∀i, (16) material manufacturing involves a furnace and n electrode
+
+t∈T materials that require sequencing. The production process of
+P I T each electrode material is influenced by temperature effects,
+
+i ≥∑P STi + pi,1−M × (1− P Ii,t ),∀i, (17)
+resulting in significant variations in energy consumption. This
+
+t∈T
+process can be divided into three stages: the front and rear
+
+T L × PWi,t = P RTi − P I Ti ,∀i, (18) stages represent low-power consumption phases, while the
+t∈T middle stage constitutes a high-power consumption phase.
+
+P RTi − P I Ti ≤ T PW + 1,∀i, (19) Table II provides an example with 5 jobs and 3 steps, giving
+P RTi − P I Ti ≥ 0,∀i, (20) the specific processing time for each step.
+PWi,t ≥ P Ii,t ,∀i, t, (21)
+
+III. DEEP REINFORCEMENT LEARNING BASED
+PWi,t ≤ 1− P Ri,t ,∀i, t, (22) OPTIMIZATION SCHEDULING FOR ECSP
+PWi,t+1 ≥ PWi,t − P Ri,t+1,∀i, t, (23) This section introduces the proposed method in detail.
+M × P Ht ≥ E Pt − H L Price,∀t, (24) In this article, solving the ECSP is considered a sequential
+− M × P Ht ≤ E Pt − H L Price,∀t, (25) decision-making process. It iteratively conducts scheduling
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+WANG et al.: DRL-BASED ENERGY-CONSCIOUS SCHEDULING UNDER TIME-OF-USE ELECTRICITY PRICE 11495
+
+TABLE II
+AN EXAMPLE OF ECSP WITH 5 JOBS AND 3 STEPS
+
+WITH THE PROCESSING TIME
+
+operations to allocate n jobs (i.e., tasks to be scheduled) to
+each period, taking into account the electricity price. The
+process continues until all tasks are scheduled. Additionally,
+it integrates the different energy consumption of these opera-
+tions to determine if a brief power outage (wait) is necessary
+for the current task to avoid areas with high electricity prices Fig. 2. The model architecture of ECSPNet.
+
+while taking into account the dual goals of waiting time and
+electricity cost. In this work, we design a specific-designed accuracy in task selection compared to using a single
+network ECSPNet without limitation of problem sizes for solv- block. While there may be a potential reduction in speed,
+ing the ECSP. Firstly, the model, centered around the attention the collaboration between the two blocks achieves an
+mechanism, conscientiously considers the characteristics of optimal balance between accuracy and efficiency.
+ECSP, allowing tasks to compete with each other and striving 3) Post-processing: A linear operation is applied to the
+to achieve a balance between accuracy and speed. It stream- output, transforming the output of each task into a two-
+lines the multi-objective problem into a singular objective dimensional array, denoted as (n, 2). After performing
+during the training phase using the Tchebycheff decomposition softmax, the output can be converted into probabilities
+method in order to obtain a more comprehensive Pareto front. Probs, which represent the two options for each task:
+Additionally, it employs the policy gradient method to train whether to wait or not.
+the network parameters, and introduces the consideration of Fundamentally, ECSPNet’s primary role involves construct-
+problem difficulty to solve the difficulty of problem size ing a functional mapping from the task parameters to the
+limitation. Finally, the parameters of ECSPNet are optimized subsequent operations to be executed.
+to obtain a better solution.
+
+B. MDP Formulation of ECSP
+A. Model of ECSPNet The scheduling process of the ECSP is formulated as a MDP
+
+In this work, the model of ECSPNet is built based on the to address the optimization problem in task scheduling through
+characteristics of ECSP, which is suitable for TOU electricity a task selection and state transition model, which is a critical
+price and energy-conscious problems. In particular, it operates step for applications of DRL-based algorithms. The relevant
+with the attention mechanism [44] at its core and adopts a definitions are outlined as follows.
+structure different from the encoder-decoder [21], [45]. The 1) State: The state refers to the description of the environ-
+architecture of the model is shown in Fig. 2. The main steps ment at a specific moment, encompassing all necessary
+are as follows: information about the current system. Here, the state
+
+1) Pre-processing: This involves embedding multiple sets comprises three related parameters: the current electric-
+of job instances, encompassing all tasks T asks and ity price E P , the current target value Objs, including
+electricity price E P . Given the multi-objective nature TWT and EEC, and the current sequence of tasks
+of the problem, it necessitates embedding the current T asks, which is the set of job i to be completed,
+target value Objs and weight w, integrating them into forming a complex multidimensional state space. These
+the tasks after embedding. parameters are mapped to a unified dimensional space,
+
+2) Core functionality within the ECSPNet Block: This ensuring that different types of information can be
+block serves as the central model component. The first is processed within the same feature space. The state
+the attention mechanism of the current electricity price incorporates the status of current task execution and
+E P to T asks, intending to obtain the tendency of the the influence of the external environment on these
+E P in selecting a specific E P ′. Then, E P is added tasks, enabling the model to consider multiple factors
+to the T ask to get T ask ′. After that, the self-attention in decision-making. Furthermore, each state influences
+mechanism is used on the T ask and allows tasks to the subsequent decision-making process. It is worth
+compete with each other to determine the probability of emphasizing that as scheduling progresses, T asks is
+choosing tasks. The model comprises two serially con- continuously updated, and the state space gradually
+nected blocks, which significantly improve the model’s reduces until it eventually becomes empty, signifying
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+11496 IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+
+that all tasks have been scheduled. This characteristic
+makes this representation computationally attractive for
+real-time and large-scale applications.
+
+2) Action: Actions are selected based on the probability
+distribution Probs derived from the model output.
+
+Probs = [PWi ]n×2 (33)
+
+where PWi = 0 indicates that task i will be executed
+next without waiting, while PWi = 1 indicates that
+task i will be delayed (wait) before execution. At each
+decision point, the model not only chooses the next task
+but also determines whether to execute it immediately
+or delay its execution, allowing for flexible decision-
+making. The action selection employs a probabilistic Fig. 3. The results of ECSPNet Tchebycheff and ECSPNet Weightsum.
+
+sampling approach, introducing a degree of random-
+ness into the decision-making process, and allowing the
+model to explore different task execution orders during D. Design of Policy Gradient
+training and inference. The purpose of this design is It is challenging to obtain the optimal solution for large-
+to balance exploration and exploitation in scheduling sized ECSP. Therefore, relying on supervised learning to train
+decisions, preventing the model from merely choosing the ECSPNet becomes impractical. Fortunately, DRL offers
+the current optimal solution and falling into local optima. the capability for the policy agent to explore the decision space
+
+3) State Transition: State transitions are based on the cur- and autonomously discover superior strategies.
+rently selected task and the state, which updates the We apply the policy gradient method to optimize the net-
+electricity price E P and the objective function Objs. work parameters. The goal of the gradient ascent method is
+Notably, it depends on the current action, meaning that to maximize the reward function extensively. Additionally,
+the selection and execution of the current task determine we introduce cross-entropy, setting as 0.1. This approach
+the changes in both the electricity price and the objective helps avoid extreme probability situations, offering several
+function, which define the next state. At each decision advantages: 1) obtaining diversified solutions through random
+step, the state is updated based on the previous state and sampling, and 2) preventing the appearance of negative infinity
+the corresponding action. in log pθ (π |s), thus ensuring algorithm stability. The gradient,
+
+after the inclusion of cross-entropy, is expressed as follows:
+
+C. Design of Reward Function
+θ ← θ +∇θ J (θ |s)
+
+As the ECSP involves considering both TWT and EEC as
+∇
+
+part of a multi-objective problem, the training process of DRL θ J (θ |s) = Eπ∼p(·|S)[(R(π |s)− b(s))∇θ log pθ (π |s)]
+
+necessitates a clear target value. To facilitate this, the ECSP is − α · Eπ∼p(·|S) log pθ (π |s) (35)
+transformed into a single-objective problem. The Tchebycheff
+decomposition method is utilized to derive the target value where b(s) is a baseline function that is independent of
+R(π). Compared to the direct weighted addition method, π . The purpose is to normalize the reward function around
+this decomposition technique offers a significant advantage 0 and estimate the maximum completion time of problem s.
+by avoiding the limitation of direct weighted addition, which This normalization helps reduce the variance of the gradient,
+can only capture a subset of the Pareto front, particularly ensuring more stability and facilitating efficient training.
+in cases where the Pareto front is concave. In this scenario, It is worth noting that b(s) in (36) does not employ the
+we uniformly distribute the variable w within the range of neural network learning method used in Actor-Critic. Training
+0.01 to 0.99. two networks simultaneously can easily lead to training insta-
+
+bility. Instead, b(s) in this context represents the average value
+R(π) = −max[w · TWT, (1− w) · EEC]. (34) within the same batch. Due to varying difficulty levels among
+
+questions, b(s) cannot be simply denoted by the mean value.
+Fig. 3 illustrates the comparison among different methods: The problem’s difficulty is determined by the cumulative high
+
+the dotted line represents the selected weight, the blue dots power consumption times of all tasks Tpt , and ratio R(π |s)
+= T ,
+
+pt
+correspond to solutions obtained via the Tchebycheff decom- which signifies the relationship between the current reward
+position method, and the orange dots represent the solutions function and its difficulty. We assume that the ratio should
+obtained using the linear weighted decomposition method. remain consistent across different problems. Thus, we define
+Notably, the results from the Tchebycheff decomposition ratio 1 ∑
+
+= B batch ratioi , and b(s) = ratio × Tpt . However,
+method align more consistently with the assumptions and in the context of ECSP, a multi-objective problem, different
+yield a more comprehensive Pareto front, compensating for values of w can alter the problem’s difficulty. Therefore,
+the limitations of the latter method. solving ratio is conducted only within the set Ai with similar
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+WANG et al.: DRL-BASED ENERGY-CONSCIOUS SCHEDULING UNDER TIME-OF-USE ELECTRICITY PRICE 11497
+
+w values. Finally, b(si ) is expressed as follows: Algorithm 2 Running of ECSPNet
+
+T i Input: s – the data of the ECSP problem
+b pt ∑ R(π j
+
+|s j )
+(si ) =
+
+|Ai | A T j . (36) B – batch size
+i pt β – randomness
+
+1: w i
+i ← B+1 , i = 1, 2, . . . , B
+
+E. Training of ECSPNet 2: Pθ (·|si , wi )← R∑eLU[pθ (·|si )− β ·maxπ (pθ (π |si ))]
+The training process of ECSPNet can be summarized as 3: p′θ (·|s
+
+P
+i , wi )←
+
+θ (·|si ,wi )
+
+π Pθ (π |si ,wi )
+
+follows. The inputs for training primarily consist of the given 4: π i
+← sample from p′θ (·|si , wi ), i = 1, 2, . . . , B
+
+distribution S of the training data, the batch size, and the 5: Calculate TWT and EEC
+scale of cross-entropy. First, we initialize the parameters θ of 6: Obtain non-dominated solutions P
+ECSPNet. For each batch, we first conduct random sampling 7: return P
+from the input data to obtain the distribution si , weight wi ,
+and processing sequence πi respectively. Next, we assess TWT
+and EEC and calculate R(π) according to (34) to establish the IV. EXPERIMENTAL STUDY
+reward function for a single target. Then we calculate the base- A. Case Introduction
+line b(si ) according to (36). Finally, the Adam optimization
+algorithm is utilized using the policy gradient function (35) To empirically evaluate the performance of the proposed
+to train the model for optimization purposes. This process ECSPNet, a series of experiments were conducted based on
+continues iteratively until the stopping condition is met. The historical production data from a real carbon material factory
+training procedure of ECSPNet is outlined in Algorithm 1. in mainland China. The experimental parameters primarily
+
+involve n jobs with three energy-related steps in each job.
+Algorithm 1 Training of ECSPNet Considering the actual electricity price conditions, four inter-
+
+Input: vals of high and low electricity price were considered each
+S – the given distribution S of training data day, with durations of 0.6, 0.4, 0.6, and 0.4 time units,
+B – batch size where one-time unit represents the actual 10 hours. Reflecting
+α – the scale of cross-entropy diverse production scenarios, the energy consumption times
+
+1: Initialize ECSPNet params θ for the three steps in each job were randomly assigned with a
+2: while stopping criterion is not met do precision of 0.1 within the range of [0.4, 0.8], [0.2, 0.6], and
+3: si ← sample from S, i = 1, 2, . . . , B [0.4, 0.8] respectively. The high energy consumption of jobs
+4: wi ← sample from 0.01 to 0.99, i = 1, 2, . . . , B is all set to 1, and the maximum allowable power outage was
+5: π i
+
+← sample from pθ (·|si , wi ), i = 1, 2, . . . , B limited to four hours. Additionally, to address ECSP instances
+6: Calculate T
+
+T i ∑WT and EEC of varying scales, the number of jobs was set to 20, 40, 60,
+7: R(π i
+
+|si , wi ) = −max[wi · TWT, (1− wi ) · EEC] and 100. Considering job durations and potential outages, the
+pt R(π j
+
+8: b(s |si ,wi )
+i ) = |Ai | Ai T j scheduling period for the largest scale could extend up to
+
+pt
+9: ∇θ J (θ)← 110 days. During the experimental process, both the training
+
+10: 1 ∑B i
+− B i [R(π s )− b
+
+=1 | i (si )]∇θ log pθ (π |s) set and the test set were randomly generated based on the
+11: 1 ∑B
+
++ aforementioned parameters, covering ECSP instances across
+B i αE
+
+=1 π∼p(·|si )∇θ log pθ (π |si )
+12: θ ← Adam(θ,∇θ J (θ)) various scales. For broader experimentation and more robust
+13: end while comparisons, three cases were randomly generated at each
+14: return a well-trained ECSPNet scale for the following experiments.
+
+B. Experimental Settings
+F. Running of ECSPNet Extensive experiments are conducted on the ECSPNet to
+
+To generate a comprehensive Pareto front throughout the verify its efficiency and effectiveness. We compare ECSPNet
+inference process, it becomes necessary to employ ECSPNet in with NSGA-II [46], GMOEA [47], and MOEA/D-DQN [48].
+producing numerous solutions in batches with varied weights. NSGA-II is selected as the most widely used multi-objective
+Simultaneously, we consider a certain random capacity to optimization algorithm (MOEA) in the field. GMOEA is
+modify the probability instead of directly using the maximum chosen as the MOEA that incorporates deep learning meth-
+probability. ods into its optimization process and MOEA/D-DQN is an
+
+∑P efficient MOEA that uses the DRL-based method to select
+θ (·|si , wi )p′θ (·|si , wi )← (37) the best operators. In addition to using MOEAs as compared
+
+π Pθ (π |si , wi ) algorithms, we also designed the Greedy algorithm based
+wherePθ (·|si , wi ) = ReLU[pθ (·|si ) − β · maxπ (pθ (π |si ))]. on the following principles, 1) prioritize actions that would
+Subsequently, random sampling occurs within the modified not increase the weighted objective value, and 2) select the
+probability to generate a solution. Within this process, the action with the highest power consumption time of its task
+value of β ranges between [0, 1), where a smaller value among them. The Greedy algorithm serves as a benchmark to
+indicates greater unpredictability in the prediction. The specific demonstrate the practical value of the approach proposed in
+reasoning behind this process is detailed in Algorithm 2. this paper. The Greedy algorithm and the proposed method,
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+11498 IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+
+ECSPNet, are based on a similar task selection structure and Given a solution set P , the HV value of P is defined as
+objective weighting approach to find the optimal task selection the area covered by P concerning a predefined reference
+strategy. Additionally, the ϵ-constraint (EC) method [7] and point in the objective space.
+the direct weighting (DW) method from the class of exact ⋃
+
+H V p∈P hv(p, r)
+approaches are employed, which provides a more comprehen- (P, r) = (38)
+sive comparison of the proposed method. Using the CPLEX hvO
+
+24.1.3 with the solvers default parameters, the solution process where hv(p, r) represents the hypervolume enclosed
+terminates when the error of the global optimal solution is between point p and the reference point r, while hvO
+less than 1% or the time limit of 2000s is exceeded. NSGA-II represents the hypervolume enclosed between the origin
+is implemented in Geatpy [49] using Python 3.10.9 without and the reference point. A higher HV value implies supe-
+modification, and the settings of GMOEA and MOEAD- rior algorithm performance. For this evaluation, we set
+DQN refer to the official implementation [47], [48]. ECSPNet the reference point as (0.3× n, 0.3× n), where n is the
+is implemented in Pytorch 1.13 using Python 3.10.9. All number of jobs.
+algorithms are executed on a PC equipped with an Intel Core 2) C-metric [52]: It evaluates the convergence and distribu-
+i9-10900K 3.7-GHz processor, 64 GB of RAM, and an Nvidia tion of the algorithm by comparing the results of the two
+GeForce RTX 4090 GPU. algorithms. Let A and B represent two approximations to
+
+The training parameters are calibrated as follows. We set the Pareto front of a multi-objective problem, C(A, B) is
+the epoch number to 3000 and the batch size to 2048. For defined as the percentage of the solutions in B that are
+the learning rate, the initial learning rate is 10−3, and using dominated by at least one solution in A. If C(A, B) is
+the multi-step learning rate scheduler, the learning rate is greater than C(B, A), it means that A is closer to the real
+divided by 10 when the epoch is 1000 and 2000. More- Pareto front and more convergent than B.
+over, the data set size is 50 × 2048, and a new data set
+
+|{b ∈ B|∃a ∈ A : a ≻ b}|
+will be randomly generated for each epoch. Once the loss C(A, B) = (39)
+function stabilizes without further changes, we consider the |B|
+training complete, and the training phase typically requires Note that C(A, B) does not necessarily equal 1 −
+approximately three hours. In addition, it is worth mentioning C(B, A). C(A, B) = 1 indicates that all solutions in
+that the training process of ECSPNet contains two types of B are dominated by at least one solution in A, while
+decision variables: ranking and Boolean, which require differ- C(A, B) = 0 implies that no solution in B is dominated
+ent operators. Specifically, permutation variables use partially by any solution in A.
+matched crossover operators and inversion mutation operators.
+Boolean variables use uniform distribution crossover operators D. Comparison of Experimental Parameters
+and mutation for binary chromosome operators.
+
+To facilitate comparison with ECSPNet at different scales, In this subsection, we conduct experiments to find an opti-
+the following algorithm parameters are set. For the Greedy mal range for β and the size of solution generation. It is crucial
+algorithm, we select the same number of generated solutions to determine appropriate hyperparameters in experiments for
+as ECSPNet, which is 1000. For NSGA-II, GMOEA, and the model. There are two critical parameters involved in
+MOEAD-DQN, three combinations of increasing population the inference experiments. One is the amount of solution
+sizes and iteration numbers are selected, which are 100×100, generation, that is, how many solutions are generated, the
+300 × 300, and 1000 × 1000 respectively. The running time other one is β. Prob′ represents the probability of choosing
+of the three algorithms is comparable to ECSPNet’s when the maximum probability. The larger the value, the better the
+the scale is 100 × 100. So by increasing the size of the result, which is equivalent to avoiding the selection with a
+comparison algorithm, the optimization ability of ECSPNet lower probability.
+can be measured. Fig. 4 shows the comparison data of finding the optimal
+
+Subsequently, the results obtained by the proposed ECSPNet range at four scales. The greater the probability of selecting
+and the compared algorithms are compared using the Wilcoxon the maximum probability, that is, the larger the number, the
+
+darker the color of the table. We can see that Prob′ gradually
+rank-sum test [50] at a significance level of 0.05. Symbols becomes larger as the number of solutions generated increases.
+“+”, “−”, and “≈” indicate the compared algorithm performs When 1000 solutions are generated, the results are stable and
+significantly better than, significantly worse than, and statisti- have no obvious growth trend, so 1000 is chosen here for
+cally tied to the chosen competitor, respectively. the first parameter. As β ∈ [0, 1) becomes larger, Prob′ first
+
+increases and then stabilizes, or even decreases in some cases,
+C. Performance Indicators so the second parameter here β is set to 0.9.
+
+We adopt the following widely used metrics to measure the
+convergence and diversity of the Pareto set approximation to E. Experimental Results and Analysis
+evaluate the performance of the proposed method. A series of comparison experiments with state-of-the-art
+
+1) Hypervolume (HV) [51]: HV can evaluate both the con- techniques are conducted to analyze and benchmark the per-
+vergence and distribution of the obtained solution set formance of the proposed ECSPNet. Next, we will present
+without requiring knowledge of the true Pareto front. detailed results and experimental analysis.
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+WANG et al.: DRL-BASED ENERGY-CONSCIOUS SCHEDULING UNDER TIME-OF-USE ELECTRICITY PRICE 11499
+
+TABLE III
+HV RESULTS OBTAINED BY ECSPNET, GREEDY, NSGA-II, GMOEA, AND MOEA/D-DQN ON ECSP. THE BEST RESULT IN EACH ROW IS BOLDED.
+
+SYMBOLS “+”, “−”, AND “≈” INDICATE THE COMPARED ALGORITHM IS SIGNIFICANTLY BETTER THAN, SIGNIFICANTLY WORSE THAN, AND
+STATISTICALLY TIED BY THE BEST, RESPECTIVELY
+
+a concise introduction and analysis of the four sets of experi-
+mental results are presented.
+
+1) Table III shows the HV values of three cases we
+collected at four scales. The bold value in each row
+is the optimal HV value obtained by the five methods
+in this case. It can be observed that the results of
+ECSPNet outperform the comparison algorithms in all
+cases. Furthermore, as the instance size increases, the
+HV value of ECSPNet remains virtually unaffected
+and stable, highlighting its robust superiority. Table IV
+presents the comparison results of ECSPNet using both
+the Tchebycheff decomposition and direct weighted
+addition methods. The results indicate that the Tcheby-
+cheff decomposition method consistently outperforms
+the direct weighted addition method in most cases,
+with its superiority becoming more pronounced as the
+problem scale increases. In addition, we have included
+
+Fig. 4. Comparison results of finding the optimal range. small-scale cases for a more comprehensive comparison,
+with the detailed results presented in S.I of the supple-
+mentary file.
+
+The statistical results of HV values, C-metric, Pareto front, 2) Table V shows the C-metric results of three cases at each
+and solution time obtained by ECSPNet, Greedy, NSGA- scale. The solution set of ECSPNet is called A here,
+II, GMOEA, and MOEA/D-DQN are displayed here. Next, and the solution sets of all comparison algorithms are
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+11500 IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+
+Fig. 6. Comparison results of solution time.
+
+Fig. 5. Comparison results of the Pareto front at four scales.
+
+It can be seen that ECSPNet has a significant advantage
+TABLE IV in solution speed at any scale. The solution speed is
+
+HV RESULTS OBTAINED BY ECSPNET_CHEB AND ECSPNET_SUM. THE relatively rapid at the same scale, and there is almost
+BEST RESULT IN EACH ROW IS BOLDED. SYMBOLS “+”, “−”, AND no significant increase in solution time as the test size
+
+“≈” INDICATE THE COMPARED ALGORITHM IS SIGNIFICANTLY
+BETTER THAN, SIGNIFICANTLY WORSE THAN, AND STATISTI- increases. As the scale increases, the Greedy algorithm’s
+
+CALLY TIED BY THE BEST, RESPECTIVELY solution time increases rapidly. The results of NSGA-
+II, GMOEA, and MOEA/D-DQN are constrained by
+the number of populations and iterations. When the
+population and the number of iterations are both 100,
+the solution time is even within one second, which is
+comparable to the solution speed of ECSPNet. It demon-
+strates that ECSPNet is not limited by the sizes of the
+problems, and can effectively and promptly solve all
+scale problems. In addition, both the EC method and
+the DW method are used for experiments, although they
+prove to be quite time-consuming, even when solving
+small-scale cases. Detailed experiments on the solving
+speed of the exact method can be found in S.I of the
+supplementary file.
+
+Statistical results demonstrate that, for solving the ECSP,
+called B. The results indicate that C(A, B) is greater ECSPNet outperforms alternative comparison techniques on
+than 0.9, and C(B, A) approaches 0 in most cases. all scales, including in terms of both solution production
+Therefore, most of the non-dominated solutions obtained speed and quality. Especially as the scale of the problem
+by ECSPNet can dominate the non-dominated solutions continues to grow, the advantages of ECSPNet become more
+obtained by other algorithms, that is to say, ECSPNet obvious. However, among the comparative algorithms, the
+significantly outperforms other algorithms. performance of NSGA-II, GMOEA, and MOEA/D-DQN is
+
+3) Fig. 5 shows the approximate distribution of non- even worse than the Greedy algorithm, indicating that evo-
+dominated solutions at four scales. The Pareto front lutionary algorithms struggle to cope with the huge search
+results in the figure clearly show that ECSPNet performs space of ECSP. Furthermore, GMOEA has more complex
+better results in test cases of both large and small mechanisms but performs worse than NSGA-II, which is likely
+scales, and the effect becomes better as the instance size due to the former’s generative model that is not suitable for
+increases, which clearly proves that the convergence and solving ECSP. The performance of MOEA/D-DQN indicates
+diversity of ECSPNet are better than other algorithms. that simply selecting a more efficient operator is insufficient to
+More detailed experiments results can be found in S.I enable the evolutionary algorithm to solve large-scale ECSP
+of the supplementary file. problems.
+
+4) Fig. 6 shows the experimental results of the average
+solution time of five methods. In the figure, the three F. Discussion on Practical Applications
+parts of NSGA-II, GMOEA, and MOEA/D-DQN are In actual enterprise production, it is quite significant to
+100 × 100, 300 × 300, and 1000 × 1000, respectively. consider energy consumption and cost-saving [1], [30]. In this
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+WANG et al.: DRL-BASED ENERGY-CONSCIOUS SCHEDULING UNDER TIME-OF-USE ELECTRICITY PRICE 11501
+
+TABLE V
+C-METRIC RESULTS BETWEEN ECSPNET(A) AND GREEDY/NSGA-II/GMOEA/MOEA/D-DQN(B) ON ECSP. SYMBOLS “+”, “−”, AND “≈” INDICATE
+
+C(B, A) IS SIGNIFICANTLY BIGGER THAN, SIGNIFICANTLY LESS THAN, AND STATISTICALLY TIED BY C(A, B)
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+11502 IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+
+aiming to concurrently optimize both TWT and TEC. Then,
+we propose ECSPNet, an efficient DRL-based optimization
+method, specifically designed to tackle the ECSP by consid-
+ering energy awareness and TOU electricity price. Leveraging
+the powerful information interaction and decision-making
+capabilities of DRL, ECSPNet proves to be highly efficient
+in solving this practical optimization problem. We introduce
+the Tchebycheff decomposition method to solve the multi-
+objective optimization problem faced by ECSP and use the
+policy gradient method to train ECSPNet. Additionally, due
+to the use of attention mechanism as the core of the model,
+ECSPNet exhibits excellent performance in handling large-
+scale problems.
+
+To evaluate ECSPNet’s performance, empirical compar-
+isons are conducted on ECSP at both large and small
+scales. The results consistently demonstrate the superiority
+of ECSPNet over four state-of-the-art algorithms: Greedy,
+NSGA-II, GMOEA, and MOEA/D-DQN. ECSPNet simul-
+taneously achieves the most efficient, best, and most stable
+
+Fig. 7. Gantt charts of the three cases for ECSP.
+results. The solution provided by ECSPNet helps enterprises
+ensure work efficiency while significantly saving electricity
+
+paper, the graphitization process of electrode materials is costs as much as possible during scheduling arrangements.
+considered as the actual background, then the proposed method This paper demonstrates the great potential of ECSPNet
+ECSPNet is used to schedule and optimize the working process in solving the ECSP under TOU electricity price. ECSPNet’s
+of the electrodes, and excellent results are obtained. Next, adaptive framework can be extended directly to other schedul-
+we analyze and discuss the practical applications from three ing problems, such as vehicle smart charging and electrolytic
+aspects of experimental results. aluminum production, by simply modifying the part of the
+
+The Pareto front results for three case scenarios are pre- model that handles task characteristics. However, actual enter-
+sented here, as shown in Fig. 7. For each chart, three prises may encounter various uncertainties, such as machine
+scheduling Gantt charts are chosen as points of reference. failures, construction delays, insufficient raw materials, and
+The red dots represent that the electrode materials work other emergencies. Future work will focus on addressing these
+continuously without interruption and avoidance of electricity practical issues that incorporate uncertainty. Furthermore, the
+price peaks is not considered during the high energy consump- flexibility and generality of ECSPNet merit further exploration
+tion stage. The green dots are the situation after optimizing to extend the application of ECSPNet to other workshop
+the solution using the ECSPNet. During the high energy scheduling problems characterized by large decision spaces,
+consumption stage, we consider whether to avoid the peak intricate constraints, and dynamic environments.
+electricity price. The orange dots indicate that all the high REFERENCES
+energy consumption stages avoid the peak electricity price
+periods. Based on the above results, the green dot is the [1] X. Li, C. Lu, L. Gao, S. Xiao, and L. Wen, “An effective multiobjective
+
+algorithm for energy-efficient scheduling in a real-life welding shop,”
+condition that while production efficiency is improved as much IEEE Trans. Ind. Informat., vol. 14, no. 12, pp. 5400–5409, Dec. 2018.
+as possible, peak electricity price are avoided and can save [2] F. Zhao, H. Zhang, and L. Wang, “A Pareto-based discrete Jaya
+enterprises roughly 30% in electricity costs every year. algorithm for multiobjective carbon-efficient distributed blocking flow
+
+shop scheduling problem,” IEEE Trans. Ind. Informat., vol. 19, no. 8,
+In the context of TOU electricity price, when arranging pp. 8588–8599, Aug. 2023.
+
+job production, enterprise schedulers can choose green dots [3] A. Sharma, F. Zhao, and J. W. Sutherland, “Econological scheduling
+based on comprehensive trade-offs. That is, while ensuring of a manufacturing enterprise operating under a time-of-use electricity
+
+production efficiency, the electricity costs of workshop work tariff,” J. Cleaner Prod., vol. 108, pp. 256–270, Dec. 2015.
+[4] Z. Pei, M. Wan, Z.-Z. Jiang, Z. Wang, and X. Dai, “An approximation
+
+can be reduced to the greatest extent possible. In addition, algorithm for unrelated parallel machine scheduling under TOU electric-
+ECSPNet’s adaptive framework can not only be applied in ity tariffs,” IEEE Trans. Autom. Sci. Eng., vol. 18, no. 2, pp. 743–756,
+the production process of graphite materials but can also Apr. 2021.
+
+[5] W. Shao, Z. Shao, and D. Pi, “An ant colony optimization behavior-based
+be directly extended to other types of scheduling problems, MOEA/D for distributed heterogeneous hybrid flow shop scheduling
+such as vehicle smart charging and electrolytic aluminum problem under nonidentical time-of-use electricity tariffs,” IEEE Trans.
+production, by simply modifying the part of the model that Autom. Sci. Eng., vol. 19, no. 4, pp. 3379–3394, Oct. 2022.
+
+[6] J.-Y. Ding, S. Song, R. Zhang, R. Chiong, and C. Wu, “Parallel
+handles task characteristics. machine scheduling under time-of-use electricity prices: New models
+
+and optimization approaches,” IEEE Trans. Autom. Sci. Eng., vol. 13,
+no. 2, pp. 1138–1154, Apr. 2016.
+
+V. CONCLUSION [7] X. Wang, F. Chu, T. Ren, and D. Bai, “Bi-objective optimiza-
+
+In this paper, we first attempt to formulate a new math- tion of a flow shop scheduling problem under time-of-use tariffs,”
+IEEE Trans. Autom. Sci. Eng., early access, Oct. 2, 2024, doi:
+
+ematical model of the ECSP under TOU electricity price, 10.1109/TASE.2024.3468448.
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+WANG et al.: DRL-BASED ENERGY-CONSCIOUS SCHEDULING UNDER TIME-OF-USE ELECTRICITY PRICE 11503
+
+[8] K. Fang, N. A. Uhan, F. Zhao, and J. W. Sutherland, “Scheduling on [29] R. Wang, Y. Jing, C. Gu, S. He, and J. Chen, “End-to-end
+a single machine under time-of-use electricity tariffs,” Ann. Operations multi-target flexible job shop scheduling with deep reinforcement
+Res., vol. 238, nos. 1–2, pp. 199–227, Mar. 2016. learning,” IEEE Internet Things J., early access, Oct. 24, 2024, doi:
+
+[9] P. Wu, N. Li, J. Cheng, and C. Chu, “Energy-efficient single-machine 10.1109/JIOT.2024.3485748.
+scheduling with release dates under time-of-use electricity tariffs,” [30] C. Lu, L. Gao, J. Yi, and X. Li, “Energy-efficient scheduling of
+J. Cleaner Prod., vol. 393, Mar. 2023, Art. no. 136228. distributed flow shop with heterogeneous factories: A real-world case
+
+[10] Z. Tian and L. Zheng, “Single machine parallel-batch scheduling from automobile industry in China,” IEEE Trans. Ind. Informat., vol. 17,
+under time-of-use electricity prices: New formulations and optimisation no. 10, pp. 6687–6696, Oct. 2021.
+approaches,” Eur. J. Oper. Res., vol. 312, no. 2, pp. 512–524, Jan. 2024. [31] Z. Tian and L. Zheng, “Scheduling unrelated parallel batch processing
+
+[11] M.-J. Park and A. Ham, “Energy-aware flexible job shop scheduling machines under time-of-use electricity prices,” IEEE Trans. Autom. Sci.
+under time-of-use pricing,” Int. J. Prod. Econ., vol. 248, Jun. 2022, Eng., early access, Feb. 26, 2024, doi: 10.1109/TASE.2024.3368617.
+Art. no. 108507. [32] X. Feng and H. Peng, “Robust identical parallel machine scheduling with
+
+[12] M. H. Ho, F. Hnaien, and F. Dugardin, “Exact method to optimize the two-stage time-of-use tariff and not-all-machine option,” Int. J. Prod.
+total electricity cost in two-machine permutation flow shop schedul- Res., vol. 62, nos. 1–2, pp. 380–403, Jan. 2024.
+ing problem under time-of-use tariff,” Comput. Oper. Res., vol. 144, [33] J. Ding, S. Dauzère-Pérès, L. Shen, and Z. Lü, “A novel evolutionary
+Aug. 2022, Art. no. 105788. algorithm for energy-efficient scheduling in flexible job shops,” IEEE
+
+[13] J. Cheng, F. Chu, M. Liu, P. Wu, and W. Xia, “Bi-criteria single-machine Trans. Evol. Comput., vol. 27, no. 5, pp. 1470–1484, Oct. 2023.
+batch scheduling with machine on/off switching under time-of-use [34] G. Zhang, S. Yan, X. Song, D. Zhang, and S. Guo, “Evolu-
+tariffs,” Comput. Ind. Eng., vol. 112, pp. 721–734, Oct. 2017. tionary algorithm incorporating reinforcement learning for energy-
+
+[14] J.-J. Wang and L. Wang, “A knowledge-based cooperative algorithm for conscious flexible job-shop scheduling problem with transportation
+energy-efficient scheduling of distributed flow-shop,” IEEE Trans. Syst., and setup times,” Eng. Appl. Artif. Intell., vol. 133, Jul. 2024,
+Man, Cybern., Syst., vol. 50, no. 5, pp. 1805–1819, May 2020. Art. no. 107974.
+
+[35] W. Song, X. Chen, Q. Li, and Z. Cao, “Flexible job-shop scheduling
+[15] L. He, R. Chiong, W. Li, S. Dhakal, Y. Cao, and Y. Zhang, “Mul- via graph neural network and deep reinforcement learning,” IEEE Trans.
+
+tiobjective optimization of energy-efficient job-shop scheduling with Ind. Informat., vol. 19, no. 2, pp. 1600–1610, Feb. 2023.
+dynamic reference point-based fuzzy relative entropy,” IEEE Trans. Ind. [36] L. Cheng, Y. Wang, F. Cheng, C. Liu, Z. Zhao, and Y. Wang, “A
+Informat., vol. 18, no. 1, pp. 600–610, Jan. 2022. deep reinforcement learning-based preemptive approach for cost-aware
+
+[16] L. Chen, L.-L. Cao, Y.-M. Wen, H. Chen, and S.-L. Jiang, “A knowledge- cloud job scheduling,” IEEE Trans. Sustain. Comput., vol. 9, no. 3,
+based NSGA-II algorithm for multi-objective hot rolling production pp. 422–432, May 2024.
+scheduling under flexible time-of-use electricity pricing,” J. Manuf. Syst., [37] M. Gaggero, M. Paolucci, and R. Ronco, “Exact and heuristic solution
+vol. 69, pp. 255–270, Aug. 2023. approaches for energy-efficient identical parallel machine scheduling
+
+[17] W. Du, W. Fang, C. Liang, Y. Tang, and Y. Jin, “A novel dual-stage with time-of-use costs,” Eur. J. Oper. Res., vol. 311, no. 3, pp. 845–866,
+evolutionary algorithm for finding robust solutions,” IEEE Trans. Emerg. Dec. 2023.
+Topics Comput. Intell., vol. 8, no. 5, pp. 3589–3602, Oct. 2024. [38] J. Wang and L. Wang, “A cooperative memetic algorithm with learning-
+
+[18] R. Li, W. Gong, and C. Lu, “A reinforcement learning based RMOEA/D based agent for energy-aware distributed hybrid flow-shop scheduling,”
+for bi-objective fuzzy flexible job shop scheduling,” Expert Syst. Appl., IEEE Trans. Evol. Comput., vol. 26, no. 3, pp. 461–475, Jun. 2022.
+vol. 203, Oct. 2022, Art. no. 117380. [39] W. Du, W. Zhong, Y. Tang, W. Du, and Y. Jin, “High-dimensional robust
+
+[19] F. Q. Zhao, Z. Y. Wang, and L. Wang, “A reinforcement learning driven multi-objective optimization for order scheduling: A decision variable
+artificial bee colony algorithm for distributed heterogeneous no-wait classification approach,” IEEE Trans. Ind. Informat., vol. 15, no. 1,
+flowshop scheduling problem with sequence-dependent setup times,” pp. 293–304, Jan. 2019.
+IEEE Trans. Autom. Sci. Eng., vol. 20, no. 4, pp. 2305–2320, Oct. 2023. [40] W. Du, Y. Tang, S. Y. S. Leung, L. Tong, A. V. Vasilakos, and F. Qian,
+
+[20] L. Xiong et al., “A two-level energy management strategy for multi- “Robust order scheduling in the discrete manufacturing industry: A mul-
+microgrid systems with interval prediction and reinforcement learning,” tiobjective optimization approach,” IEEE Trans. Ind. Informat., vol. 14,
+IEEE Trans. Circuits Syst. I, Reg. Papers, vol. 69, no. 4, pp. 1788–1799, no. 1, pp. 253–264, Jan. 2018.
+Apr. 2022. [41] M. H. Ho, F. Hnaien, and F. Dugardin, “Electricity cost minimisation
+
+[21] Z. Pan, L. Wang, C. Dong, and J. Chen, “A knowledge-guided end- for optimal makespan solution in flow shop scheduling under time-
+to-end optimization framework based on reinforcement learning for of-use tariffs,” Int. J. Prod. Res., vol. 59, no. 4, pp. 1041–1067,
+flow shop scheduling,” IEEE Trans. Ind. Informat., vol. 20, no. 2, Feb. 2021.
+pp. 1853–1861, Feb. 2023. [42] R. Graham, E. Lawler, J. Lenstra, and A. Kan, “Optimization and
+
+[22] B.-G. Kim, Y. Zhang, M. van der Schaar, and J.-W. Lee, “Dynamic approximation in deterministic sequencing and scheduling: A survey,”
+pricing and energy consumption scheduling with reinforcement learn- in Discrete Optimization II (Annals of discrete mathematics), vol. 5.
+ing,” IEEE Trans. Smart Grid, vol. 7, no. 5, pp. 2187–2198, Sep. 2016. Amsterdam, The Netherlands: Elsevier, 1979, pp. 287–326.
+
+[23] F. Zhao, T. Jiang, and L. Wang, “A reinforcement learning driven [43] S. Wang, M. Liu, F. Chu, and C. Chu, “Bi-objective optimiza-
+cooperative meta-heuristic algorithm for energy-efficient distributed no- tion of a single machine batch scheduling problem with energy
+wait flow-shop scheduling with sequence-dependent setup time,” IEEE cost consideration,” J. Cleaner Prod., vol. 137, pp. 1205–1215,
+Trans. Ind. Informat., vol. 19, no. 7, pp. 8427–8440, Jul. 2023. Nov. 2016.
+
+[44] A. Vaswani et al., “Attention is all you need,” in Proc. Adv. Neural
+[24] K. Lei, P. Guo, Y. Wang, J. Zhang, X. Meng, and L. Qian, “Large-scale Inform. Process. Syst. (NIPS), 2017, pp. 5998–6008.
+
+dynamic scheduling for flexible job-shop with random arrivals of new
+jobs by hierarchical reinforcement learning,” IEEE Trans. Ind. Informat., [45] W. Zhang, W. Du, W. Du, R. He, and Y. Jin, “Large-scale continuous-
+vol. 20, no. 1, pp. 1007–1018, Jan. 2024. time crude oil scheduling: A variable-length evolutionary optimization
+
+approach,” IEEE Trans. Autom. Sci. Eng., early access, Apr. 2, 2024,
+[25] R. Li, W. Gong, C. Lu, and L. Wang, “A learning-based memetic doi: 10.1109/TASE.2024.3380744.
+
+algorithm for energy-efficient flexible job-shop scheduling with type- [46] K. Deb, A. Pratap, S. Agarwal, and T. Meyarivan, “A fast and elitist
+2 fuzzy processing time,” IEEE Trans. Evol. Comput., vol. 27, no. 3, multiobjective genetic algorithm: NSGA-II,” IEEE Trans. Evol. Comput.,
+pp. 610–620, Jun. 2023. vol. 6, no. 2, pp. 182–197, Apr. 2002.
+
+[26] Z. Pan, L. Wang, J. Wang, and J. Lu, “Deep reinforcement learning [47] C. He, S. Huang, R. Cheng, K. C. Tan, and Y. Jin, “Evolu-
+based optimization algorithm for permutation flow-shop scheduling,” tionary multiobjective optimization driven by generative adversarial
+IEEE Trans. Emerg. Topics Comput. Intell., vol. 7, no. 4, pp. 983–994, networks (GANs),” IEEE Trans. Cybern., vol. 51, no. 6, pp. 3129–3142,
+Aug. 2023. Jun. 2021.
+
+[27] R. Li, W. Gong, L. Wang, C. Lu, Z. Pan, and X. Zhuang, “Double DQN- [48] Y. Tian, X. Li, H. Ma, X. Zhang, K. C. Tan, and Y. Jin, “Deep
+based coevolution for green distributed heterogeneous hybrid flowshop reinforcement learning based adaptive operator selection for evolution-
+scheduling with multiple priorities of jobs,” IEEE Trans. Autom. Sci. ary multi-objective optimization,” IEEE Trans. Emerg. Topics Comput.
+Eng., vol. 21, no. 4, pp. 6550–6562, Oct. 2024. Intell., vol. 7, no. 4, pp. 1051–1064, Aug. 2023.
+
+[28] C.-L. Liu, C.-J. Tseng, and P.-H. Weng, “Dynamic job-shop scheduling [49] E. Jazzbin. (2020). Geatpy: The Genetic and Evolutionary Algorithm
+via graph attention networks and deep reinforcement learning,” IEEE Toolbox With High Performance in Python. [Online]. Available:
+Trans. Ind. Informat., vol. 20, no. 6, pp. 8662–8672, Jun. 2024. https://github.com/geatpy-dev/geatpy/
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply. 
+
+
+
+11504 IEEE TRANSACTIONS ON AUTOMATION SCIENCE AND ENGINEERING, VOL. 22, 2025
+
+[50] Z. Wang, H. Hong, K. Ye, G.-E. Zhang, M. Jiang, and K. C. Tan, Wei Du (Senior Member, IEEE) received the B.S.
+“Manifold interpolation for large-scale multiobjective optimization via and M.S. degrees in electrical engineering from
+generative adversarial networks,” IEEE Trans. Neural Netw. Learn. Syst., Donghua University, Shanghai, China, in 2009 and
+vol. 34, no. 8, pp. 4631–4645, Aug. 2023. 2012, respectively, and the Ph.D. degree from The
+
+[51] L. While, P. Hingston, L. Barone, and S. Huband, “A faster algorithm Hong Kong Polytechnic University, Hong Kong,
+for calculating hypervolume,” IEEE Trans. Evol. Comput., vol. 10, no. 1, in 2016.
+pp. 29–38, Feb. 2006. He is currently an Associate Professor with the
+
+[52] Q. Zhang and H. Li, “MOEA/D: A multiobjective evolutionary algorithm Department of Automation and the Key Laboratory
+based on decomposition,” IEEE Trans. Evol. Comput., vol. 11, no. 6, of Smart Manufacturing in Energy Chemical Pro-
+pp. 712–731, Dec. 2007. cess, Ministry of Education, East China University
+
+of Science and Technology, Shanghai. His current
+research interests include the theories, methods, and applications of intelligent
+
+Caixia Wang received the B.S. degree in automation optimization, especially evolutionary computation, large-scale optimization,
+from Jiangnan University, Jiangsu, China, in 2019, robust optimization, and decision-making of complex industrial processes.
+and the M.S. degree in control engineering from the
+East China University of Science and Technology,
+Shanghai, China, in 2022, where she is currently
+pursuing the Ph.D. degree. Her current research
+interests include industrial scheduling optimization
+and the application of reinforcement learning.
+
+Wenxuan Fang received the Bachelor of Science
+and master’s degrees in automotive engineering from
+the East China University of Science and Technol- Yang Tang (Fellow, IEEE) received the B.S.
+ogy, Shanghai, China. His research interests include and Ph.D. degrees in electrical engineering from
+the application of artificial intelligence in industrial Donghua University, Shanghai, China, in 2006 and
+settings and industrial scheduling and optimization. 2010, respectively.
+
+From 2008 to 2010, he was a Research Asso-
+ciate with The Hong Kong Polytechnic University,
+Hong Kong. From 2011 to 2015, he was a Post-
+Doctoral Researcher with the Humboldt University
+of Berlin, Berlin, Germany, and with Potsdam
+Institute for Climate Impact Research, Potsdam,
+
+Xin Dai received the Ph.D. degree from the Germany. He is currently a Professor with the
+East China University of Science and Technology, East China University of Science and Technology, Shanghai. He has pub-
+Shanghai, China, in 2023. He is currently a Post- lished more than 200 papers in international journals and conferences,
+Doctoral Researcher with the East China University including more than 140 papers in IEEE TRANSACTIONS and 20 arti-
+of Science and Technology. His research interests cles in IFAC journals. His current research interests include distributed
+include decision optimization of process systems, estimation/control/optimization, computer vision, reinforcement learning,
+optimization under uncertainty, and reinforcement cyber-physical systems, hybrid dynamical systems, and their applications.
+learning. Prof. Tang was a recipient of the Alexander von Humboldt Fel-
+
+lowship. He is an Senior Area Editor of IEEE TRANSACTIONS ON
+CIRCUITS AND SYSTEMS—I: REGULAR PAPERS and an Associate Edi-
+tor of IEEE TRANSACTIONS ON NEURAL NETWORKS AND LEARNING
+
+Renchu He SYSTEMS, IEEE TRANSACTIONS ON CYBERNETICS, IEEE TRANSAC-
+received the M.S. degree in con-
+
+TIONS ON INDUSTRIAL INFORMATICS, IEEE/ASME TRANSACTIONS ON
+trol theory and control engineering and the Ph.D. MECHATRONICS, IEEE TRANSACTIONS ON CIRCUITS AND SYSTEMS—I:
+degree in chemical equipment and process control REGULAR PAPERS, IEEE TRANSACTIONS ON COGNITIVE AND DEVEL-
+from China University of Petroleum, Beijing, in
+
+OPMENTAL SYSTEMS, IEEE TRANSACTIONS ON EMERGING TOPICS IN
+2004 and 2007, respectively. He is currently a Pro- COMPUTATIONAL INTELLIGENCE, IEEE SYSTEMS JOURNAL, Engineering
+fessor with the College of Artificial Intelligence, Applications of Artificial Intelligence journal, Science China Information Sci-
+China University of Petroleum, Beijing. His research ences, and Acta Automatica Sinica. He has been awarded as best/outstanding
+interests include control theory and its applications, associate editor of IEEE journals for five times. He is a (leading) guest
+intelligent modeling, advanced process control, and editor of several special issues focusing on autonomous systems, robotics,
+intelligent decision-making. and industrial intelligence in IEEE TRANSACTIONS.
+
+Authorized licensed use limited to: Universite de Technologie de Troyes. Downloaded on October 02,2025 at 08:17:48 UTC from IEEE Xplore.  Restrictions apply.

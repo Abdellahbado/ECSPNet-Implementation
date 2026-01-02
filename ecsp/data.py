@@ -52,7 +52,7 @@ def get_price_at_slot(slot_idx: int) -> float:
         return 0.0
 
 
-def generate_instance(N: int, seed: int = None) -> np.ndarray:
+def generate_instance(N: int, seed: int = None, sampling: str = "round") -> np.ndarray:
     """
     Generate a single problem instance with N tasks.
 
@@ -75,19 +75,33 @@ def generate_instance(N: int, seed: int = None) -> np.ndarray:
 
     tasks = np.zeros((N, 5), dtype=np.float32)
 
-    for i in range(N):
-        # Generate durations with 0.1 precision
-        # round(uniform(a,b), 1) gives values in {a, a+0.1, ..., b}
-        p1 = np.round(np.random.uniform(0.4, 0.8), 1)
-        p2 = np.round(np.random.uniform(0.2, 0.6), 1)
-        p3 = np.round(np.random.uniform(0.4, 0.8), 1)
+    # Paper text: "randomly assigned with a precision of 0.1 within the range of
+    # [0.4, 0.8], [0.2, 0.6], and [0.4, 0.8] respectively".
+    # It does not specify discrete-uniform over the grid, only 0.1 precision.
+    if sampling == "round":
+        tasks[:, 0] = np.round(np.random.uniform(0.4, 0.8, size=N), 1)
+        tasks[:, 1] = np.round(np.random.uniform(0.2, 0.6, size=N), 1)
+        tasks[:, 2] = np.round(np.random.uniform(0.4, 0.8, size=N), 1)
+    elif sampling == "choice":
+        # Optional: discrete-uniform on the 0.1 grid (useful for controlled ablations).
+        p1_choices = np.array([0.4, 0.5, 0.6, 0.7, 0.8], dtype=np.float32)
+        p2_choices = np.array([0.2, 0.3, 0.4, 0.5, 0.6], dtype=np.float32)
+        p3_choices = np.array([0.4, 0.5, 0.6, 0.7, 0.8], dtype=np.float32)
+        tasks[:, 0] = np.random.choice(p1_choices, size=N)
+        tasks[:, 1] = np.random.choice(p2_choices, size=N)
+        tasks[:, 2] = np.random.choice(p3_choices, size=N)
+    else:
+        raise ValueError("sampling must be either 'round' or 'choice'")
 
-        tasks[i] = [p1, p2, p3, 1.0, 0.0]  # [p1, p2, p3, P_high, P_low]
+    tasks[:, 3] = 1.0
+    tasks[:, 4] = 0.0
 
     return tasks
 
 
-def generate_batch(N: int, batch_size: int, seed: int = None) -> np.ndarray:
+def generate_batch(
+    N: int, batch_size: int, seed: int = None, sampling: str = "round"
+) -> np.ndarray:
     """
     Generate a batch of problem instances (vectorized for speed).
 
@@ -102,16 +116,24 @@ def generate_batch(N: int, batch_size: int, seed: int = None) -> np.ndarray:
     if seed is not None:
         np.random.seed(seed)
 
-    # Vectorized generation - much faster than loop
     batch = np.zeros((batch_size, N, 5), dtype=np.float32)
 
-    # Generate all random values at once and round to 0.1
-    # p1: [0.4, 0.8], p2: [0.2, 0.6], p3: [0.4, 0.8]
-    batch[:, :, 0] = np.round(np.random.uniform(0.4, 0.8, (batch_size, N)), 1)  # p1
-    batch[:, :, 1] = np.round(np.random.uniform(0.2, 0.6, (batch_size, N)), 1)  # p2
-    batch[:, :, 2] = np.round(np.random.uniform(0.4, 0.8, (batch_size, N)), 1)  # p3
-    batch[:, :, 3] = 1.0  # P_high
-    batch[:, :, 4] = 0.0  # P_low
+    if sampling == "round":
+        batch[:, :, 0] = np.round(np.random.uniform(0.4, 0.8, (batch_size, N)), 1)
+        batch[:, :, 1] = np.round(np.random.uniform(0.2, 0.6, (batch_size, N)), 1)
+        batch[:, :, 2] = np.round(np.random.uniform(0.4, 0.8, (batch_size, N)), 1)
+    elif sampling == "choice":
+        p1_choices = np.array([0.4, 0.5, 0.6, 0.7, 0.8], dtype=np.float32)
+        p2_choices = np.array([0.2, 0.3, 0.4, 0.5, 0.6], dtype=np.float32)
+        p3_choices = np.array([0.4, 0.5, 0.6, 0.7, 0.8], dtype=np.float32)
+        batch[:, :, 0] = np.random.choice(p1_choices, size=(batch_size, N))
+        batch[:, :, 1] = np.random.choice(p2_choices, size=(batch_size, N))
+        batch[:, :, 2] = np.random.choice(p3_choices, size=(batch_size, N))
+    else:
+        raise ValueError("sampling must be either 'round' or 'choice'")
+
+    batch[:, :, 3] = 1.0
+    batch[:, :, 4] = 0.0
 
     return batch
 

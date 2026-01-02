@@ -6,11 +6,18 @@ VERSION: 2.0-GPU - Full GPU acceleration for training
 """
 
 import numpy as np
-import torch
 import gymnasium as gym
 from gymnasium import spaces
 from typing import Dict, Tuple, Optional, List, Union
 from dataclasses import dataclass
+
+try:
+    import torch  # type: ignore
+
+    TORCH_AVAILABLE = True
+except ImportError:  # pragma: no cover
+    torch = None  # type: ignore
+    TORCH_AVAILABLE = False
 
 from .data import (
     generate_instance,
