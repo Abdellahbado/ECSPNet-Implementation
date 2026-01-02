@@ -894,27 +894,38 @@ def plot_pareto_fronts(
 def generate_hv_table(hv_results: Dict, methods: List[str]) -> str:
     """
     Generate Table III style markdown table for hypervolume.
-    Includes Wilcoxon test results comparing each method to ECSPNet.
+    Includes Wilcoxon test results comparing each method to ECSPNet (if present).
     """
     lines = ["# Hypervolume Results (N=20)", ""]
     lines.append("Reference point: (6, 6)")
     lines.append("")
-    lines.append("| Method | Case 1 | Case 2 | Case 3 | Mean | Sig |")
-    lines.append("|--------|--------|--------|--------|------|-----|")
 
-    ecspnet_hv = hv_results.get("ECSPNet", [0, 0, 0])
+    # Check if ECSPNet is in results for significance testing
+    has_ecspnet = "ECSPNet" in hv_results and len(hv_results["ECSPNet"]) > 0
+
+    if has_ecspnet:
+        lines.append("| Method | Case 1 | Case 2 | Case 3 | Mean | Sig |")
+        lines.append("|--------|--------|--------|--------|------|-----|")
+        ecspnet_hv = hv_results["ECSPNet"]
+    else:
+        lines.append("| Method | Case 1 | Case 2 | Case 3 | Mean |")
+        lines.append("|--------|--------|--------|--------|------|")
 
     for method in methods:
+        if method not in hv_results:
+            continue
         vals = hv_results[method]
         mean_val = np.mean(vals)
 
-        # Wilcoxon test vs ECSPNet
-        if method == "ECSPNet":
-            sig = "-"
+        if has_ecspnet:
+            # Wilcoxon test vs ECSPNet
+            if method == "ECSPNet":
+                sig = "-"
+            else:
+                _, sig = wilcoxon_test(ecspnet_hv, vals)
+            line = f"| {method} | {vals[0]:.4f} | {vals[1]:.4f} | {vals[2]:.4f} | {mean_val:.4f} | {sig} |"
         else:
-            _, sig = wilcoxon_test(ecspnet_hv, vals)
-
-        line = f"| {method} | {vals[0]:.4f} | {vals[1]:.4f} | {vals[2]:.4f} | {mean_val:.4f} | {sig} |"
+            line = f"| {method} | {vals[0]:.4f} | {vals[1]:.4f} | {vals[2]:.4f} | {mean_val:.4f} |"
         lines.append(line)
 
     lines.append("")
@@ -927,6 +938,12 @@ def generate_hv_table(hv_results: Dict, methods: List[str]) -> str:
 
 def generate_cmetric_table(cm_results: Dict, methods: List[str]) -> str:
     """Generate Table V style markdown table for C-metric."""
+    # Skip C-metric table if no ECSPNet comparison was done
+    if not cm_results or all(
+        len(cm_results.get(m, {}).get("C(A,B)", [])) == 0 for m in methods
+    ):
+        return "# C-Metric Results (N=20)\n\nSkipped (ECSPNet not evaluated)"
+
     lines = ["# C-Metric Results (N=20)", ""]
     lines.append("A = ECSPNet, B = Comparator")
     lines.append("C(A,B) = fraction of B dominated by A (higher = ECSPNet better)")
@@ -938,8 +955,10 @@ def generate_cmetric_table(cm_results: Dict, methods: List[str]) -> str:
     for method in methods:
         if method not in cm_results:
             continue
-        cab = cm_results[method]["C(A,B)"]
-        cba = cm_results[method]["C(B,A)"]
+        cab = cm_results[method].get("C(A,B)", [])
+        cba = cm_results[method].get("C(B,A)", [])
+        if not cab or not cba:
+            continue
         line = f"| {method} | {np.mean(cab):.4f} | {np.mean(cba):.4f} |"
         lines.append(line)
 
@@ -953,6 +972,8 @@ def generate_time_table(time_results: Dict, methods: List[str]) -> str:
     lines.append("|--------|------------|------------|------------|----------|")
 
     for method in methods:
+        if method not in time_results:
+            continue
         vals = time_results[method]
         mean_val = np.mean(vals)
         line = f"| {method} | {vals[0]:.2f} | {vals[1]:.2f} | {vals[2]:.2f} | {mean_val:.2f} |"
@@ -991,24 +1012,24 @@ def run_full_evaluation(
     print(f"  HV reference = {HV_REFERENCE}")
     print(f"  α = {SIGNIFICANCE_LEVEL} (Wilcoxon)")
 
-    # Load model
-    print("\n1. Loading trained model...")
-    model = ECSPNet(
-        d_model=TRAINING_CONFIG["d_model"],
-        num_heads=TRAINING_CONFIG["num_heads"],
-        num_blocks=TRAINING_CONFIG["num_blocks"],
-    ).to(device)
-
-    checkpoint = torch.load(model_path, map_location=device, weights_only=False)
-    if "model_state_dict" in checkpoint:
-        model.load_state_dict(checkpoint["model_state_dict"])
-    else:
-        model.load_state_dict(checkpoint)
-    model.eval()
-    print(f"   Loaded model from {model_path}")
+    # NOTE: ECSPNet loading is skipped for baseline-only evaluation
+    # Uncomment below to include ECSPNet inference
+    # print("\n1. Loading trained model...")
+    # model = ECSPNet(
+    #     d_model=TRAINING_CONFIG["d_model"],
+    #     num_heads=TRAINING_CONFIG["num_heads"],
+    #     num_blocks=TRAINING_CONFIG["num_blocks"],
+    # ).to(device)
+    # checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+    # if "model_state_dict" in checkpoint:
+    #     model.load_state_dict(checkpoint["model_state_dict"])
+    # else:
+    #     model.load_state_dict(checkpoint)
+    # model.eval()
+    # print(f"   Loaded model from {model_path}")
 
     # Generate/load test cases
-    print("\n2. Loading test cases...")
+    print("\n1. Loading test cases...")
     test_cases = generate_test_cases(os.path.join(output_dir, "test_cases"))
 
     # Results storage
@@ -1019,9 +1040,10 @@ def run_full_evaluation(
         "pareto_fronts": {},
     }
 
-    methods = ["ECSPNet", "Greedy"]
+    # Baselines only (ECSPNet skipped for scaling validation)
+    methods = ["Greedy"]
     for budget in MOEA_BUDGETS:
-        methods.append(f"NSGA-II*_{budget[0]}x{budget[1]}")  # * = custom impl
+        methods.append(f"NSGA-II({budget[0]}x{budget[1]})")
 
     for method in methods:
         results["hypervolume"][method] = []
@@ -1031,21 +1053,20 @@ def run_full_evaluation(
 
     # Evaluate each test case
     for case_idx, tasks in enumerate(test_cases):
-        print(f"\n3.{case_idx + 1}. Evaluating Case {case_idx + 1}...")
+        print(f"\n2.{case_idx + 1}. Evaluating Case {case_idx + 1}...")
 
         case_fronts = {}
 
-        # ECSPNet
-        print("   - ECSPNet inference...")
-        pf_ecspnet, time_ecspnet = ecspnet_inference(model, tasks, device)
-        front_ecspnet = pf_ecspnet.to_array()
-        results["hypervolume"]["ECSPNet"].append(compute_hypervolume(front_ecspnet))
-        results["solution_times"]["ECSPNet"].append(time_ecspnet)
-        results["pareto_fronts"]["ECSPNet"].append(front_ecspnet)
-        case_fronts["ECSPNet"] = front_ecspnet
-        print(
-            f"     HV={results['hypervolume']['ECSPNet'][-1]:.4f}, Time={time_ecspnet:.2f}s, |P|={len(front_ecspnet)}"
-        )
+        # NOTE: ECSPNet inference skipped for baseline validation
+        # Uncomment to include:
+        # print("   - ECSPNet inference...")
+        # pf_ecspnet, time_ecspnet = ecspnet_inference(model, tasks, device)
+        # front_ecspnet = pf_ecspnet.to_array()
+        # results["hypervolume"]["ECSPNet"].append(compute_hypervolume(front_ecspnet))
+        # results["solution_times"]["ECSPNet"].append(time_ecspnet)
+        # results["pareto_fronts"]["ECSPNet"].append(front_ecspnet)
+        # case_fronts["ECSPNet"] = front_ecspnet
+        # print(f"     HV={results['hypervolume']['ECSPNet'][-1]:.4f}, Time={time_ecspnet:.2f}s, |P|={len(front_ecspnet)}")
 
         # Greedy
         print("   - Greedy baseline...")
@@ -1055,21 +1076,13 @@ def run_full_evaluation(
         results["solution_times"]["Greedy"].append(time_greedy)
         results["pareto_fronts"]["Greedy"].append(front_greedy)
         case_fronts["Greedy"] = front_greedy
-
-        # C-metric: ECSPNet vs Greedy
-        results["c_metric"]["Greedy"]["C(A,B)"].append(
-            compute_c_metric(front_ecspnet, front_greedy)
-        )
-        results["c_metric"]["Greedy"]["C(B,A)"].append(
-            compute_c_metric(front_greedy, front_ecspnet)
-        )
         print(
             f"     HV={results['hypervolume']['Greedy'][-1]:.4f}, Time={time_greedy:.2f}s, |P|={len(front_greedy)}"
         )
 
         # NSGA-II with different budgets
         for pop, gen in MOEA_BUDGETS:
-            method_name = f"NSGA-II*_{pop}x{gen}"
+            method_name = f"NSGA-II({pop}x{gen})"
             print(f"   - {method_name}...")
             pf_nsga, time_nsga = nsga2_baseline(tasks, pop, gen)
             front_nsga = pf_nsga.to_array()
@@ -1077,14 +1090,6 @@ def run_full_evaluation(
             results["solution_times"][method_name].append(time_nsga)
             results["pareto_fronts"][method_name].append(front_nsga)
             case_fronts[method_name] = front_nsga
-
-            # C-metric
-            results["c_metric"][method_name]["C(A,B)"].append(
-                compute_c_metric(front_ecspnet, front_nsga)
-            )
-            results["c_metric"][method_name]["C(B,A)"].append(
-                compute_c_metric(front_nsga, front_ecspnet)
-            )
             print(
                 f"     HV={results['hypervolume'][method_name][-1]:.4f}, Time={time_nsga:.2f}s, |P|={len(front_nsga)}"
             )

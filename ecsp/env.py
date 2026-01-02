@@ -366,12 +366,13 @@ class ECSPEnv(gym.Env):
 
     def get_final_metrics(self) -> Tuple[float, float]:
         """
-        Get final TWT and EEC (with scaling).
+        Get final TWT and raw EEC (unscaled for evaluation).
 
         Returns:
-            (TWT, EEC) where EEC is scaled by 2 as per paper
+            (TWT, EEC) - raw values matching paper's HV reference (0.3N, 0.3N)
+        Note: The ×2 scaling is kept in step() reward only, not here.
         """
-        return self.twt, self.eec * 2
+        return self.twt, self.eec
 
 
 class BatchECSPEnv:
@@ -628,8 +629,8 @@ class BatchECSPEnv:
         return valid
 
     def get_final_metrics(self) -> Tuple[np.ndarray, np.ndarray]:
-        """Get final (TWT, EEC*2) for all instances."""
-        return self.twts.copy(), self.eecs * 2
+        """Get final (TWT, raw EEC) for all instances."""
+        return self.twts.copy(), self.eecs.copy()
 
 
 class GPUBatchECSPEnv:
@@ -851,8 +852,8 @@ class GPUBatchECSPEnv:
         return self._get_obs(), rewards, self.dones, {}
 
     def get_final_metrics(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        """Get final (TWT, EEC*2) as GPU tensors."""
-        return self.twts, self.eecs * 2
+        """Get final (TWT, raw EEC) as GPU tensors."""
+        return self.twts, self.eecs
 
 
 if __name__ == "__main__":
