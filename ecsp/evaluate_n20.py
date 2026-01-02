@@ -83,6 +83,17 @@ class ParetoFront:
         return np.array([[s.twt, s.eec] for s in self.solutions])
 
 
+@dataclass
+class TestCase:
+    seed: int
+    case_idx: int
+    tasks: np.ndarray
+
+    @property
+    def label(self) -> str:
+        return f"S{self.seed}_C{self.case_idx + 1}"
+
+
 # ============================================================================
 # Test Case Generation & Management
 # ============================================================================
@@ -91,7 +102,8 @@ class ParetoFront:
 def generate_test_cases(
     save_dir: str = "test_cases",
     sampling: str = "round",
-) -> List[np.ndarray]:
+    seeds: Optional[List[int]] = None,
+) -> List[TestCase]:
     """
     Generate and save 3 test cases for N=20.
     Each case is saved to disk to ensure reproducibility.
@@ -107,40 +119,66 @@ def generate_test_cases(
     durations and power parameters.
     """
     os.makedirs(save_dir, exist_ok=True)
-    cases = []
 
-    for case_idx in range(NUM_TEST_CASES):
-        # Include sampling mode in filename to avoid mixing cached instances.
-        case_path = os.path.join(save_dir, f"case_{case_idx}_n{N}_{sampling}.npy")
+    # Backward-compatible default: old behavior seeded cases with 42,43,44.
+    # We model that as base seed 42, with per-case offsets.
+    if seeds is None:
+        seeds = [42]
 
-        if os.path.exists(case_path):
-            # Load existing case
-            tasks = np.load(case_path)
-            print(f"Loaded existing test case {case_idx} from {case_path}")
-        else:
-            # Generate new case with fixed seed for reproducibility
-            np.random.seed(42 + case_idx)
-            tasks = generate_instance(N, sampling=sampling)
-            np.save(case_path, tasks)
-            print(f"Generated and saved test case {case_idx} to {case_path}")
+    cases: List[TestCase] = []
+    for base_seed in seeds:
+        for case_idx in range(NUM_TEST_CASES):
+            case_seed = int(base_seed) + int(case_idx)
 
-        cases.append(tasks)
+            # Include sampling + base_seed in filename to avoid mixing cached instances.
+            case_path = os.path.join(
+                save_dir, f"seed{base_seed}_case{case_idx}_n{N}_{sampling}.npy"
+            )
+
+            if os.path.exists(case_path):
+                tasks = np.load(case_path)
+                print(
+                    f"Loaded existing test case seed={base_seed} case={case_idx} from {case_path}"
+                )
+            else:
+                np.random.seed(case_seed)
+                tasks = generate_instance(N, sampling=sampling)
+                np.save(case_path, tasks)
+                print(
+                    f"Generated and saved test case seed={base_seed} case={case_idx} to {case_path}"
+                )
+
+            cases.append(TestCase(seed=int(base_seed), case_idx=case_idx, tasks=tasks))
 
     return cases
 
 
 def load_test_cases(
-    save_dir: str = "test_cases", sampling: str = "round"
-) -> List[np.ndarray]:
-    """Load existing test cases for a given sampling mode."""
-    cases = []
-    for case_idx in range(NUM_TEST_CASES):
-        case_path = os.path.join(save_dir, f"case_{case_idx}_n{N}_{sampling}.npy")
-        if not os.path.exists(case_path):
-            raise FileNotFoundError(
-                f"Test case {case_idx} not found. Run generate_test_cases first."
+    save_dir: str = "test_cases",
+    sampling: str = "round",
+    seeds: Optional[List[int]] = None,
+) -> List[TestCase]:
+    """Load existing test cases for a given sampling mode and seed set."""
+    if seeds is None:
+        seeds = [42]
+
+    cases: List[TestCase] = []
+    for base_seed in seeds:
+        for case_idx in range(NUM_TEST_CASES):
+            case_path = os.path.join(
+                save_dir, f"seed{base_seed}_case{case_idx}_n{N}_{sampling}.npy"
             )
-        cases.append(np.load(case_path))
+            if not os.path.exists(case_path):
+                raise FileNotFoundError(
+                    f"Test case seed={base_seed} case={case_idx} not found. Run generate_test_cases first."
+                )
+            cases.append(
+                TestCase(
+                    seed=int(base_seed),
+                    case_idx=case_idx,
+                    tasks=np.load(case_path),
+                )
+            )
     return cases
 
 
@@ -986,7 +1024,11 @@ def plot_pareto_fronts(
 # ============================================================================
 
 
-def generate_hv_table(hv_results: Dict, methods: List[str]) -> str:
+def generate_hv_table(
+    hv_results: Dict,
+    methods: List[str],
+    case_labels: Optional[List[str]] = None,
+) -> str:
     """
     Generate Table III style markdown table for hypervolume.
     Includes Wilcoxon test results comparing each method to ECSPNet (if present).
@@ -998,19 +1040,29 @@ def generate_hv_table(hv_results: Dict, methods: List[str]) -> str:
     # Check if ECSPNet is in results for significance testing
     has_ecspnet = "ECSPNet" in hv_results and len(hv_results["ECSPNet"]) > 0
 
+    if case_labels is None:
+        n_cases = max((len(v) for v in hv_results.values()), default=0)
+        case_labels = [f"Case {i + 1}" for i in range(n_cases)]
+    n_cases = len(case_labels)
+    header_cols = " | ".join(case_labels)
+
     if has_ecspnet:
-        lines.append("| Method | Case 1 | Case 2 | Case 3 | Mean | Sig |")
-        lines.append("|--------|--------|--------|--------|------|-----|")
+        lines.append(f"| Method | {header_cols} | Mean | Sig |")
+        lines.append("|--------|" + "|".join(["--------"] * n_cases) + "|------|-----|")
         ecspnet_hv = hv_results["ECSPNet"]
     else:
-        lines.append("| Method | Case 1 | Case 2 | Case 3 | Mean |")
-        lines.append("|--------|--------|--------|--------|------|")
+        lines.append(f"| Method | {header_cols} | Mean |")
+        lines.append("|--------|" + "|".join(["--------"] * n_cases) + "|------|")
 
     for method in methods:
         if method not in hv_results:
             continue
         vals = hv_results[method]
-        mean_val = np.mean(vals)
+        mean_val = np.mean(vals) if len(vals) else 0.0
+
+        rendered = []
+        for i in range(n_cases):
+            rendered.append(f"{vals[i]:.4f}" if i < len(vals) else "")
 
         if has_ecspnet:
             # Wilcoxon test vs ECSPNet
@@ -1018,9 +1070,11 @@ def generate_hv_table(hv_results: Dict, methods: List[str]) -> str:
                 sig = "-"
             else:
                 _, sig = wilcoxon_test(ecspnet_hv, vals)
-            line = f"| {method} | {vals[0]:.4f} | {vals[1]:.4f} | {vals[2]:.4f} | {mean_val:.4f} | {sig} |"
+            line = (
+                f"| {method} | " + " | ".join(rendered) + f" | {mean_val:.4f} | {sig} |"
+            )
         else:
-            line = f"| {method} | {vals[0]:.4f} | {vals[1]:.4f} | {vals[2]:.4f} | {mean_val:.4f} |"
+            line = f"| {method} | " + " | ".join(rendered) + f" | {mean_val:.4f} |"
         lines.append(line)
 
     lines.append("")
@@ -1060,18 +1114,32 @@ def generate_cmetric_table(cm_results: Dict, methods: List[str]) -> str:
     return "\n".join(lines)
 
 
-def generate_time_table(time_results: Dict, methods: List[str]) -> str:
+def generate_time_table(
+    time_results: Dict,
+    methods: List[str],
+    case_labels: Optional[List[str]] = None,
+) -> str:
     """Generate solution time table."""
     lines = ["# Solution Times (N=20)", ""]
-    lines.append("| Method | Case 1 (s) | Case 2 (s) | Case 3 (s) | Mean (s) |")
-    lines.append("|--------|------------|------------|------------|----------|")
+    if case_labels is None:
+        n_cases = max((len(v) for v in time_results.values()), default=0)
+        case_labels = [f"Case {i + 1}" for i in range(n_cases)]
+    n_cases = len(case_labels)
+
+    header_cols = " | ".join([f"{c} (s)" for c in case_labels])
+    lines.append(f"| Method | {header_cols} | Mean (s) |")
+    lines.append("|--------|" + "|".join(["------------"] * n_cases) + "|----------|")
 
     for method in methods:
         if method not in time_results:
             continue
         vals = time_results[method]
-        mean_val = np.mean(vals)
-        line = f"| {method} | {vals[0]:.2f} | {vals[1]:.2f} | {vals[2]:.2f} | {mean_val:.2f} |"
+        mean_val = np.mean(vals) if len(vals) else 0.0
+
+        rendered = []
+        for i in range(n_cases):
+            rendered.append(f"{vals[i]:.2f}" if i < len(vals) else "")
+        line = f"| {method} | " + " | ".join(rendered) + f" | {mean_val:.2f} |"
         lines.append(line)
 
     return "\n".join(lines)
@@ -1088,6 +1156,7 @@ def run_full_evaluation(
     device: str = "cuda" if TORCH_AVAILABLE and torch.cuda.is_available() else "cpu",
     baselines_only: bool = False,
     sampling: str = "round",
+    seeds: Optional[List[int]] = None,
 ):
     """
     Run complete paper-exact evaluation for N=20.
@@ -1123,6 +1192,7 @@ def run_full_evaluation(
     print(f"  HV reference = {HV_REFERENCE}")
     print(f"  α = {SIGNIFICANCE_LEVEL} (Wilcoxon)")
     print(f"  sampling = {sampling}")
+    print(f"  seeds = {seeds if seeds is not None else '[42] (default)'}")
 
     model = None
     if not baselines_only:
@@ -1145,7 +1215,10 @@ def run_full_evaluation(
     test_cases = generate_test_cases(
         os.path.join(output_dir, "test_cases"),
         sampling=sampling,
+        seeds=seeds,
     )
+
+    case_labels = [tc.label for tc in test_cases]
 
     # Results storage
     results = {
@@ -1169,8 +1242,9 @@ def run_full_evaluation(
         results["pareto_fronts"][method] = []
 
     # Evaluate each test case
-    for case_idx, tasks in enumerate(test_cases):
-        print(f"\n2.{case_idx + 1}. Evaluating Case {case_idx + 1}...")
+    for case_global_idx, tc in enumerate(test_cases):
+        tasks = tc.tasks
+        print(f"\n2.{case_global_idx + 1}. Evaluating {tc.label}...")
 
         case_fronts = {}
 
@@ -1215,15 +1289,17 @@ def run_full_evaluation(
         # Plot Pareto fronts for this case
         plot_pareto_fronts(
             case_fronts,
-            case_idx,
-            os.path.join(output_dir, f"pareto_front_case{case_idx + 1}.png"),
+            case_global_idx,
+            os.path.join(output_dir, f"pareto_front_{tc.label}.png"),
         )
 
     # Generate tables with Wilcoxon test
     print("\n4. Generating result tables...")
 
     # Table III: Hypervolume with significance
-    hv_table = generate_hv_table(results["hypervolume"], methods)
+    hv_table = generate_hv_table(
+        results["hypervolume"], methods, case_labels=case_labels
+    )
     with open(os.path.join(output_dir, "table_hypervolume.md"), "w") as f:
         f.write(hv_table)
     print(f"   Saved hypervolume table to table_hypervolume.md")
@@ -1236,7 +1312,9 @@ def run_full_evaluation(
     print(f"   Saved C-metric table to table_cmetric.md")
 
     # Solution times
-    time_table = generate_time_table(results["solution_times"], methods)
+    time_table = generate_time_table(
+        results["solution_times"], methods, case_labels=case_labels
+    )
     with open(os.path.join(output_dir, "table_solution_times.md"), "w") as f:
         f.write(time_table)
     print(f"   Saved solution times table to table_solution_times.md")
@@ -1279,6 +1357,7 @@ def run_sampling_comparison(
     output_dir: str = "evaluation_results",
     device: str = "cpu",
     baselines_only: bool = False,
+    seeds: Optional[List[int]] = None,
 ):
     """Run evaluation twice: sampling='round' and sampling='choice'."""
     out_round = os.path.join(output_dir, "sampling_round")
@@ -1291,6 +1370,7 @@ def run_sampling_comparison(
         device=device,
         baselines_only=baselines_only,
         sampling="round",
+        seeds=seeds,
     )
 
     print("\n=== Sampling comparison: choice ===")
@@ -1300,6 +1380,7 @@ def run_sampling_comparison(
         device=device,
         baselines_only=baselines_only,
         sampling="choice",
+        seeds=seeds,
     )
 
     return {"round": res_round, "choice": res_choice}
@@ -1351,7 +1432,33 @@ if __name__ == "__main__":
         help="Run both sampling modes and save under output/sampling_round and output/sampling_choice",
     )
 
+    parser.add_argument(
+        "--num-seeds",
+        type=int,
+        default=1,
+        help="Number of base seeds to run (each base seed generates NUM_TEST_CASES cases via +case_idx)",
+    )
+
+    parser.add_argument(
+        "--seed-start",
+        type=int,
+        default=42,
+        help="First base seed when using --num-seeds (defaults to 42 to match prior behavior)",
+    )
+
+    parser.add_argument(
+        "--seeds",
+        type=str,
+        default=None,
+        help="Comma-separated explicit base seeds (overrides --num-seeds/--seed-start). Example: 0,1,2,3",
+    )
+
     args = parser.parse_args()
+
+    if args.seeds is not None:
+        base_seeds = [int(s.strip()) for s in args.seeds.split(",") if s.strip()]
+    else:
+        base_seeds = [args.seed_start + i for i in range(args.num_seeds)]
 
     if args.compare_sampling:
         run_sampling_comparison(
@@ -1359,6 +1466,7 @@ if __name__ == "__main__":
             output_dir=args.output,
             device=args.device,
             baselines_only=args.baselines_only,
+            seeds=base_seeds,
         )
     else:
         run_full_evaluation(
@@ -1367,4 +1475,5 @@ if __name__ == "__main__":
             args.device,
             baselines_only=args.baselines_only,
             sampling=args.sampling,
+            seeds=base_seeds,
         )
