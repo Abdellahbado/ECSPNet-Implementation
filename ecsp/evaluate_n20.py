@@ -1032,16 +1032,33 @@ def run_geatpy_nsga2(
         if hasattr(algorithm, "logTras"):
             algorithm.logTras = 0
 
-    # Run the algorithm
-    res = ea.optimize(
-        algorithm,
-        seed=seed,
-        verbose=False,
-        drawing=0,
-        outputMsg=False,
-        drawLog=False,
-        saveFlag=False,
-    )
+    # Run the algorithm. Geatpy "optimize" exists in some versions, but not in
+    # Geatpy 2.6.0 wheels commonly used on Kaggle.
+    if hasattr(ea, "optimize"):
+        res = ea.optimize(
+            algorithm,
+            seed=seed,
+            verbose=False,
+            drawing=0,
+            outputMsg=False,
+            drawLog=False,
+            saveFlag=False,
+        )
+    else:
+        # Geatpy2-style API: configure via attributes, then call run().
+        if hasattr(algorithm, "MAXGEN"):
+            algorithm.MAXGEN = generations
+        if hasattr(algorithm, "logTras"):
+            algorithm.logTras = 0
+        if hasattr(algorithm, "drawing"):
+            algorithm.drawing = 0
+
+        run_res = algorithm.run()
+        # Depending on Geatpy build, run() may return NDSet or (NDSet, population).
+        if isinstance(run_res, (list, tuple)) and len(run_res) > 0:
+            res = run_res[0]
+        else:
+            res = run_res
 
     solution_time = time.time() - start_time
 
