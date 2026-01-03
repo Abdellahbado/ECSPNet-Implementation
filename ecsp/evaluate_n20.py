@@ -976,15 +976,29 @@ def run_geatpy_nsga2(
 
     # Problem parameters
     # 2n decision variables: first n for permutation (real 0-1), next n for modes (real 0-1)
+    dim = 2 * n
+    lb = [0.0] * dim
+    ub = [1.0] * dim
+    varTypes = [0] * dim  # 0 = continuous
+    lbin = [1] * dim
+    ubin = [1] * dim
+
+    # Geatpy 2.6.x uses aimFunc(pop) (pop.Phen -> pop.ObjV).
+    def aimFunc(pop):
+        Vars = pop.Phen
+        pop.ObjV = evalVars(Vars)
+
     geatpy_problem = ea.Problem(
-        name="ECSP",
-        M=2,  # Number of objectives
-        maxormins=[1, 1],  # Both minimize
-        Dim=2 * n,  # Decision variables
-        varTypes=[0] * (2 * n),  # 0 = continuous
-        lb=[0.0] * (2 * n),  # Lower bounds
-        ub=[1.0] * (2 * n),  # Upper bounds
-        evalVars=evalVars,
+        "ECSP",
+        2,  # M
+        [1, 1],  # maxormins
+        dim,
+        varTypes,
+        lb,
+        ub,
+        lbin,
+        ubin,
+        aimFunc=aimFunc,
     )
 
     # NSGA-II algorithm "without modification" (Geatpy's default)
