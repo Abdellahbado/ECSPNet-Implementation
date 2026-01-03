@@ -18,6 +18,33 @@ from .env import ECSPEnv
 from .model import ECSPNet, obs_dict_to_tensors
 
 
+def _make_weight_sweep(
+    B: int,
+    mode: str = "biased",
+    exponent: float = 0.4,
+    w_min: float = 0.01,
+    w_max: float = 0.99,
+) -> np.ndarray:
+    """Generate B weights in (0,1), optionally biased toward high w."""
+    if B <= 0:
+        return np.empty((0,), dtype=np.float64)
+
+    if mode == "uniform":
+        # Paper sweep: w = i / (B + 1), i=1..B
+        return np.array([i / (B + 1) for i in range(1, B + 1)], dtype=np.float64)
+
+    if mode == "biased":
+        u = np.linspace(0.001, 0.999, B, dtype=np.float64)
+        w = u ** float(exponent)
+        w = (w - w.min()) / (w.max() - w.min() + 1e-12)
+        w = w * (w_max - w_min) + w_min
+        return w
+
+    raise ValueError(
+        f"Unknown weight sampling mode: {mode}. Use 'uniform' or 'biased'."
+    )
+
+
 @dataclass
 class Solution:
     """A single solution with its objectives."""
@@ -133,6 +160,8 @@ class Inferencer:
         device: torch.device = torch.device("cpu"),
         B: int = INFERENCE_CONFIG["num_solutions"],
         beta: float = INFERENCE_CONFIG["beta"],
+        w_sampling: str = "biased",
+        w_exponent: float = 0.4,
     ):
         """
         Initialize inferencer.
@@ -147,6 +176,8 @@ class Inferencer:
         self.device = device
         self.B = B
         self.beta = beta
+        self.w_sampling = w_sampling
+        self.w_exponent = w_exponent
 
         self.model.eval()
         self.model.to(device)
@@ -175,22 +206,25 @@ class Inferencer:
 
         all_solutions = []
 
-        iterator = range(1, self.B + 1)
+        weights = _make_weight_sweep(
+            self.B,
+            mode=self.w_sampling,
+            exponent=self.w_exponent,
+        )
+        iterator = weights
         if verbose:
-            iterator = tqdm(iterator, desc="Generating solutions")
+            iterator = tqdm(weights, desc="Generating solutions")
 
-        for i in iterator:
-            # Preference weight: w = i / (B + 1)
-            w = i / (self.B + 1)
+        for w in iterator:
 
             # Rollout with truncation sampling
-            twt, eec, trajectory = self._rollout_single(env, tasks, w)
+            twt, eec, trajectory = self._rollout_single(env, tasks, float(w))
 
             all_solutions.append(
                 Solution(
                     twt=twt,
                     eec=eec,
-                    w=w,
+                    w=float(w),
                     trajectory=trajectory if return_all else None,
                 )
             )

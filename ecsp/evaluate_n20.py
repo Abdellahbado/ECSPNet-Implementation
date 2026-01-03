@@ -56,6 +56,33 @@ SIGNIFICANCE_LEVEL = 0.05  # Wilcoxon test
 MOEA_BUDGETS = [(100, 100), (300, 300), (1000, 1000)]
 
 
+def _make_weight_sweep(
+    B: int,
+    mode: str = "biased",
+    exponent: float = 0.4,
+    w_min: float = W_MIN,
+    w_max: float = W_MAX,
+) -> np.ndarray:
+    """Generate B weights in (0,1), optionally biased toward higher w."""
+    if B <= 0:
+        return np.empty((0,), dtype=np.float64)
+
+    if mode == "uniform":
+        # Paper sweep: w = i / (B + 1), i=1..B
+        return np.array([i / (B + 1) for i in range(1, B + 1)], dtype=np.float64)
+
+    if mode == "biased":
+        u = np.linspace(0.001, 0.999, B, dtype=np.float64)
+        w = u ** float(exponent)
+        w = (w - w.min()) / (w.max() - w.min() + 1e-12)
+        w = w * (w_max - w_min) + w_min
+        return w
+
+    raise ValueError(
+        f"Unknown weight sampling mode: {mode}. Use 'uniform' or 'biased'."
+    )
+
+
 # ============================================================================
 # Data Classes
 # ============================================================================
@@ -314,6 +341,8 @@ def ecspnet_inference(
     device: Any,
     B: int = B_SOLUTIONS,
     beta: float = BETA,
+    w_sampling: str = "biased",
+    w_exponent: float = 0.4,
 ) -> Tuple[ParetoFront, float]:
     """
     Run ECSPNet inference following Algorithm 2.
@@ -337,9 +366,9 @@ def ecspnet_inference(
 
     solutions = []
 
-    # Generate B solutions with varied weights
-    # w = i / (B + 1) for i = 1, ..., B (paper's weight sweep)
-    weights = np.array([i / (B + 1) for i in range(1, B + 1)])
+    # Generate B solutions with varied weights.
+    # Paper uses uniform sweep; we optionally bias toward higher w.
+    weights = _make_weight_sweep(B, mode=w_sampling, exponent=w_exponent)
 
     with torch.no_grad():
         for w in weights:
@@ -526,9 +555,20 @@ except ImportError:
     Mutation = object  # type: ignore
     minimize = None  # type: ignore
     get_termination = None  # type: ignore
+    warnings.warn("Pymoo not installed. Install with: pip install pymoo\n")
+
+# Check for Geatpy availability (paper uses Geatpy without modification)
+try:
+    import geatpy as ea  # type: ignore
+
+    GEATPY_AVAILABLE = True
+except ImportError:
+    GEATPY_AVAILABLE = False
+    ea = None  # type: ignore
     warnings.warn(
-        "Pymoo not installed. Install with: pip install pymoo\n"
-        "NSGA-II baseline will use random search fallback."
+        "Geatpy not installed. Install with: pip install geatpy\n"
+        "Geatpy is the paper's original NSGA-II backend.\n"
+        "Use --nsga2-backend=pymoo as alternative."
     )
 
 
@@ -818,35 +858,214 @@ def run_pymoo_nsga2(
     return ParetoFront(solutions=pareto_solutions), solution_time
 
 
+# ============================================================================
+# Baseline: NSGA-II (Geatpy Implementation) - Paper's Original Backend
+# Uses Geatpy "without modification" as stated in the paper.
+# ============================================================================
+
+
+class ECSPProblemGeatpy:
+    """
+    ECSP problem for Geatpy's NSGA-II.
+
+    The paper uses Geatpy without modification. We encode solutions as:
+    - First N integers: permutation of jobs (0 to N-1)
+    - Next N integers: binary mode for each job (0=no wait, 1=wait)
+
+    Geatpy uses a real encoding internally which we convert.
+    """
+
+    def __init__(self, tasks: np.ndarray, n_jobs: int = N):
+        self.tasks = tasks
+        self.n_jobs = n_jobs
+
+    def evaluate(self, perm: np.ndarray, modes: np.ndarray) -> Tuple[float, float]:
+        """Evaluate a single solution (permutation + modes)."""
+        env = ECSPEnv(N=self.n_jobs)
+        env.reset(options={"tasks": self.tasks.copy(), "w": 0.5})
+
+        for i in range(self.n_jobs):
+            task_idx = int(perm[i])
+            mode = int(modes[task_idx])
+            action = task_idx * 2 + mode
+            env.step(action)
+
+        twt, eec = env.get_final_metrics()
+        return float(twt), float(eec)
+
+
+def run_geatpy_nsga2(
+    tasks: np.ndarray,
+    population_size: int,
+    generations: int,
+    n_jobs: int = N,
+    seed: int = None,
+) -> Tuple[ParetoFront, float]:
+    """
+    Run Geatpy NSGA-II for ECSP problem.
+
+    This is the paper's original NSGA-II backend:
+    "NSGA-II is implemented in Geatpy [49] using Python 3.10.9 without modification"
+
+    Uses Geatpy's default operators for mixed permutation+binary encoding.
+
+    Args:
+        tasks: Task array [N, 5]
+        population_size: NSGA-II population size
+        generations: Number of generations
+        n_jobs: Number of jobs
+        seed: Random seed for reproducibility
+
+    Returns:
+        ParetoFront: Non-dominated solutions
+        float: Runtime in seconds
+    """
+    if not GEATPY_AVAILABLE:
+        raise ImportError(
+            "Geatpy is not installed. Install with: pip install geatpy\n"
+            "Note: Geatpy requires Python <= 3.10"
+        )
+
+    if seed is not None:
+        np.random.seed(seed)
+
+    start_time = time.time()
+
+    problem = ECSPProblemGeatpy(tasks, n_jobs)
+    n = n_jobs
+
+    # Geatpy Problem definition using soea_NSGA2_templet (or moea_NSGA2_templet)
+    # The paper says "without modification", so we use default operators.
+
+    # Define the problem for Geatpy
+    # Encoding: [perm(0:n), modes(n:2n)]
+    # perm: permutation encoded as integers 0..n-1
+    # modes: binary 0 or 1 per job
+
+    # Geatpy encoding types:
+    # 'RI' = real integer encoding
+    # 'P' = permutation encoding
+    # 'BG' = binary/gray encoding
+
+    # For mixed encoding, Geatpy uses field descriptors (Encoding = 'RI')
+    # We define bounds for permutation part (will repair) and binary part.
+
+    # Method 1: Use real encoding and repair solutions
+    # This matches "without modification" - Geatpy's default continuous operators
+
+    # Create Geatpy Problem class
+    @ea.Problem.single
+    def evalVars(Vars):  # Vars: (pop_size, 2*n) real values
+        ObjV = np.zeros((Vars.shape[0], 2))
+        for i in range(Vars.shape[0]):
+            # Decode: first n values -> permutation via argsort
+            perm_vals = Vars[i, :n]
+            perm = np.argsort(perm_vals)  # Convert real values to permutation
+
+            # Decode: next n values -> binary via threshold
+            mode_vals = Vars[i, n:]
+            modes = (mode_vals >= 0.5).astype(int)
+
+            twt, eec = problem.evaluate(perm, modes)
+            ObjV[i, 0] = twt
+            ObjV[i, 1] = eec
+        return ObjV
+
+    # Problem parameters
+    # 2n decision variables: first n for permutation (real 0-1), next n for modes (real 0-1)
+    geatpy_problem = ea.Problem(
+        name="ECSP",
+        M=2,  # Number of objectives
+        maxormins=[1, 1],  # Both minimize
+        Dim=2 * n,  # Decision variables
+        varTypes=[0] * (2 * n),  # 0 = continuous
+        lb=[0.0] * (2 * n),  # Lower bounds
+        ub=[1.0] * (2 * n),  # Upper bounds
+        evalVars=evalVars,
+    )
+
+    # NSGA-II algorithm "without modification" (Geatpy's default)
+    # Uses SBX crossover and polynomial mutation by default
+    algorithm = ea.moea_NSGA2_templet(
+        geatpy_problem,
+        ea.Population(Encoding="RI", NIND=population_size),
+        MAXGEN=generations,
+        logTras=0,  # No logging during run
+    )
+
+    # Run the algorithm
+    res = ea.optimize(
+        algorithm,
+        seed=seed,
+        verbose=False,
+        drawing=0,
+        outputMsg=False,
+        drawLog=False,
+        saveFlag=False,
+    )
+
+    solution_time = time.time() - start_time
+
+    # Extract Pareto front from results
+    if (
+        res is not None
+        and hasattr(res, "ObjV")
+        and res.ObjV is not None
+        and len(res.ObjV) > 0
+    ):
+        pts = get_pareto_front(np.asarray(res.ObjV, dtype=np.float64))
+        pareto_solutions = [Solution(twt=float(p[0]), eec=float(p[1])) for p in pts]
+    else:
+        pareto_solutions = []
+
+    return ParetoFront(solutions=pareto_solutions), solution_time
+
+
 def nsga2_baseline(
     tasks: np.ndarray,
     population_size: int,
     generations: int,
+    backend: str = "pymoo",
 ) -> Tuple[ParetoFront, float]:
     """
-    NSGA-II baseline using Pymoo library.
+    NSGA-II baseline with selectable backend.
 
-    Uses Pymoo's NSGA-II implementation (Python 3.12+ compatible).
-    Falls back to a simple random search if Pymoo is not available.
+    Backends:
+        - "pymoo": Pymoo library (Python 3.12+ compatible)
+        - "geatpy": Geatpy library (paper's original, Python <= 3.10)
 
     Args:
         tasks: Task array [N, 5] with features [p1, p2, p3, P_high, P_low]
         population_size: Population size for NSGA-II
         generations: Number of generations
+        backend: "pymoo" or "geatpy"
 
     Returns:
         ParetoFront: Non-dominated solutions found
         float: Runtime in seconds
     """
-    if PYMOO_AVAILABLE:
-        return run_pymoo_nsga2(tasks, population_size, generations)
-    else:
-        # Fallback: simple random search (not paper-exact)
-        warnings.warn(
-            "Pymoo not available. Using random search fallback. "
-            "Install pymoo for NSGA-II results: pip install pymoo"
-        )
-        return _random_search_fallback(tasks, population_size * generations)
+    if backend == "geatpy":
+        if GEATPY_AVAILABLE:
+            return run_geatpy_nsga2(tasks, population_size, generations)
+        else:
+            warnings.warn(
+                "Geatpy not available (requires Python <= 3.10). "
+                "Falling back to Pymoo."
+            )
+            backend = "pymoo"
+
+    if backend == "pymoo":
+        if PYMOO_AVAILABLE:
+            return run_pymoo_nsga2(tasks, population_size, generations)
+        else:
+            # Fallback: simple random search (not paper-exact)
+            warnings.warn(
+                "Neither Pymoo nor Geatpy available. Using random search fallback. "
+                "Install pymoo with: pip install pymoo"
+            )
+            return _random_search_fallback(tasks, population_size * generations)
+
+    raise ValueError(f"Unknown NSGA-II backend: {backend}. Use 'pymoo' or 'geatpy'.")
 
 
 def _random_search_fallback(
@@ -1157,6 +1376,9 @@ def run_full_evaluation(
     baselines_only: bool = False,
     sampling: str = "round",
     seeds: Optional[List[int]] = None,
+    nsga2_backend: str = "pymoo",
+    w_sampling: str = "biased",
+    w_exponent: float = 0.4,
 ):
     """
     Run complete paper-exact evaluation for N=20.
@@ -1165,6 +1387,10 @@ def run_full_evaluation(
         model_path: Path to trained ECSPNet checkpoint
         output_dir: Directory for results
         device: Torch device
+        baselines_only: Skip ECSPNet inference, run only baselines
+        sampling: Instance generation mode ("round" or "choice")
+        seeds: List of base seeds for test cases
+        nsga2_backend: NSGA-II backend ("pymoo" or "geatpy")
     """
     os.makedirs(output_dir, exist_ok=True)
 
@@ -1193,6 +1419,8 @@ def run_full_evaluation(
     print(f"  α = {SIGNIFICANCE_LEVEL} (Wilcoxon)")
     print(f"  sampling = {sampling}")
     print(f"  seeds = {seeds if seeds is not None else '[42] (default)'}")
+    print(f"  nsga2_backend = {nsga2_backend}")
+    print(f"  w_sampling = {w_sampling} (exp={w_exponent})")
 
     model = None
     if not baselines_only:
@@ -1223,6 +1451,7 @@ def run_full_evaluation(
     # Results storage
     results = {
         "hypervolume": {},
+        "hypervolume_x2": {},
         "c_metric": {},
         "solution_times": {},
         "pareto_fronts": {},
@@ -1237,6 +1466,7 @@ def run_full_evaluation(
 
     for method in methods:
         results["hypervolume"][method] = []
+        results["hypervolume_x2"][method] = []
         results["c_metric"][method] = {"C(A,B)": [], "C(B,A)": []}
         results["solution_times"][method] = []
         results["pareto_fronts"][method] = []
@@ -1250,40 +1480,85 @@ def run_full_evaluation(
 
         if not baselines_only:
             print("   - ECSPNet inference...")
-            pf_ecspnet, time_ecspnet = ecspnet_inference(model, tasks, device)
+            pf_ecspnet, time_ecspnet = ecspnet_inference(
+                model,
+                tasks,
+                device,
+                w_sampling=w_sampling,
+                w_exponent=w_exponent,
+            )
             front_ecspnet = pf_ecspnet.to_array()
-            results["hypervolume"]["ECSPNet"].append(compute_hypervolume(front_ecspnet))
+            results["hypervolume"]["ECSPNet"].append(
+                compute_hypervolume(front_ecspnet, reference=HV_REFERENCE)
+            )
+            front_ecspnet_x2 = front_ecspnet.copy()
+            if len(front_ecspnet_x2) > 0:
+                front_ecspnet_x2[:, 1] *= 2.0
+            results["hypervolume_x2"]["ECSPNet"].append(
+                compute_hypervolume(
+                    front_ecspnet_x2,
+                    reference=(HV_REFERENCE[0], HV_REFERENCE[1] * 2.0),
+                )
+            )
             results["solution_times"]["ECSPNet"].append(time_ecspnet)
             results["pareto_fronts"]["ECSPNet"].append(front_ecspnet)
             case_fronts["ECSPNet"] = front_ecspnet
             print(
-                f"     HV={results['hypervolume']['ECSPNet'][-1]:.4f}, Time={time_ecspnet:.2f}s, |P|={len(front_ecspnet)}"
+                f"     HV(raw)={results['hypervolume']['ECSPNet'][-1]:.4f}, "
+                f"HV(x2)={results['hypervolume_x2']['ECSPNet'][-1]:.4f}, "
+                f"Time={time_ecspnet:.2f}s, |P|={len(front_ecspnet)}"
             )
 
         # Greedy
         print("   - Greedy baseline...")
         pf_greedy, time_greedy = greedy_baseline(tasks)
         front_greedy = pf_greedy.to_array()
-        results["hypervolume"]["Greedy"].append(compute_hypervolume(front_greedy))
+        results["hypervolume"]["Greedy"].append(
+            compute_hypervolume(front_greedy, reference=HV_REFERENCE)
+        )
+        front_greedy_x2 = front_greedy.copy()
+        if len(front_greedy_x2) > 0:
+            front_greedy_x2[:, 1] *= 2.0
+        results["hypervolume_x2"]["Greedy"].append(
+            compute_hypervolume(
+                front_greedy_x2,
+                reference=(HV_REFERENCE[0], HV_REFERENCE[1] * 2.0),
+            )
+        )
         results["solution_times"]["Greedy"].append(time_greedy)
         results["pareto_fronts"]["Greedy"].append(front_greedy)
         case_fronts["Greedy"] = front_greedy
         print(
-            f"     HV={results['hypervolume']['Greedy'][-1]:.4f}, Time={time_greedy:.2f}s, |P|={len(front_greedy)}"
+            f"     HV(raw)={results['hypervolume']['Greedy'][-1]:.4f}, "
+            f"HV(x2)={results['hypervolume_x2']['Greedy'][-1]:.4f}, "
+            f"Time={time_greedy:.2f}s, |P|={len(front_greedy)}"
         )
 
         # NSGA-II with different budgets
         for pop, gen in MOEA_BUDGETS:
             method_name = f"NSGA-II({pop}x{gen})"
-            print(f"   - {method_name}...")
-            pf_nsga, time_nsga = nsga2_baseline(tasks, pop, gen)
+            print(f"   - {method_name} (backend={nsga2_backend})...")
+            pf_nsga, time_nsga = nsga2_baseline(tasks, pop, gen, backend=nsga2_backend)
             front_nsga = pf_nsga.to_array()
-            results["hypervolume"][method_name].append(compute_hypervolume(front_nsga))
+            results["hypervolume"][method_name].append(
+                compute_hypervolume(front_nsga, reference=HV_REFERENCE)
+            )
+            front_nsga_x2 = front_nsga.copy()
+            if len(front_nsga_x2) > 0:
+                front_nsga_x2[:, 1] *= 2.0
+            results["hypervolume_x2"][method_name].append(
+                compute_hypervolume(
+                    front_nsga_x2,
+                    reference=(HV_REFERENCE[0], HV_REFERENCE[1] * 2.0),
+                )
+            )
             results["solution_times"][method_name].append(time_nsga)
             results["pareto_fronts"][method_name].append(front_nsga)
             case_fronts[method_name] = front_nsga
             print(
-                f"     HV={results['hypervolume'][method_name][-1]:.4f}, Time={time_nsga:.2f}s, |P|={len(front_nsga)}"
+                f"     HV(raw)={results['hypervolume'][method_name][-1]:.4f}, "
+                f"HV(x2)={results['hypervolume_x2'][method_name][-1]:.4f}, "
+                f"Time={time_nsga:.2f}s, |P|={len(front_nsga)}"
             )
 
         # Plot Pareto fronts for this case
@@ -1297,12 +1572,21 @@ def run_full_evaluation(
     print("\n4. Generating result tables...")
 
     # Table III: Hypervolume with significance
-    hv_table = generate_hv_table(
+    hv_table_raw = generate_hv_table(
         results["hypervolume"], methods, case_labels=case_labels
     )
     with open(os.path.join(output_dir, "table_hypervolume.md"), "w") as f:
-        f.write(hv_table)
-    print(f"   Saved hypervolume table to table_hypervolume.md")
+        f.write(hv_table_raw)
+    with open(os.path.join(output_dir, "table_hypervolume_raw.md"), "w") as f:
+        f.write(hv_table_raw)
+    print("   Saved hypervolume table to table_hypervolume_raw.md")
+
+    hv_table_x2 = generate_hv_table(
+        results["hypervolume_x2"], methods, case_labels=case_labels
+    )
+    with open(os.path.join(output_dir, "table_hypervolume_x2.md"), "w") as f:
+        f.write(hv_table_x2)
+    print("   Saved hypervolume table to table_hypervolume_x2.md")
 
     # Table V: C-metric
     baseline_methods = [m for m in methods if m != "ECSPNet"]
@@ -1321,8 +1605,22 @@ def run_full_evaluation(
 
     # Save full results as JSON
     results_json = {
+        "settings": {
+            "sampling": sampling,
+            "seeds": seeds,
+            "nsga2_backend": nsga2_backend,
+            "hv_reference": list(HV_REFERENCE),
+            "hv_reference_x2": [HV_REFERENCE[0], HV_REFERENCE[1] * 2.0],
+            "beta": BETA,
+            "b_solutions": B_SOLUTIONS,
+            "w_sampling": w_sampling,
+            "w_exponent": w_exponent,
+        },
         "hypervolume": {
             k: [float(v) for v in vals] for k, vals in results["hypervolume"].items()
+        },
+        "hypervolume_x2": {
+            k: [float(v) for v in vals] for k, vals in results["hypervolume_x2"].items()
         },
         "c_metric": {
             k: {kk: [float(x) for x in vv] for kk, vv in v.items()}
@@ -1342,12 +1640,13 @@ def run_full_evaluation(
 
     # Print summary
     print("\n--- Summary ---")
-    print(f"{'Method':<20} {'Mean HV':<10} {'Mean Time':<10}")
+    print(f"{'Method':<20} {'Mean HV(raw)':<13} {'Mean HV(x2)':<12} {'Mean Time':<10}")
     print("-" * 40)
     for method in methods:
-        hv = np.mean(results["hypervolume"][method])
+        hv_raw = np.mean(results["hypervolume"][method])
+        hv_x2 = np.mean(results["hypervolume_x2"][method])
         t = np.mean(results["solution_times"][method])
-        print(f"{method:<20} {hv:<10.4f} {t:<10.2f}s")
+        print(f"{method:<20} {hv_raw:<13.4f} {hv_x2:<12.4f} {t:<10.2f}s")
 
     return results
 
@@ -1358,6 +1657,9 @@ def run_sampling_comparison(
     device: str = "cpu",
     baselines_only: bool = False,
     seeds: Optional[List[int]] = None,
+    nsga2_backend: str = "pymoo",
+    w_sampling: str = "biased",
+    w_exponent: float = 0.4,
 ):
     """Run evaluation twice: sampling='round' and sampling='choice'."""
     out_round = os.path.join(output_dir, "sampling_round")
@@ -1371,6 +1673,9 @@ def run_sampling_comparison(
         baselines_only=baselines_only,
         sampling="round",
         seeds=seeds,
+        nsga2_backend=nsga2_backend,
+        w_sampling=w_sampling,
+        w_exponent=w_exponent,
     )
 
     print("\n=== Sampling comparison: choice ===")
@@ -1381,6 +1686,9 @@ def run_sampling_comparison(
         baselines_only=baselines_only,
         sampling="choice",
         seeds=seeds,
+        nsga2_backend=nsga2_backend,
+        w_sampling=w_sampling,
+        w_exponent=w_exponent,
     )
 
     return {"round": res_round, "choice": res_choice}
@@ -1453,6 +1761,29 @@ if __name__ == "__main__":
         help="Comma-separated explicit base seeds (overrides --num-seeds/--seed-start). Example: 0,1,2,3",
     )
 
+    parser.add_argument(
+        "--nsga2-backend",
+        type=str,
+        default="pymoo",
+        choices=["pymoo", "geatpy"],
+        help="NSGA-II backend: 'pymoo' (Python 3.12+ compatible) or 'geatpy' (paper's original, Python <= 3.10)",
+    )
+
+    parser.add_argument(
+        "--w-sampling",
+        type=str,
+        default="biased",
+        choices=["uniform", "biased"],
+        help="Weight sweep for ECSPNet inference: 'uniform' (paper) or 'biased' (more high-w samples)",
+    )
+
+    parser.add_argument(
+        "--w-exponent",
+        type=float,
+        default=0.4,
+        help="Exponent for biased weight sampling (lower => stronger bias to high w).",
+    )
+
     args = parser.parse_args()
 
     if args.seeds is not None:
@@ -1467,6 +1798,9 @@ if __name__ == "__main__":
             device=args.device,
             baselines_only=args.baselines_only,
             seeds=base_seeds,
+            nsga2_backend=args.nsga2_backend,
+            w_sampling=args.w_sampling,
+            w_exponent=args.w_exponent,
         )
     else:
         run_full_evaluation(
@@ -1476,4 +1810,7 @@ if __name__ == "__main__":
             baselines_only=args.baselines_only,
             sampling=args.sampling,
             seeds=base_seeds,
+            nsga2_backend=args.nsga2_backend,
+            w_sampling=args.w_sampling,
+            w_exponent=args.w_exponent,
         )
