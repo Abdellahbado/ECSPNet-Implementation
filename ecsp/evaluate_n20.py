@@ -1016,12 +1016,21 @@ def run_geatpy_nsga2(
         )
         population = ea.Population(Encoding, Field, population_size)
 
-    algorithm = ea.moea_NSGA2_templet(
-        geatpy_problem,
-        population,
-        MAXGEN=generations,
-        logTras=0,  # No logging during run
-    )
+    # Some Geatpy builds (e.g., 2.6.0) don't accept MAXGEN/logTras as kwargs.
+    # Construct first, then set attributes.
+    try:
+        algorithm = ea.moea_NSGA2_templet(
+            geatpy_problem,
+            population,
+            MAXGEN=generations,
+            logTras=0,  # No logging during run
+        )
+    except TypeError:
+        algorithm = ea.moea_NSGA2_templet(geatpy_problem, population)
+        if hasattr(algorithm, "MAXGEN"):
+            algorithm.MAXGEN = generations
+        if hasattr(algorithm, "logTras"):
+            algorithm.logTras = 0
 
     # Run the algorithm
     res = ea.optimize(
