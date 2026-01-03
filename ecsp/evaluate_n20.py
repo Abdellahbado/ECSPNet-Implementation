@@ -953,14 +953,17 @@ def run_geatpy_nsga2(
     # Method 1: Use real encoding and repair solutions
     # This matches "without modification" - Geatpy's default continuous operators
 
-    # Create Geatpy Problem class
-    @ea.Problem.single
-    def evalVars(Vars):  # Vars: (pop_size, 2*n) real values
-        ObjV = np.zeros((Vars.shape[0], 2))
+    # Geatpy calls evalVars with Vars shaped (NIND, Dim). Some versions (e.g.
+    # geatpy==2.6.0) do NOT provide ea.Problem.single, so keep this as a plain
+    # callable for compatibility.
+    def evalVars(Vars):
+        Vars = np.asarray(Vars)
+        Vars = np.atleast_2d(Vars)
+        ObjV = np.zeros((Vars.shape[0], 2), dtype=np.float64)
         for i in range(Vars.shape[0]):
             # Decode: first n values -> permutation via argsort
             perm_vals = Vars[i, :n]
-            perm = np.argsort(perm_vals)  # Convert real values to permutation
+            perm = np.argsort(perm_vals)
 
             # Decode: next n values -> binary via threshold
             mode_vals = Vars[i, n:]
@@ -1006,15 +1009,21 @@ def run_geatpy_nsga2(
 
     solution_time = time.time() - start_time
 
-    # Extract Pareto front from results
-    if (
-        res is not None
-        and hasattr(res, "ObjV")
-        and res.ObjV is not None
-        and len(res.ObjV) > 0
-    ):
-        pts = get_pareto_front(np.asarray(res.ObjV, dtype=np.float64))
-        pareto_solutions = [Solution(twt=float(p[0]), eec=float(p[1])) for p in pts]
+    # Extract Pareto front from results.
+    # Geatpy may return a dict or an object depending on version/config.
+    objv = None
+    if isinstance(res, dict):
+        objv = res.get("ObjV", None)
+    elif res is not None and hasattr(res, "ObjV"):
+        objv = getattr(res, "ObjV")
+
+    if objv is not None:
+        objv = np.asarray(objv, dtype=np.float64)
+        if objv.ndim == 2 and objv.shape[0] > 0:
+            pts = get_pareto_front(objv[:, :2])
+            pareto_solutions = [Solution(twt=float(p[0]), eec=float(p[1])) for p in pts]
+        else:
+            pareto_solutions = []
     else:
         pareto_solutions = []
 
