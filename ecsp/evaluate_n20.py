@@ -1003,9 +1003,22 @@ def run_geatpy_nsga2(
 
     # NSGA-II algorithm "without modification" (Geatpy's default)
     # Uses SBX crossover and polynomial mutation by default
+    Encoding = "RI"
+    # Geatpy 2.6.0 requires an explicit Field descriptor for Population.
+    try:
+        population = ea.Population(Encoding=Encoding, NIND=population_size)
+    except TypeError:
+        Field = ea.crtfld(
+            Encoding,
+            geatpy_problem.varTypes,
+            geatpy_problem.ranges,
+            geatpy_problem.borders,
+        )
+        population = ea.Population(Encoding, Field, population_size)
+
     algorithm = ea.moea_NSGA2_templet(
         geatpy_problem,
-        ea.Population(Encoding="RI", NIND=population_size),
+        population,
         MAXGEN=generations,
         logTras=0,  # No logging during run
     )
