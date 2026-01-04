@@ -17,7 +17,10 @@ import json
 import time
 import copy
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")   # headless backend
 import matplotlib.pyplot as plt
+
 from typing import List, Tuple, Dict, Optional, Any
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -343,6 +346,7 @@ def ecspnet_inference(
     beta: float = BETA,
     w_sampling: str = "biased",
     w_exponent: float = 0.4,
+    remap_w_for_eec_x2_training: bool = False,
 ) -> Tuple[ParetoFront, float]:
     """
     Run ECSPNet inference following Algorithm 2.
@@ -367,8 +371,17 @@ def ecspnet_inference(
     solutions = []
 
     # Generate B solutions with varied weights.
-    # Paper uses uniform sweep; we optionally bias toward higher w.
-    weights = _make_weight_sweep(B, mode=w_sampling, exponent=w_exponent)
+    # Paper uses uniform sweep (i/(B+1), i=1..B).
+    weights_target = _make_weight_sweep(B, mode=w_sampling, exponent=w_exponent)
+    if remap_w_for_eec_x2_training:
+        # If the policy was trained with EEC multiplied by 2 in the scalarization,
+        # remap "target" preference weights into the equivalent "train" weights:
+        # w_train = 2*w_target / (1 + w_target)
+        w = weights_target
+        weights = (2.0 * w) / (1.0 + w)
+        weights = np.clip(weights, W_MIN, W_MAX)
+    else:
+        weights = weights_target
 
     with torch.no_grad():
         for w in weights:
@@ -1439,8 +1452,11 @@ def run_full_evaluation(
     sampling: str = "round",
     seeds: Optional[List[int]] = None,
     nsga2_backend: str = "pymoo",
-    w_sampling: str = "biased",
+    w_sampling: str = "uniform",
     w_exponent: float = 0.4,
+    beta: float = BETA,
+    num_solutions: int = B_SOLUTIONS,
+    remap_w_for_eec_x2_training: bool = False,
 ):
     """
     Run complete paper-exact evaluation for N=20.
@@ -1546,8 +1562,11 @@ def run_full_evaluation(
                 model,
                 tasks,
                 device,
+                B=num_solutions,
+                beta=beta,
                 w_sampling=w_sampling,
                 w_exponent=w_exponent,
+                remap_w_for_eec_x2_training=remap_w_for_eec_x2_training,
             )
             front_ecspnet = pf_ecspnet.to_array()
             results["hypervolume"]["ECSPNet"].append(
@@ -1571,30 +1590,7 @@ def run_full_evaluation(
                 f"Time={time_ecspnet:.2f}s, |P|={len(front_ecspnet)}"
             )
 
-        # Greedy
-        print("   - Greedy baseline...")
-        pf_greedy, time_greedy = greedy_baseline(tasks)
-        front_greedy = pf_greedy.to_array()
-        results["hypervolume"]["Greedy"].append(
-            compute_hypervolume(front_greedy, reference=HV_REFERENCE)
-        )
-        front_greedy_x2 = front_greedy.copy()
-        if len(front_greedy_x2) > 0:
-            front_greedy_x2[:, 1] *= 2.0
-        results["hypervolume_x2"]["Greedy"].append(
-            compute_hypervolume(
-                front_greedy_x2,
-                reference=(HV_REFERENCE[0], HV_REFERENCE[1] * 2.0),
-            )
-        )
-        results["solution_times"]["Greedy"].append(time_greedy)
-        results["pareto_fronts"]["Greedy"].append(front_greedy)
-        case_fronts["Greedy"] = front_greedy
-        print(
-            f"     HV(raw)={results['hypervolume']['Greedy'][-1]:.4f}, "
-            f"HV(x2)={results['hypervolume_x2']['Greedy'][-1]:.4f}, "
-            f"Time={time_greedy:.2f}s, |P|={len(front_greedy)}"
-        )
+
 
         # NSGA-II with different budgets
         for pop, gen in MOEA_BUDGETS:
@@ -1622,7 +1618,30 @@ def run_full_evaluation(
                 f"HV(x2)={results['hypervolume_x2'][method_name][-1]:.4f}, "
                 f"Time={time_nsga:.2f}s, |P|={len(front_nsga)}"
             )
-
+        # Greedy
+        print("   - Greedy baseline...")
+        pf_greedy, time_greedy = greedy_baseline(tasks)
+        front_greedy = pf_greedy.to_array()
+        results["hypervolume"]["Greedy"].append(
+            compute_hypervolume(front_greedy, reference=HV_REFERENCE)
+        )
+        front_greedy_x2 = front_greedy.copy()
+        if len(front_greedy_x2) > 0:
+            front_greedy_x2[:, 1] *= 2.0
+        results["hypervolume_x2"]["Greedy"].append(
+            compute_hypervolume(
+                front_greedy_x2,
+                reference=(HV_REFERENCE[0], HV_REFERENCE[1] * 2.0),
+            )
+        )
+        results["solution_times"]["Greedy"].append(time_greedy)
+        results["pareto_fronts"]["Greedy"].append(front_greedy)
+        case_fronts["Greedy"] = front_greedy
+        print(
+            f"     HV(raw)={results['hypervolume']['Greedy'][-1]:.4f}, "
+            f"HV(x2)={results['hypervolume_x2']['Greedy'][-1]:.4f}, "
+            f"Time={time_greedy:.2f}s, |P|={len(front_greedy)}"
+        )
         # Plot Pareto fronts for this case
         plot_pareto_fronts(
             case_fronts,
@@ -1720,8 +1739,11 @@ def run_sampling_comparison(
     baselines_only: bool = False,
     seeds: Optional[List[int]] = None,
     nsga2_backend: str = "pymoo",
-    w_sampling: str = "biased",
+    w_sampling: str = "uniform",
     w_exponent: float = 0.4,
+    beta: float = BETA,
+    num_solutions: int = B_SOLUTIONS,
+    remap_w_for_eec_x2_training: bool = False,
 ):
     """Run evaluation twice: sampling='round' and sampling='choice'."""
     out_round = os.path.join(output_dir, "sampling_round")
@@ -1738,6 +1760,9 @@ def run_sampling_comparison(
         nsga2_backend=nsga2_backend,
         w_sampling=w_sampling,
         w_exponent=w_exponent,
+        beta=beta,
+        num_solutions=num_solutions,
+        remap_w_for_eec_x2_training=remap_w_for_eec_x2_training,
     )
 
     print("\n=== Sampling comparison: choice ===")
@@ -1751,6 +1776,9 @@ def run_sampling_comparison(
         nsga2_backend=nsga2_backend,
         w_sampling=w_sampling,
         w_exponent=w_exponent,
+        beta=beta,
+        num_solutions=num_solutions,
+        remap_w_for_eec_x2_training=remap_w_for_eec_x2_training,
     )
 
     return {"round": res_round, "choice": res_choice}
@@ -1834,7 +1862,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--w-sampling",
         type=str,
-        default="biased",
+        default="uniform",
         choices=["uniform", "biased"],
         help="Weight sweep for ECSPNet inference: 'uniform' (paper) or 'biased' (more high-w samples)",
     )
@@ -1844,6 +1872,29 @@ if __name__ == "__main__":
         type=float,
         default=0.4,
         help="Exponent for biased weight sampling (lower => stronger bias to high w).",
+    )
+
+    parser.add_argument(
+        "--beta",
+        type=float,
+        default=BETA,
+        help="Truncation parameter for ECSPNet inference (paper: 0.9).",
+    )
+
+    parser.add_argument(
+        "--num-solutions",
+        type=int,
+        default=B_SOLUTIONS,
+        help="Number of solutions generated by ECSPNet and Greedy (paper: 1000).",
+    )
+
+    parser.add_argument(
+        "--remap-w-eecx2",
+        action="store_true",
+        help=(
+            "If your trained model used EEC multiplied by 2 in scalarization during training, "
+            "remap inference weights w via w_train=2*w/(1+w) before feeding the policy."
+        ),
     )
 
     args = parser.parse_args()
@@ -1863,6 +1914,9 @@ if __name__ == "__main__":
             nsga2_backend=args.nsga2_backend,
             w_sampling=args.w_sampling,
             w_exponent=args.w_exponent,
+            beta=args.beta,
+            num_solutions=args.num_solutions,
+            remap_w_for_eec_x2_training=args.remap_w_eecx2,
         )
     else:
         run_full_evaluation(
@@ -1875,4 +1929,7 @@ if __name__ == "__main__":
             nsga2_backend=args.nsga2_backend,
             w_sampling=args.w_sampling,
             w_exponent=args.w_exponent,
+            beta=args.beta,
+            num_solutions=args.num_solutions,
+            remap_w_for_eec_x2_training=args.remap_w_eecx2,
         )
