@@ -18,7 +18,8 @@ import time
 import copy
 import numpy as np
 import matplotlib
-matplotlib.use("Agg")   # headless backend
+
+matplotlib.use("Agg")  # headless backend
 import matplotlib.pyplot as plt
 
 from typing import List, Tuple, Dict, Optional, Any
@@ -1262,6 +1263,7 @@ def plot_pareto_fronts(
     fronts: Dict[str, np.ndarray],
     case_idx: int,
     save_path: str = None,
+    hv_reference: Tuple[float, float] = HV_REFERENCE,
 ):
     """
     Plot Pareto fronts for comparison.
@@ -1295,15 +1297,15 @@ def plot_pareto_fronts(
     plt.grid(True, alpha=0.3)
 
     # Mark reference point
-    plt.axhline(y=HV_REFERENCE[1], color="red", linestyle="--", alpha=0.5)
-    plt.axvline(x=HV_REFERENCE[0], color="red", linestyle="--", alpha=0.5)
+    plt.axhline(y=hv_reference[1], color="red", linestyle="--", alpha=0.5)
+    plt.axvline(x=hv_reference[0], color="red", linestyle="--", alpha=0.5)
     plt.scatter(
-        [HV_REFERENCE[0]],
-        [HV_REFERENCE[1]],
+        [hv_reference[0]],
+        [hv_reference[1]],
         color="red",
         marker="x",
         s=100,
-        label="Reference (6,6)",
+        label=f"Reference ({hv_reference[0]:g},{hv_reference[1]:g})",
     )
 
     if save_path:
@@ -1322,13 +1324,14 @@ def generate_hv_table(
     hv_results: Dict,
     methods: List[str],
     case_labels: Optional[List[str]] = None,
+    hv_reference: Tuple[float, float] = HV_REFERENCE,
 ) -> str:
     """
     Generate Table III style markdown table for hypervolume.
     Includes Wilcoxon test results comparing each method to ECSPNet (if present).
     """
     lines = ["# Hypervolume Results (N=20)", ""]
-    lines.append("Reference point: (6, 6)")
+    lines.append(f"Reference point: ({hv_reference[0]:g}, {hv_reference[1]:g})")
     lines.append("")
 
     # Check if ECSPNet is in results for significance testing
@@ -1457,6 +1460,7 @@ def run_full_evaluation(
     beta: float = BETA,
     num_solutions: int = B_SOLUTIONS,
     remap_w_for_eec_x2_training: bool = False,
+    hv_reference: Tuple[float, float] = HV_REFERENCE,
 ):
     """
     Run complete paper-exact evaluation for N=20.
@@ -1491,9 +1495,9 @@ def run_full_evaluation(
     print("Paper-Exact Evaluation Suite for N=20")
     print("=" * 60)
     print(f"\nSettings:")
-    print(f"  B = {B_SOLUTIONS} solutions")
-    print(f"  β = {BETA} (truncation)")
-    print(f"  HV reference = {HV_REFERENCE}")
+    print(f"  B = {num_solutions} solutions")
+    print(f"  β = {beta} (truncation)")
+    print(f"  HV reference = {hv_reference}")
     print(f"  α = {SIGNIFICANCE_LEVEL} (Wilcoxon)")
     print(f"  sampling = {sampling}")
     print(f"  seeds = {seeds if seeds is not None else '[42] (default)'}")
@@ -1570,7 +1574,7 @@ def run_full_evaluation(
             )
             front_ecspnet = pf_ecspnet.to_array()
             results["hypervolume"]["ECSPNet"].append(
-                compute_hypervolume(front_ecspnet, reference=HV_REFERENCE)
+                compute_hypervolume(front_ecspnet, reference=hv_reference)
             )
             front_ecspnet_x2 = front_ecspnet.copy()
             if len(front_ecspnet_x2) > 0:
@@ -1578,7 +1582,7 @@ def run_full_evaluation(
             results["hypervolume_x2"]["ECSPNet"].append(
                 compute_hypervolume(
                     front_ecspnet_x2,
-                    reference=(HV_REFERENCE[0], HV_REFERENCE[1] * 2.0),
+                    reference=(hv_reference[0], hv_reference[1] * 2.0),
                 )
             )
             results["solution_times"]["ECSPNet"].append(time_ecspnet)
@@ -1590,8 +1594,6 @@ def run_full_evaluation(
                 f"Time={time_ecspnet:.2f}s, |P|={len(front_ecspnet)}"
             )
 
-
-
         # NSGA-II with different budgets
         for pop, gen in MOEA_BUDGETS:
             method_name = f"NSGA-II({pop}x{gen})"
@@ -1599,7 +1601,7 @@ def run_full_evaluation(
             pf_nsga, time_nsga = nsga2_baseline(tasks, pop, gen, backend=nsga2_backend)
             front_nsga = pf_nsga.to_array()
             results["hypervolume"][method_name].append(
-                compute_hypervolume(front_nsga, reference=HV_REFERENCE)
+                compute_hypervolume(front_nsga, reference=hv_reference)
             )
             front_nsga_x2 = front_nsga.copy()
             if len(front_nsga_x2) > 0:
@@ -1607,7 +1609,7 @@ def run_full_evaluation(
             results["hypervolume_x2"][method_name].append(
                 compute_hypervolume(
                     front_nsga_x2,
-                    reference=(HV_REFERENCE[0], HV_REFERENCE[1] * 2.0),
+                    reference=(hv_reference[0], hv_reference[1] * 2.0),
                 )
             )
             results["solution_times"][method_name].append(time_nsga)
@@ -1623,7 +1625,7 @@ def run_full_evaluation(
         pf_greedy, time_greedy = greedy_baseline(tasks)
         front_greedy = pf_greedy.to_array()
         results["hypervolume"]["Greedy"].append(
-            compute_hypervolume(front_greedy, reference=HV_REFERENCE)
+            compute_hypervolume(front_greedy, reference=hv_reference)
         )
         front_greedy_x2 = front_greedy.copy()
         if len(front_greedy_x2) > 0:
@@ -1631,7 +1633,7 @@ def run_full_evaluation(
         results["hypervolume_x2"]["Greedy"].append(
             compute_hypervolume(
                 front_greedy_x2,
-                reference=(HV_REFERENCE[0], HV_REFERENCE[1] * 2.0),
+                reference=(hv_reference[0], hv_reference[1] * 2.0),
             )
         )
         results["solution_times"]["Greedy"].append(time_greedy)
@@ -1647,6 +1649,7 @@ def run_full_evaluation(
             case_fronts,
             case_global_idx,
             os.path.join(output_dir, f"pareto_front_{tc.label}.png"),
+            hv_reference=hv_reference,
         )
 
     # Generate tables with Wilcoxon test
@@ -1654,7 +1657,10 @@ def run_full_evaluation(
 
     # Table III: Hypervolume with significance
     hv_table_raw = generate_hv_table(
-        results["hypervolume"], methods, case_labels=case_labels
+        results["hypervolume"],
+        methods,
+        case_labels=case_labels,
+        hv_reference=hv_reference,
     )
     with open(os.path.join(output_dir, "table_hypervolume.md"), "w") as f:
         f.write(hv_table_raw)
@@ -1663,7 +1669,10 @@ def run_full_evaluation(
     print("   Saved hypervolume table to table_hypervolume_raw.md")
 
     hv_table_x2 = generate_hv_table(
-        results["hypervolume_x2"], methods, case_labels=case_labels
+        results["hypervolume_x2"],
+        methods,
+        case_labels=case_labels,
+        hv_reference=(hv_reference[0], hv_reference[1] * 2.0),
     )
     with open(os.path.join(output_dir, "table_hypervolume_x2.md"), "w") as f:
         f.write(hv_table_x2)
@@ -1690,10 +1699,10 @@ def run_full_evaluation(
             "sampling": sampling,
             "seeds": seeds,
             "nsga2_backend": nsga2_backend,
-            "hv_reference": list(HV_REFERENCE),
-            "hv_reference_x2": [HV_REFERENCE[0], HV_REFERENCE[1] * 2.0],
-            "beta": BETA,
-            "b_solutions": B_SOLUTIONS,
+            "hv_reference": [float(hv_reference[0]), float(hv_reference[1])],
+            "hv_reference_x2": [float(hv_reference[0]), float(hv_reference[1] * 2.0)],
+            "beta": float(beta),
+            "b_solutions": int(num_solutions),
             "w_sampling": w_sampling,
             "w_exponent": w_exponent,
         },
@@ -1897,7 +1906,23 @@ if __name__ == "__main__":
         ),
     )
 
+    parser.add_argument(
+        "--hv-ref-twt",
+        type=float,
+        default=HV_REFERENCE[0],
+        help="Hypervolume reference point for TWT (x-axis). Default: 0.3*N (6 for N=20).",
+    )
+
+    parser.add_argument(
+        "--hv-ref-eec",
+        type=float,
+        default=HV_REFERENCE[1],
+        help="Hypervolume reference point for EEC (y-axis). Default: 0.3*N (6 for N=20).",
+    )
+
     args = parser.parse_args()
+
+    hv_reference = (float(args.hv_ref_twt), float(args.hv_ref_eec))
 
     if args.seeds is not None:
         base_seeds = [int(s.strip()) for s in args.seeds.split(",") if s.strip()]
@@ -1917,6 +1942,8 @@ if __name__ == "__main__":
             beta=args.beta,
             num_solutions=args.num_solutions,
             remap_w_for_eec_x2_training=args.remap_w_eecx2,
+            # Use the same HV reference for both sampling modes.
+            hv_reference=hv_reference,
         )
     else:
         run_full_evaluation(
@@ -1932,4 +1959,5 @@ if __name__ == "__main__":
             beta=args.beta,
             num_solutions=args.num_solutions,
             remap_w_for_eec_x2_training=args.remap_w_eecx2,
+            hv_reference=hv_reference,
         )
