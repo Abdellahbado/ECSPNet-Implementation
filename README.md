@@ -4,7 +4,7 @@
 
 ## VERSION: 2.3-AUTO-RESUME - Automatic Checkpoint Resume for Kaggle
 
-This version includes automatic checkpoint detection and resume functionality, perfect for Kaggle's 12-hour GPU limit.
+This version includes automatic checkpoint detection and resume functionality, for Kaggle's 12-hour GPU limit.
 
 **Key Features:**
 - Automatically detects latest checkpoint on startup
